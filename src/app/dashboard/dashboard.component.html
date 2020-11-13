@@ -103,7 +103,7 @@
         (backdropClick)="closeNewTask()"
         (overlayKeydown)="maybeCloseNewTask($event)">
       <mat-card style="width: 800px">
-        <app-task-add></app-task-add>
+        <app-task-add (finished)="closeNewTask()"></app-task-add>
       </mat-card>
     </ng-template>
 

@@ -1,31 +1,10 @@
 <mat-tab-group>
 
-  <mat-tab>
+  <mat-tab *ngFor="let ledger of getLedgers()">
     <ng-template mat-tab-label>
-      Backlog
+      {{ledger.label}} {{getLedgerSize(ledger.name)|async}}
     </ng-template>
-    <app-task-ledger ledger="backlog"></app-task-ledger>
-  </mat-tab>
-
-  <mat-tab>
-    <ng-template mat-tab-label>
-      Next
-    </ng-template>
-    <app-task-ledger ledger="next"></app-task-ledger>
-  </mat-tab>
-
-  <mat-tab>
-    <ng-template mat-tab-label>
-      In Progress
-    </ng-template>
-    <app-task-ledger ledger="inprogress"></app-task-ledger>
-  </mat-tab>
-
-  <mat-tab>
-    <ng-template mat-tab-label>
-      Done
-    </ng-template>
-    <app-task-ledger ledger="done"></app-task-ledger>
+    <app-task-ledger [ledger]="ledger.name"></app-task-ledger>
   </mat-tab>
 
 </mat-tab-group>

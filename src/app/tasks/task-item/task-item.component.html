@@ -3,13 +3,11 @@
     <a href="https://wipwd.dev" target="new">
       <mat-icon style="font-size: 16px;">open_in_new</mat-icon>
     </a>
-    <span><strong>My Task Title</strong></span>
+    <span><strong>{{task.item.title}}</strong></span>
   </div>
-  <span>Added 32 days ago</span>
+  <span>N/A</span>
   <div fxLayout="row" fxLayoutAlign="space-between center">
-    <span><strong>on</strong></span>
-    <span>Ceph</span>
-    <span>SUSE</span>
+    <span>{{getProjects()}}</span>
   </div>
   <div>
     <button mat-icon-button (click)="undefined"
