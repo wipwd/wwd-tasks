@@ -1,0 +1,46 @@
+.sidenav-container {
+  height: 100%;
+}
+
+.sidenav-toolbar {
+  background: inherit;
+  height: 64px;
+}
+
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.menu-item {
+  padding-left: 5px;
+}
+
+.menu-header-button.mat-icon-button {
+  width: unset;
+}
+
+.expanded-sidenav {
+  width: 80px;
+  padding-left: 5px;
+}
+
+.sidenav-menu {
+  height: calc(100vh - 64px);
+}
+
+.sidenav-menu-spacer {
+  height: 100vh;
+}
+
+.content-container {
+  margin: 20px;
+}
+
+.selected-route,
+.selected-route:hover,
+.selected-route:focus {
+  color: white;
+  background-color: #3f51b5;
+}

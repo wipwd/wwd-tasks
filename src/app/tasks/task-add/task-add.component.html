@@ -1,0 +1,40 @@
+<div fxLayout="column">
+  <h3 class="mat-h3">Add Task to Backlog</h3>
+  <div fxLayout="row" fxLayoutAlign="space-between center">
+    <mat-form-field style="width: 64ch" appearance="fill">
+      <mat-label>Title</mat-label>
+      <input matInput placeholder="my fancy task" required>
+    </mat-form-field>
+
+    <span style="width: 12px;"></span>
+
+    <mat-form-field appearance="fill" style="width: 15ch">
+      <mat-label>Priority</mat-label>
+      <mat-select value="medium" required>
+        <mat-option value="high">High</mat-option>
+        <mat-option value="medium">Medium</mat-option>
+        <mat-option value="low">Low</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <span style="width: 12px;"></span>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Project</mat-label>
+      <mat-select multiple>
+        <mat-option>Ceph</mat-option>
+        <mat-option>SUSE</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="space-between center">
+    <mat-form-field style="width: 128ch" appearance="fill">
+      <mat-label>URL</mat-label>
+      <input matInput placeholder="https://github.com/wipwd/wwd-tasks.git">
+    </mat-form-field>
+    <button mat-icon-button>
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+
+</div>

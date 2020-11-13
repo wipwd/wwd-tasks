@@ -1,0 +1,117 @@
+<mat-sidenav-container class="sidenav-container" autosize>
+
+  <!-- sidenav bar -->
+  <mat-sidenav #drawer fixedInViewport
+      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+      [mode]="(isHandset$ | async) ? 'over' : 'side'"
+      [opened]="(isHandset$ | async) === false">
+
+
+      <!-- sidenav toolbar header -->
+      <mat-toolbar class="sidenav-toolbar">
+        <button *ngIf="!(isHandset$ | async)"
+            mat-icon-button (click)="toggleMenu()"
+            class="menu-header-button" type="button"
+            aria-label="Expand side menu">
+          <mat-icon matTooltip="Menu" matTooltipPosition="right"
+              [matTooltipDisabled]="isExpanded()">
+            menu
+          </mat-icon>
+        </button>
+        <span *ngIf="isExpanded()" [class.expanded-sidenav]="isExpanded()">
+          Menu
+        </span>
+      </mat-toolbar>
+
+    <div fxLayout="column" fxLayoutAlign="space-between" class="sidenav-menu">
+
+      <!-- sidenav menu -->
+      <mat-nav-list>
+        <a mat-list-item
+            routerLink="task-organizer"
+            routerLinkActive="selected-route"
+            matTooltip="Tasks" matTooltipPosition="right"
+            [matTooltipDisabled]="isExpanded()">
+          <mat-icon>all_inbox</mat-icon>
+          <span *ngIf="isExpanded()" class="menu-item">Tasks</span>
+        </a>
+
+        <a mat-list-item
+            routerLinkActive="selected-route"
+            routerLink="tmp"
+            matTooltip="Reports" matTooltipPosition="right"
+            [matTooltipDisabled]="isExpanded()">
+          <mat-icon>pending_actions</mat-icon>
+          <span *ngIf="isExpanded()" class="menu-item">Reports</span>
+        </a>
+      </mat-nav-list>
+
+      <!-- spacer -->
+      <span class="sidenav-menu-spacer"></span>
+
+      <!-- sidenav menu footer -->
+      <div>
+        <mat-divider></mat-divider>
+        <mat-nav-list>
+          <a mat-list-item
+              routerLinkActive="selected-route"
+              routerLink="tmp"
+              matTooltip="Settings" matTooltipPosition="right"
+              [matTooltipDisabled]="isExpanded()">
+            <mat-icon>settings</mat-icon>
+            <span *ngIf="isExpanded()" class="menu-item">Settings</span>
+          </a>
+          <a mat-list-item
+              href="https://github.com/wipwd/wwd-tasks.git" target="new"
+              matTooltip="Homepage" matTooltipPosition="right"
+              [matTooltipDisabled]="isExpanded()">
+            <mat-icon svgIcon="github"></mat-icon>
+            <span *ngIf="isExpanded()" class="menu-item">homepage</span>
+          </a>
+        </mat-nav-list>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <!-- content -->
+  <mat-sidenav-content>
+
+    <!-- top toolbar -->
+    <mat-toolbar color="primary">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="isHandset$ | async">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+      <span>Task Tracker</span>
+      <button mat-icon-button type="button"
+          (click)="toggleNewTask()"
+          cdkOverlayOrigin #trigger="cdkOverlayOrigin">
+        <mat-icon *ngIf="!isNewTaskOpen()">add_circle_outline</mat-icon>
+        <mat-icon *ngIf="isNewTaskOpen()">highlight_off</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="trigger"
+        [cdkConnectedOverlayOpen]="isNewTaskOverlayOpen()"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        (backdropClick)="closeNewTask()"
+        (overlayKeydown)="maybeCloseNewTask($event)">
+      <mat-card style="width: 800px">
+        <app-task-add></app-task-add>
+      </mat-card>
+    </ng-template>
+
+    <!-- actual content -->
+    <div class="content-container mat-elevation-z2">
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- possible footer goes here -->
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,36 @@
+<div fxLayout="row" fxLayoutAlign="space-between center">
+  <div>
+    <a href="https://wipwd.dev" target="new">
+      <mat-icon style="font-size: 16px;">open_in_new</mat-icon>
+    </a>
+    <span><strong>My Task Title</strong></span>
+  </div>
+  <span>Added 32 days ago</span>
+  <div fxLayout="row" fxLayoutAlign="space-between center">
+    <span><strong>on</strong></span>
+    <span>Ceph</span>
+    <span>SUSE</span>
+  </div>
+  <div>
+    <button mat-icon-button (click)="undefined"
+        matTooltip="To Backlog" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>reply_all</mat-icon>
+    </button>
+    <button mat-icon-button (click)="undefined"
+        matTooltip="Cancel" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>cancel</mat-icon>
+    </button>
+    <button mat-icon-button (click)="undefined"
+        matTooltip="Done" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>check_circle</mat-icon>
+    </button>
+    <button mat-icon-button (click)="undefined"
+        matTooltip="Next" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>forward</mat-icon>
+    </button>
+  </div>
+</div>
