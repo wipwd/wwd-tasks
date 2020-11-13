@@ -16,8 +16,6 @@ export class DashboardComponent {
   private _is_handset: boolean = false;
   private _is_new_task_overlay_open: boolean = false;
   private _is_new_task_bottom_sheet_open: boolean = false;
-  private _use_new_task_overlay: boolean = true;
-  private _use_new_task_bottom_sheet: boolean = false;
 
   public isHandset$: Observable<boolean> =
       this._breakpoint_observer.observe([
