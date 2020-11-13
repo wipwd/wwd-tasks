@@ -42,7 +42,7 @@
     "max-classes-per-file": false,
     "max-line-length": [
       true,
-      140
+      80
     ],
     "member-ordering": [
       true,
@@ -65,7 +65,7 @@
     ],
     "no-empty": false,
     "no-inferrable-types": [
-      true,
+      false,
       "ignore-params"
     ],
     "no-non-null-assertion": true,
@@ -77,8 +77,9 @@
       "as-needed"
     ],
     "quotemark": [
-      true,
-      "single"
+      false,
+      "single",
+      "double"
     ],
     "semicolon": {
       "options": [
@@ -120,7 +121,9 @@
       "options": [
         "ban-keywords",
         "check-format",
-        "allow-pascal-case"
+        "allow-pascal-case",
+        "allow-leading-underscore",
+        "allow-snake-case"
       ]
     },
     "whitespace": {
