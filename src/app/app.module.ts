@@ -32,6 +32,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { FirstTimeDialogComponent } from './first-time-dialog/first-time-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { SettingsDashboardComponent } from './settings/settings-dashboard/settings-dashboard.component';
+import { MatChipsModule } from '@angular/material/chips';
 
 @NgModule({
   declarations: [
@@ -43,6 +45,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     TaskLedgerListComponent,
     TaskAddComponent,
     FirstTimeDialogComponent,
+    SettingsDashboardComponent,
   ],
   imports: [
     BrowserModule,
@@ -70,6 +73,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatInputModule,
     MatSelectModule,
     MatDialogModule,
+    MatChipsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

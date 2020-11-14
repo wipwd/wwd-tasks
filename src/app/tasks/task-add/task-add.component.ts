@@ -1,5 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
+import { ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskItem, TaskService } from '../../services/task-service.service';
 
 @Component({
@@ -20,7 +22,8 @@ export class TaskAddComponent implements OnInit {
 
   public constructor(
     private _fb: FormBuilder,
-    private _tasks_svc: TaskService
+    private _tasks_svc: TaskService,
+    private _projects_svc: ProjectsService
   ) {
     this.form_ctrl_title = new FormControl('');
     this.form_ctrl_priority = new FormControl("medium");
@@ -61,5 +64,9 @@ export class TaskAddComponent implements OnInit {
     this._tasks_svc.add(task);
     console.log("add new task > ", task);
     this.finished.next(true);
+  }
+
+  public getProjects(): BehaviorSubject<string[]> {
+    return this._projects_svc.getProjects();
   }
 }
