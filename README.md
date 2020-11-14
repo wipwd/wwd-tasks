@@ -1,27 +1,16 @@
-# WwdTasks
+# wip:wd's Tasks
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.5.
+A task manager for the browser, follows a Kanban style to task management:
+a new task is placed under the backlog, and is moved forward by the user as
+progress on the task is achieved. At any point in time a task can be moved
+back to the backlog, unless it has been completed.
 
-## Development server
+The current implementation keeps tasks stored in the browser's IndexedDB,
+and thus requires no backend to function. However, an obvious limitation is
+that these tasks are not shared across devices, nor across browsers.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## LICENSE
 
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+This work is distributed under the European Union Public License version 1.2,
+as published by the European Commission. You may find a copy of the license in
+this repository, under LICENSE.
