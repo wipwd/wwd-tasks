@@ -30,6 +30,8 @@ import { TaskAddComponent } from './tasks/task-add/task-add.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { FirstTimeDialogComponent } from './first-time-dialog/first-time-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -40,6 +42,7 @@ import { MatSelectModule } from '@angular/material/select';
     TaskItemComponent,
     TaskLedgerListComponent,
     TaskAddComponent,
+    FirstTimeDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -66,6 +69,7 @@ import { MatSelectModule } from '@angular/material/select';
     ReactiveFormsModule,
     MatInputModule,
     MatSelectModule,
+    MatDialogModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

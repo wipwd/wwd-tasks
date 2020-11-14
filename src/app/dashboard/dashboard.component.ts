@@ -1,16 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { TaskAddComponent } from '../tasks/task-add/task-add.component';
+import { MatDialog } from '@angular/material/dialog';
+import { FirstTimeDialogComponent } from '../first-time-dialog/first-time-dialog.component';
+import { set as idbset, get as idbget } from 'idb-keyval';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
 
   private _is_menu_expanded: boolean = false;
   private _is_handset: boolean = false;
@@ -30,13 +33,32 @@ export class DashboardComponent {
 
   constructor(
     private _breakpoint_observer: BreakpointObserver,
-    private _bottom_sheet: MatBottomSheet
+    private _bottom_sheet: MatBottomSheet,
+    private _first_time_dialog: MatDialog
   ) {
     this.isHandset$.subscribe({
       next: (result: boolean) => {
         this._is_handset = result;
       }
     });
+  }
+
+  public ngOnInit(): void {
+    this._checkVersion();
+  }
+
+  private _checkVersion(): void {
+    idbget("_wwdtasks_version").then(
+      (version: number|undefined) => {
+        if (!version) {
+          this._doFirstRun();
+        }
+    });
+  }
+
+  private _doFirstRun(): void {
+    const dialogref = this._first_time_dialog.open(FirstTimeDialogComponent);
+    idbset("_wwdtasks_version", 1);
   }
 
   public isExpanded(): boolean {
