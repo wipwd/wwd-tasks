@@ -78,7 +78,7 @@ export class AppModule {
   ) {
     this._mat_icon_registry.addSvgIcon("github",
       this._dom_sanitizer.bypassSecurityTrustResourceUrl(
-        "/assets/github-icon.svg"
+        "assets/github-icon.svg"
       )
     );
   }
