@@ -64,12 +64,9 @@ export class TaskLedgerComponent implements OnInit {
       str = `(${total})`;
     }
     this.priorities[prio].size.next(str);
-    // this.priorities[prio].has_tasks = (total > 0);
     this.priorities[prio].enabled.next(total > 0);
-    console.log(`(${this.ledger}) total prio ${prio}: ${total}`);
     if (total === 0) {
       this.priorities[prio].expanded.next(false);
-      console.log(`(${this.ledger}) collapse panel: ${prio}`);
     }
   }
 
