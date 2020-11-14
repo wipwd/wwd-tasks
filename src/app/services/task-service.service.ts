@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import {
+  set as idbset,
+  get as idbget
+} from 'idb-keyval';
 
 
 export interface TaskItem {
@@ -21,6 +25,12 @@ export interface Ledger {
   name: string;
   label: string;
   tasks: TaskLedgerMap;
+}
+
+interface IDBTaskItem {
+  id: string;
+  item: TaskItem;
+  ledger: string;
 }
 
 export declare type TaskLedgerMap = {[id: string]: TaskLedgerEntry};
@@ -60,6 +70,54 @@ export class TaskService {
     this._ledger_by_name.inprogress.next = this._ledger_by_name.done;
     this._ledger_by_name.inprogress.previous = this._ledger_by_name.backlog;
     // 'done' tasks are not movable.
+    this._stateLoad();
+  }
+
+  private _stateSave(): void {
+    const tasks: IDBTaskItem[] = [];
+    Object.values(this._ledger_by_name).forEach( (ledger: Ledger) => {
+      const ledgername: string = ledger.name;
+      Object.values(ledger.tasks).forEach( (entry: TaskLedgerEntry) => {
+        tasks.push({
+          id: entry.id,
+          item: entry.item,
+          ledger: ledgername
+        });
+      });
+    });
+    // const tasks_json: string = JSON.stringify(tasks);
+    idbset("_wwd_tasks", tasks);
+  }
+
+  private _stateLoad(): void {
+    idbget("_wwd_tasks").then( (value: IDBTaskItem[]|undefined) => {
+      if (!value) {
+        return;
+      }
+      this._loadTasks(value);
+    });
+  }
+
+  private _loadTasks(tasks: IDBTaskItem[]): void {
+    const updated_ledgers: {[id: string]: boolean} = {};
+    tasks.forEach( (task: IDBTaskItem) => {
+      console.log("task > ", task);
+      console.assert(task.ledger in this._ledger_by_name);
+      if (!(task.ledger in this._ledger_by_name)) {
+        return;
+      }
+      this._ledger_by_name[task.ledger].tasks[task.id] = {
+        id: task.id,
+        item: task.item,
+        ledger: this._ledger_by_name[task.ledger]
+      };
+      this._ledger_by_taskid[task.id] = this._ledger_by_name[task.ledger];
+      updated_ledgers[task.ledger] = true;
+    });
+
+    Object.keys(updated_ledgers).forEach( (ledgername: string) => {
+      this._updateLedgerSubjects(this._ledger_by_name[ledgername]);
+    });
   }
 
   private _updateLedgerSubjects(ledger: Ledger): void {
@@ -73,6 +131,7 @@ export class TaskService {
     const ledger: Ledger = task.ledger;
     delete ledger.tasks[task.id];
     delete this._ledger_by_taskid[task.id];
+    this._stateSave();
     this._updateLedgerSubjects(ledger);
   }
 
@@ -88,6 +147,7 @@ export class TaskService {
       ledger: this._ledger_by_name.backlog
     };
     this._ledger_by_taskid[taskid] = this._ledger_by_name.backlog;
+    this._stateSave();
     this._updateLedgerSubjects(this._ledger_by_name.backlog);
   }
 
