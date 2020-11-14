@@ -1,6 +1,6 @@
 <div fxLayout="row" fxLayoutAlign="space-between center">
   <div>
-    <a href="https://wipwd.dev" target="new">
+    <a [href]="task.item.url" target="new" *ngIf="hasURL()">
       <mat-icon style="font-size: 16px;">open_in_new</mat-icon>
     </a>
     <span><strong>{{task.item.title}}</strong></span>
@@ -10,7 +10,7 @@
     <span>{{getProjects()}}</span>
   </div>
   <div>
-    <button mat-icon-button (click)="movePrevious()"
+    <button mat-icon-button *ngIf="hasPrevious()" (click)="movePrevious()"
         matTooltip="To Backlog" matTooltipPosition="above"
         [matTooltipDisabled]="false">
       <mat-icon>reply_all</mat-icon>
@@ -20,12 +20,12 @@
         [matTooltipDisabled]="false">
       <mat-icon>cancel</mat-icon>
     </button>
-    <button mat-icon-button (click)="markDone()"
+    <button mat-icon-button *ngIf="canMarkDone()" (click)="markDone()"
         matTooltip="Done" matTooltipPosition="above"
         [matTooltipDisabled]="false">
       <mat-icon>check_circle</mat-icon>
     </button>
-    <button mat-icon-button (click)="moveNext()"
+    <button mat-icon-button *ngIf="hasNext()" (click)="moveNext()"
         matTooltip="Next" matTooltipPosition="above"
         [matTooltipDisabled]="false">
       <mat-icon>forward</mat-icon>

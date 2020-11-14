@@ -44,4 +44,20 @@ export class TaskItemComponent implements OnInit {
     this._tasks_svc.remove(this.task);
   }
 
+  public hasNext(): boolean {
+    return !!this.task.ledger.next;
+  }
+
+  public hasPrevious(): boolean {
+    return !!this.task.ledger.previous;
+  }
+
+  public hasURL(): boolean {
+    return !!this.task.item.url && (this.task.item.url !== "");
+  }
+
+  public canMarkDone(): boolean {
+    return this._tasks_svc.canMarkDone(this.task);
+  }
+
 }

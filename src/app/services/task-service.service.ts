@@ -185,8 +185,12 @@ export class TaskService {
     this._moveTo(task, task.ledger.previous);
   }
 
+  public canMarkDone(task: TaskLedgerEntry): boolean {
+    return (task.ledger.name !== "done");
+  }
+
   public markDone(task: TaskLedgerEntry): void {
-    if (task.ledger.name === "done") {
+    if (!this.canMarkDone(task)) {
       return;
     }
     this._moveTo(task, this._ledger_by_name.done);
