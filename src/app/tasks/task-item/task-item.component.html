@@ -10,17 +10,17 @@
     <span>{{getProjects()}}</span>
   </div>
   <div>
-    <button mat-icon-button (click)="undefined"
+    <button mat-icon-button (click)="movePrevious()"
         matTooltip="To Backlog" matTooltipPosition="above"
         [matTooltipDisabled]="false">
       <mat-icon>reply_all</mat-icon>
     </button>
-    <button mat-icon-button (click)="undefined"
+    <button mat-icon-button (click)="remove()"
         matTooltip="Cancel" matTooltipPosition="above"
         [matTooltipDisabled]="false">
       <mat-icon>cancel</mat-icon>
     </button>
-    <button mat-icon-button (click)="undefined"
+    <button mat-icon-button (click)="markDone()"
         matTooltip="Done" matTooltipPosition="above"
         [matTooltipDisabled]="false">
       <mat-icon>check_circle</mat-icon>

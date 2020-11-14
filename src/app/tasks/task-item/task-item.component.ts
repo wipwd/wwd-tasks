@@ -32,4 +32,16 @@ export class TaskItemComponent implements OnInit {
     this._tasks_svc.moveNext(this.task);
   }
 
+  public movePrevious(): void {
+    this._tasks_svc.movePrevious(this.task);
+  }
+
+  public markDone(): void {
+    this._tasks_svc.markDone(this.task);
+  }
+
+  public remove(): void {
+    this._tasks_svc.remove(this.task);
+  }
+
 }

@@ -164,18 +164,32 @@ export class TaskService {
     }
   }
 
-  public moveNext(task: TaskLedgerEntry): void {
-    const cur_ledger: Ledger = task.ledger;
-    const next_ledger: Ledger|undefined = task.ledger.next;
-    if (!next_ledger) {
+  private _moveTo(task: TaskLedgerEntry, dest: Ledger|undefined): void {
+    if (!dest) {
       return;
     }
-    next_ledger.tasks[task.id] = task;
+    const cur_ledger: Ledger = task.ledger;
+    dest.tasks[task.id] = task;
     delete cur_ledger.tasks[task.id];
-    task.ledger = next_ledger;
+    task.ledger = dest;
     this._stateSave();
     this._updateLedgerSubjects(cur_ledger);
-    this._updateLedgerSubjects(next_ledger);
+    this._updateLedgerSubjects(dest);
+  }
+
+  public moveNext(task: TaskLedgerEntry): void {
+    this._moveTo(task, task.ledger.next);
+  }
+
+  public movePrevious(task: TaskLedgerEntry): void {
+    this._moveTo(task, task.ledger.previous);
+  }
+
+  public markDone(task: TaskLedgerEntry): void {
+    if (task.ledger.name === "done") {
+      return;
+    }
+    this._moveTo(task, this._ledger_by_name.done);
   }
 
   public getLedger(name: string): BehaviorSubject<Ledger> {
