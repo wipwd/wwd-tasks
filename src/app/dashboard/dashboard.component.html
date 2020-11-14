@@ -61,6 +61,13 @@
             <mat-icon>settings</mat-icon>
             <span *ngIf="isExpanded()" class="menu-item">Settings</span>
           </a>
+          <a mat-list-item href="#"
+              matTooltip="Help" matTooltipPosition="right"
+              [matTooltipDisabled]="isExpanded()"
+              (click)="openHelpDialog()">
+            <mat-icon>help_outline</mat-icon>
+            <span *ngIf="isExpanded()" class="menu-item">Help</span>
+          </a>
           <a mat-list-item
               href="https://github.com/wipwd/wwd-tasks.git" target="new"
               matTooltip="Homepage" matTooltipPosition="right"

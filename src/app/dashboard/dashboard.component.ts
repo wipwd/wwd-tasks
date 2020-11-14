@@ -7,6 +7,7 @@ import { TaskAddComponent } from '../tasks/task-add/task-add.component';
 import { MatDialog } from '@angular/material/dialog';
 import { FirstTimeDialogComponent } from '../first-time-dialog/first-time-dialog.component';
 import { set as idbset, get as idbget } from 'idb-keyval';
+import { HelpDialogComponent } from '../help-dialog/help-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -120,5 +121,11 @@ export class DashboardComponent implements OnInit {
 
   public isNewTaskOpen(): boolean {
     return this.isNewTaskBottomSheetOpen() || this.isNewTaskOverlayOpen();
+  }
+
+  public openHelpDialog(): void {
+    const ref = this._first_time_dialog.open(
+      HelpDialogComponent, {closeOnNavigation: false}
+    );
   }
 }

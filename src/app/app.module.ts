@@ -34,6 +34,7 @@ import { FirstTimeDialogComponent } from './first-time-dialog/first-time-dialog.
 import { MatDialogModule } from '@angular/material/dialog';
 import { SettingsDashboardComponent } from './settings/settings-dashboard/settings-dashboard.component';
 import { MatChipsModule } from '@angular/material/chips';
+import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { MatChipsModule } from '@angular/material/chips';
     TaskAddComponent,
     FirstTimeDialogComponent,
     SettingsDashboardComponent,
+    HelpDialogComponent,
   ],
   imports: [
     BrowserModule,
