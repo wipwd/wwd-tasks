@@ -1,7 +1,10 @@
 <mat-accordion>
 
-  <mat-expansion-panel *ngFor="let prio of priorities"
-      [disabled]="!(prio.enabled|async)">
+  <mat-expansion-panel *ngFor="let prio of getPriorities()"
+      [expanded]="(prio.expanded|async)"
+      [disabled]="!(prio.enabled|async)"
+      (opened)="expanded(prio)"
+      (closed)="collapsed(prio)">
 
     <mat-expansion-panel-header>
       <mat-panel-title>{{prio.label}} {{prio.size|async}}</mat-panel-title>

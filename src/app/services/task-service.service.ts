@@ -164,6 +164,20 @@ export class TaskService {
     }
   }
 
+  public moveNext(task: TaskLedgerEntry): void {
+    const cur_ledger: Ledger = task.ledger;
+    const next_ledger: Ledger|undefined = task.ledger.next;
+    if (!next_ledger) {
+      return;
+    }
+    next_ledger.tasks[task.id] = task;
+    delete cur_ledger.tasks[task.id];
+    task.ledger = next_ledger;
+    this._stateSave();
+    this._updateLedgerSubjects(cur_ledger);
+    this._updateLedgerSubjects(next_ledger);
+  }
+
   public getLedger(name: string): BehaviorSubject<Ledger> {
     console.assert(name in this._ledger_by_name);
     return this._ledger_subjects[name];

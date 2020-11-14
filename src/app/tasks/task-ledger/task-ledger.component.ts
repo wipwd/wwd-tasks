@@ -4,6 +4,15 @@ import {
   Ledger, TaskLedgerEntry, TaskLedgerMap, TaskService
 } from '../../services/task-service.service';
 
+
+declare interface Priority {
+  name: string;
+  label: string;
+  size: BehaviorSubject<string>;
+  enabled: BehaviorSubject<boolean>;
+  expanded: BehaviorSubject<boolean>;
+}
+
 @Component({
   selector: 'app-task-ledger',
   templateUrl: './task-ledger.component.html',
@@ -13,23 +22,26 @@ export class TaskLedgerComponent implements OnInit {
 
   @Input() ledger: string = "backlog";
 
-  public priorities = [
-    {
+  public priorities: {[id: string]: Priority} = {
+    high: {
       name: "high", label: "High",
       size: new BehaviorSubject<string>(""),
-      enabled: new BehaviorSubject<boolean>(false)
+      enabled: new BehaviorSubject<boolean>(false),
+      expanded: new BehaviorSubject<boolean>(false),
     },
-    {
+    medium: {
       name: "medium", label: "Medium",
       size: new BehaviorSubject<string>(""),
-      enabled: new BehaviorSubject<boolean>(false)
+      enabled: new BehaviorSubject<boolean>(false),
+      expanded: new BehaviorSubject<boolean>(false),
     },
-    {
+    low: {
       name: "low", label: "Low",
       size: new BehaviorSubject<string>(""),
-      enabled: new BehaviorSubject<boolean>(false)
+      enabled: new BehaviorSubject<boolean>(false),
+      expanded: new BehaviorSubject<boolean>(false),
     }
-  ];
+  };
 
   public constructor(
     private _tasks_svc: TaskService
@@ -46,6 +58,21 @@ export class TaskLedgerComponent implements OnInit {
     });
   }
 
+  private _updateSize(prio: string, total: number): void {
+    let str = "";
+    if (total > 0) {
+      str = `(${total})`;
+    }
+    this.priorities[prio].size.next(str);
+    // this.priorities[prio].has_tasks = (total > 0);
+    this.priorities[prio].enabled.next(total > 0);
+    console.log(`(${this.ledger}) total prio ${prio}: ${total}`);
+    if (total === 0) {
+      this.priorities[prio].expanded.next(false);
+      console.log(`(${this.ledger}) collapse panel: ${prio}`);
+    }
+  }
+
   private _updateSizes(tasks: TaskLedgerMap): void {
     let total_high: number = 0;
     let total_medium: number = 0;
@@ -58,24 +85,20 @@ export class TaskLedgerComponent implements OnInit {
         case "low": total_low++; break;
       }
     });
-    let high_str: string = "";
-    let medium_str: string = "";
-    let low_str: string = "";
-    if (total_high > 0) {
-      high_str = `(${total_high})`;
-    }
-    if (total_medium > 0) {
-      medium_str = `(${total_medium})`;
-    }
-    if (total_low > 0) {
-      low_str = `(${total_low})`;
-    }
-    this.priorities[0].size.next(high_str);
-    this.priorities[0].enabled.next((total_high > 0));
-    this.priorities[1].size.next(medium_str);
-    this.priorities[1].enabled.next((total_medium > 0));
-    this.priorities[2].size.next(low_str);
-    this.priorities[2].enabled.next((total_low > 0));
+    this._updateSize("high", total_high);
+    this._updateSize("medium", total_medium);
+    this._updateSize("low", total_low);
   }
 
+  public getPriorities(): Priority[] {
+    return [this.priorities.high, this.priorities.medium, this.priorities.low];
+  }
+
+  public expanded(prio: Priority): void {
+    prio.expanded.next(true);
+  }
+
+  public collapsed(prio: Priority): void {
+    prio.expanded.next(false);
+  }
 }
