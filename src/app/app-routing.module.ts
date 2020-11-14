@@ -6,6 +6,8 @@ import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer/ta
 const routes: Routes = [
   { path: 'task-organizer', component: TaskOrganizerComponent },
   { path: 'tmp', component: TaskLedgerComponent },
+  { path: '**', component: TaskOrganizerComponent },
+  { path: '', component: TaskOrganizerComponent },
 ];
 
 @NgModule({
