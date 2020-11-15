@@ -20,6 +20,11 @@ export interface TaskLedgerEntry {
   ledger: Ledger;
 }
 
+export interface TaskArchiveEntry {
+  id: string;
+  item: TaskItem;
+}
+
 export interface Ledger {
   previous?: Ledger;
   next?: Ledger;
@@ -33,6 +38,8 @@ interface IDBTaskItem {
   item: TaskItem;
   ledger: string;
 }
+
+declare type IDBTaskArchiveType = {[id: string]: TaskArchiveEntry};
 
 export declare type TaskLedgerMap = {[id: string]: TaskLedgerEntry};
 
@@ -49,6 +56,7 @@ export class TaskService {
     done: { name: "done", label: "Done", tasks: {} }
   };
   private _ledger_by_taskid: {[id: string]: Ledger} = {};
+  private _archived_tasks: {[id: string]: TaskArchiveEntry} = {};
 
   private _ledger_subjects: {[id: string]: BehaviorSubject<Ledger>} = {
     backlog: new BehaviorSubject<Ledger>({} as Ledger),
@@ -63,6 +71,9 @@ export class TaskService {
     inprogress: new BehaviorSubject<number>(0),
     done: new BehaviorSubject<number>(0)
   };
+
+  private _archive_subject: BehaviorSubject<TaskArchiveEntry[]> =
+    new BehaviorSubject<TaskArchiveEntry[]>([]);
 
   public constructor() {
     this._ledger_by_name.backlog.next = this._ledger_by_name.next;
@@ -88,6 +99,11 @@ export class TaskService {
     });
     // const tasks_json: string = JSON.stringify(tasks);
     idbset("_wwd_tasks", tasks);
+    this._archiveStateSave();
+  }
+
+  private _archiveStateSave(): void {
+    idbset("_wwdtasks_archive", this._archived_tasks);
   }
 
   private _stateLoad(): void {
@@ -97,6 +113,14 @@ export class TaskService {
       }
       this._loadTasks(value);
     });
+    idbget("_wwdtasks_archive").then(
+      (value: IDBTaskArchiveType|undefined) => {
+        if (!value) {
+          return;
+        }
+        this._loadArchive(value);
+      }
+    );
   }
 
   private _loadTasks(tasks: IDBTaskItem[]): void {
@@ -121,6 +145,14 @@ export class TaskService {
     });
   }
 
+  private _loadArchive(archive: IDBTaskArchiveType): void {
+    this._archived_tasks = {};
+    Object.keys(archive).forEach( (key: string) => {
+      this._archived_tasks[key] = archive[key];
+    });
+    this._updateArchiveSubject();
+  }
+
   private _updateLedgerSubjects(ledger: Ledger): void {
     this._ledger_subjects[ledger.name].next(ledger);
     this._ledger_size_subjects[ledger.name].next(
@@ -128,10 +160,21 @@ export class TaskService {
     );
   }
 
-  private _remove(task: TaskLedgerEntry): void {
+  private _updateArchiveSubject(): void {
+    this._archive_subject.next(
+      Object.values(this._archived_tasks).reverse()
+    );
+  }
+
+  private _removeFromLedgers(task: TaskLedgerEntry): void {
     const ledger: Ledger = task.ledger;
     delete ledger.tasks[task.id];
     delete this._ledger_by_taskid[task.id];
+  }
+
+  private _remove(task: TaskLedgerEntry): void {
+    const ledger: Ledger = task.ledger;
+    this._removeFromLedgers(task);
     this._stateSave();
     this._updateLedgerSubjects(ledger);
   }
@@ -165,6 +208,20 @@ export class TaskService {
     }
   }
 
+  public archive(task: TaskLedgerEntry): void {
+    if (task.id in this._archived_tasks) {
+      return;
+    }
+    this._archived_tasks[task.id] = {
+      id: task.id,
+      item: task.item
+    };
+    this._removeFromLedgers(task);
+    this._stateSave();
+    this._updateLedgerSubjects(task.ledger);
+    this._updateArchiveSubject();
+  }
+
   private _moveTo(task: TaskLedgerEntry, dest: Ledger|undefined): void {
     if (!dest) {
       return;
@@ -187,7 +244,11 @@ export class TaskService {
   }
 
   public canMarkDone(task: TaskLedgerEntry): boolean {
-    return (task.ledger.name !== "done");
+    return !this.isDone(task);
+  }
+
+  public isDone(task: TaskLedgerEntry): boolean {
+    return (task.ledger.name === "done");
   }
 
   public markDone(task: TaskLedgerEntry): void {
@@ -226,6 +287,10 @@ export class TaskService {
       return "";
     }
     return this._ledger_by_name[ledgername].label;
+  }
+
+  public getArchive(): BehaviorSubject<TaskArchiveEntry[]> {
+    return this._archive_subject;
   }
 
   public updateTask(task: TaskLedgerEntry, item: TaskItem): void {

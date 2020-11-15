@@ -47,6 +47,10 @@ export class TaskItemComponent implements OnInit {
     this._tasks_svc.remove(this.task);
   }
 
+  public archive(): void {
+    this._tasks_svc.archive(this.task);
+  }
+
   public hasNext(): boolean {
     return !!this.task.ledger.next;
   }
@@ -61,6 +65,10 @@ export class TaskItemComponent implements OnInit {
 
   public canMarkDone(): boolean {
     return this._tasks_svc.canMarkDone(this.task);
+  }
+
+  public isMarkedDone(): boolean {
+    return this._tasks_svc.isDone(this.task);
   }
 
   public editTask(): void {

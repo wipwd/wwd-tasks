@@ -44,6 +44,15 @@
           <mat-icon>pending_actions</mat-icon>
           <span *ngIf="isExpanded()" class="menu-item">Reports</span>
         </a>
+
+        <a mat-list-item
+            routerLinkActive="selected-route"
+            routerLink="archives"
+            matTooltip="Archives" matTooltipPosition="right"
+            [matTooltipDisabled]="isExpanded()">
+          <mat-icon>archive</mat-icon>
+          <span *ngIf="isExpanded()" class="menu-item">Archives</span>
+        </a>
       </mat-nav-list>
 
       <!-- spacer -->

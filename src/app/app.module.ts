@@ -37,6 +37,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { TaskEditComponent } from './tasks/task-edit/task-edit.component';
 import { ReportsComponent } from './reports/reports/reports.component';
+import { ArchivesListComponent } from './archives/archives-list/archives-list.component';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { ReportsComponent } from './reports/reports/reports.component';
     HelpDialogComponent,
     TaskEditComponent,
     ReportsComponent,
+    ArchivesListComponent,
   ],
   imports: [
     BrowserModule,

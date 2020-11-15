@@ -28,6 +28,11 @@
         [matTooltipDisabled]="false">
       <mat-icon>check_circle</mat-icon>
     </button>
+    <button mat-icon-button *ngIf="isMarkedDone()" (click)="archive()"
+        matTooltip="Archive" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>archive</mat-icon>
+    </button>
     <button mat-icon-button *ngIf="hasNext()" (click)="moveNext()"
         matTooltip="Next" matTooltipPosition="above"
         [matTooltipDisabled]="false">
