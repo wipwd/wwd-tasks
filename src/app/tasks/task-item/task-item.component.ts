@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { BehaviorSubject, interval, Subscription } from 'rxjs';
 import { TaskLedgerEntry, TaskService } from 'src/app/services/task-service.service';
 import { TaskEditComponent } from '../task-edit/task-edit.component';
 
@@ -12,12 +13,22 @@ export class TaskItemComponent implements OnInit {
 
   @Input() task: TaskLedgerEntry;
 
+  private _running_for_observer: BehaviorSubject<string> =
+    new BehaviorSubject<string>("");
+  private _running_check_interval_subscription: Subscription;
+
   public constructor(
     private _tasks_svc: TaskService,
     private _edit_task_dialog: MatDialog,
   ) { }
 
-  public ngOnInit(): void { }
+  public ngOnInit(): void {
+    if (this._tasks_svc.isTimerRunning(this.task)) {
+      this._startTimer();
+    } else {
+      this._updateTimer();
+    }
+  }
 
   public hasProjects(): boolean {
     return this.task.item.project.length > 0;
@@ -85,12 +96,70 @@ export class TaskItemComponent implements OnInit {
     }
     return `created ${getTimeSince(this.task.item.date)}`;
   }
+
+  public isRunning(): boolean {
+    return this._tasks_svc.isTimerRunning(this.task);
+  }
+
+  public isPaused(): boolean {
+    return this._tasks_svc.isTimerPaused(this.task);
+  }
+
+  public isStopped(): boolean {
+    return this._tasks_svc.isTimerStopped(this.task);
+  }
+
+  public markStart(): void {
+    this._tasks_svc.timerStart(this.task);
+    this._startTimer();
+  }
+
+  private _startTimer(): void {
+    this._running_check_interval_subscription = interval(1000).subscribe({
+      next: () => {
+        this._updateTimer();
+      }
+    });
+    this._updateTimer();
+  }
+
+  private _updateTimer(): void {
+    const milisecs: number = this._tasks_svc.getTimerTotal(this.task);
+    if (milisecs <= 0) {
+      return;
+    }
+    const secs: number = Math.floor(milisecs / 1000);
+    const str: string = getTimeDiffStr(secs, true);
+    this._running_for_observer.next(str);
+  }
+
+  private _stopTimer(): void {
+    this._running_check_interval_subscription.unsubscribe();
+  }
+
+  public markPause(): void {
+    this._tasks_svc.timerPause(this.task);
+    this._stopTimer();
+  }
+
+  public markStop(): void {
+
+  }
+
+  public getRunningFor(): BehaviorSubject<string> {
+    return this._running_for_observer;
+  }
 }
 
 
 function getTimeSince(date: Date): string {
   const now = new Date().getTime();
-  let diff = Math.floor((now - date.getTime()) / 1000);
+  const diff = Math.floor((now - date.getTime()) / 1000);
+  return getTimeDiffStr(diff);
+}
+
+
+function getTimeDiffStr(diff: number, with_secs: boolean = false): string {
 
   const month_secs = 2.628e+6; // months in seconds
   const week_secs = 604800; // weeks in seconds
@@ -135,12 +204,14 @@ function getTimeSince(date: Date): string {
       time_lst.push(`${mins}m`);
   }
 
-  if (time_lst.length === 0) {
+  if (time_lst.length === 0 && !with_secs) {
       if (diff > 0) {
           return "about a minute ago";
       } else {
           return "few seconds ago";
       }
+  } else if (with_secs) {
+    time_lst.push(`${diff}s`)
   }
   return `${time_lst.join(', ')} ago`;
 }

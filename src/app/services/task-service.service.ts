@@ -1,10 +1,19 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, timer } from 'rxjs';
 import {
   set as idbset,
   get as idbget
 } from 'idb-keyval';
 
+export interface TaskTimerItem {
+  start: Date;
+  end?: Date;
+}
+
+export interface TaskTimerState {
+  state: string;
+  intervals: TaskTimerItem[];
+}
 
 export interface TaskItem {
   title: string;
@@ -12,6 +21,7 @@ export interface TaskItem {
   project: string[];
   url: string;
   date?: Date;
+  timer?: TaskTimerState;
 }
 
 export interface TaskLedgerEntry {
@@ -305,5 +315,74 @@ export class TaskService {
     actual_task.item = item;
     this._stateSave();
     this._updateLedgerSubjects(ledger);
+  }
+
+  public timerStart(task: TaskLedgerEntry): void {
+    if (!task.item.timer) {
+      task.item.timer = { state: "stopped", intervals: [] };
+    }
+    const timer_state: TaskTimerState = task.item.timer;
+    if (timer_state.state !== "stopped" && timer_state.state !== "paused") {
+      console.error(
+        "unable to start time for task because it's not stopped nor paused",
+        task);
+      return;
+    }
+
+    timer_state.state = "running";
+    timer_state.intervals.push({start: new Date(), end: undefined});
+    if (task.ledger.name !== "inprogress") {
+      // move task to in-progress.
+      this._moveTo(task, this._ledger_by_name.inprogress);
+    }
+  }
+
+  public timerPause(task: TaskLedgerEntry): void {
+    if (!task.item.timer || !this.isTimerRunning(task)) {
+      // can't pause a task that has not been started.
+      return;
+    }
+    const timer_state: TaskTimerState = task.item.timer;
+    timer_state.state = "paused";
+    const cur_interval: TaskTimerItem = this.getCurrentTimerInterval(task);
+    cur_interval.end = new Date();
+    this._stateSave();
+  }
+
+  public timerStop(task: TaskLedgerEntry): void {
+  }
+
+  public isTimerRunning(task: TaskLedgerEntry): boolean {
+    return !!task.item.timer && task.item.timer.state === "running";
+  }
+
+  public isTimerPaused(task: TaskLedgerEntry): boolean {
+    return !!task.item.timer && task.item.timer.state === "paused";
+  }
+
+  public isTimerStopped(task: TaskLedgerEntry): boolean {
+    return !!task.item.timer && task.item.timer.state === "stopped";
+  }
+
+  public getCurrentTimerInterval(
+    task: TaskLedgerEntry
+  ): TaskTimerItem|undefined {
+    if (!task.item.timer || task.item.timer.intervals.length === 0) {
+      return undefined;
+    }
+    return task.item.timer.intervals[task.item.timer.intervals.length - 1];
+  }
+
+  public getTimerTotal(task: TaskLedgerEntry): number {
+    if (!task.item.timer) {
+      return -1;
+    }
+    let total_milisec: number = 0;
+    task.item.timer.intervals.forEach( (interval: TaskTimerItem) => {
+      const end: Date = (interval.end ? interval.end : new Date());
+      const diff: number = end.getTime() - interval.start.getTime();
+      total_milisec += diff;
+    });
+    return total_milisec;
   }
 }

@@ -9,6 +9,27 @@
     </button>
   </div>
   <span class="item-date">{{getCreatedSince()}}</span>
+  <div *ngIf="!isMarkedDone()">
+    <span>{{getRunningFor()|async}}</span>
+    <button mat-icon-button *ngIf="!isRunning()"
+        (click)="markStart()"
+        matTooltip="Start" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>play_circle_outline</mat-icon>
+    </button>
+    <button mat-icon-button *ngIf="isRunning()"
+        (click)="markPause()"
+        matTooltip="Pause" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>pause_circle_outline</mat-icon>
+    </button>
+    <button mat-icon-button *ngIf="isRunning()"
+        (click)="markStop()"
+        matTooltip="Stop" matTooltipPosition="above"
+        [matTooltipDisabled]="false">
+      <mat-icon>stop</mat-icon>
+    </button>
+  </div>
   <div fxLayout="row" fxLayoutAlign="space-between center">
     <span>{{getProjects()}}</span>
   </div>
