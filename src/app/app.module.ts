@@ -36,6 +36,7 @@ import { SettingsDashboardComponent } from './settings/settings-dashboard/settin
 import { MatChipsModule } from '@angular/material/chips';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { TaskEditComponent } from './tasks/task-edit/task-edit.component';
+import { ReportsComponent } from './reports/reports/reports.component';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { TaskEditComponent } from './tasks/task-edit/task-edit.component';
     SettingsDashboardComponent,
     HelpDialogComponent,
     TaskEditComponent,
+    ReportsComponent,
   ],
   imports: [
     BrowserModule,

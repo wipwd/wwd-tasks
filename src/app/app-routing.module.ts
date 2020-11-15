@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { ReportsComponent } from './reports/reports/reports.component';
 import { SettingsDashboardComponent } from './settings/settings-dashboard/settings-dashboard.component';
 import { TaskLedgerComponent } from './tasks/task-ledger/task-ledger.component';
 import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer/task-organizer.component';
@@ -7,7 +8,7 @@ import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer/ta
 const routes: Routes = [
   { path: 'task-organizer', component: TaskOrganizerComponent },
   { path: 'settings', component: SettingsDashboardComponent },
-  { path: 'tmp', component: TaskLedgerComponent },
+  { path: 'reports', component: ReportsComponent },
   { path: '**', component: TaskOrganizerComponent },
   { path: '', component: TaskOrganizerComponent },
 ];
