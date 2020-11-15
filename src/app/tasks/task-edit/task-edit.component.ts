@@ -52,7 +52,8 @@ export class TaskEditComponent implements OnInit {
       title: this.form_ctrl_title.value,
       priority: this.form_ctrl_priority.value,
       project: this.form_ctrl_projects.value,
-      url: this.form_ctrl_url.value
+      url: this.form_ctrl_url.value,
+      date: this.item.date
     };
     this._tasks_svc.updateTask(this.task, new_item);
     this._dialog_ref.close();

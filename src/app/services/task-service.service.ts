@@ -11,6 +11,7 @@ export interface TaskItem {
   priority: string;
   project: string[];
   url: string;
+  date?: Date;
 }
 
 export interface TaskLedgerEntry {

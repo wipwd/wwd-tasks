@@ -59,7 +59,8 @@ export class TaskAddComponent implements OnInit {
       title: this.form_ctrl_title.value,
       priority: this.form_ctrl_priority.value,
       project: project_lst,
-      url: this.form_ctrl_url.value
+      url: this.form_ctrl_url.value,
+      date: new Date()
     };
     this._tasks_svc.add(task);
     console.log("add new task > ", task);
