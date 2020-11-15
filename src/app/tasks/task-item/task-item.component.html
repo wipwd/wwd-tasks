@@ -1,14 +1,14 @@
 <div fxLayout="row" fxLayoutAlign="space-between center">
-  <div>
+  <div class="item-title">
     <a [href]="task.item.url" target="new" *ngIf="hasURL()">
-      <mat-icon style="font-size: 16px;">open_in_new</mat-icon>
+      <mat-icon class="item-title-icon">open_in_new</mat-icon>
     </a>
     <span><strong>{{task.item.title}}</strong></span>
     <button mat-icon-button (click)="editTask()">
-      <mat-icon style="font-size: 16px">create</mat-icon>
+      <mat-icon class="item-title-icon">create</mat-icon>
     </button>
   </div>
-  <span>{{getCreatedSince()}}</span>
+  <span class="item-date">{{getCreatedSince()}}</span>
   <div fxLayout="row" fxLayoutAlign="space-between center">
     <span>{{getProjects()}}</span>
   </div>
