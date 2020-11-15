@@ -226,4 +226,18 @@ export class TaskService {
     }
     return this._ledger_by_name[ledgername].label;
   }
+
+  public updateTask(task: TaskLedgerEntry, item: TaskItem): void {
+    // ensure we are editing the actual task entry. While we expect angular to
+    // be smart about it, and that we are receiving the actual task reference
+    // via the argument, lets not trust 100% on angular and be paranoid.
+    if (!(task.id in this._ledger_by_taskid)) {
+      return;
+    }
+    const ledger: Ledger = this._ledger_by_taskid[task.id];
+    const actual_task: TaskLedgerEntry = ledger.tasks[task.id];
+    actual_task.item = item;
+    this._stateSave();
+    this._updateLedgerSubjects(ledger);
+  }
 }

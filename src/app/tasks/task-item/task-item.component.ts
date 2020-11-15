@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { TaskLedgerEntry, TaskService } from 'src/app/services/task-service.service';
+import { TaskEditComponent } from '../task-edit/task-edit.component';
 
 @Component({
   selector: 'app-task-item',
@@ -11,7 +13,8 @@ export class TaskItemComponent implements OnInit {
   @Input() task: TaskLedgerEntry;
 
   public constructor(
-    private _tasks_svc: TaskService
+    private _tasks_svc: TaskService,
+    private _edit_task_dialog: MatDialog,
   ) { }
 
   public ngOnInit(): void { }
@@ -60,4 +63,11 @@ export class TaskItemComponent implements OnInit {
     return this._tasks_svc.canMarkDone(this.task);
   }
 
+  public editTask(): void {
+    this._edit_task_dialog.open(TaskEditComponent, {
+      data: {
+        task: this.task
+      }
+    });
+  }
 }
