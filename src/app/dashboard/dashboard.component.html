@@ -69,6 +69,13 @@
             <span *ngIf="isExpanded()" class="menu-item">Help</span>
           </a>
           <a mat-list-item
+              href="https://github.com/wipwd/wwd-tasks/issues" target="new"
+              matTooltip="Report Bug" matTooltipPosition="right"
+              [matTooltipDisabled]="isExpanded()">
+            <mat-icon>bug_report</mat-icon>
+            <span *ngIf="isExpanded()" class="menu-item">Report Bug</span>
+          </a>
+          <a mat-list-item
               href="https://github.com/wipwd/wwd-tasks.git" target="new"
               matTooltip="Homepage" matTooltipPosition="right"
               [matTooltipDisabled]="isExpanded()">
