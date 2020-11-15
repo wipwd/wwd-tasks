@@ -19,9 +19,9 @@
       <mat-icon>reply_all</mat-icon>
     </button>
     <button mat-icon-button (click)="remove()"
-        matTooltip="Cancel" matTooltipPosition="above"
+        matTooltip="Delete" matTooltipPosition="above"
         [matTooltipDisabled]="false">
-      <mat-icon>cancel</mat-icon>
+      <mat-icon>delete_forever</mat-icon>
     </button>
     <button mat-icon-button *ngIf="canMarkDone()" (click)="markDone()"
         matTooltip="Done" matTooltipPosition="above"
