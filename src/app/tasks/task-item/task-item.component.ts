@@ -155,7 +155,7 @@ export class TaskItemComponent implements OnInit {
 function getTimeSince(date: Date): string {
   const now = new Date().getTime();
   const diff = Math.floor((now - date.getTime()) / 1000);
-  return getTimeDiffStr(diff);
+  return `${getTimeDiffStr(diff)} ago`;
 }
 
 
@@ -206,12 +206,12 @@ function getTimeDiffStr(diff: number, with_secs: boolean = false): string {
 
   if (time_lst.length === 0 && !with_secs) {
       if (diff > 0) {
-          return "about a minute ago";
+          return "about a minute";
       } else {
-          return "few seconds ago";
+          return "few seconds";
       }
   } else if (with_secs) {
-    time_lst.push(`${diff}s`)
+    time_lst.push(`${diff}s`);
   }
-  return `${time_lst.join(', ')} ago`;
+  return `${time_lst.join(', ')}`;
 }
