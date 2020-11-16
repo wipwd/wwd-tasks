@@ -13,7 +13,7 @@
   </table>
 
   <mat-paginator #paginator
-      [length]="data_source?.getLength()"
+      [length]="(data_source?.getLength()|async)"
       [pageIndex]="0"
       [pageSize]="10"
       [pageSizeOptions]="[20, 50, 100, 250]">

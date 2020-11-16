@@ -21,6 +21,8 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
   private _tasks_subject: BehaviorSubject<TaskLedgerEntry[]> =
     new BehaviorSubject<TaskLedgerEntry[]>([]);
   private _ledger_subscription: Subscription;
+  private _tasks_size_subject: BehaviorSubject<number> =
+    new BehaviorSubject<number>(0);
 
   constructor(
     private _tasks_svc: TaskService,
@@ -106,10 +108,11 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
     });
     this._tasks = [...new_entries];
     this._tasks_subject.next(this._tasks);
+    this._tasks_size_subject.next(this._tasks.length);
   }
 
-  public getLength(): number {
-    return this._tasks.length;
+  public getLength(): BehaviorSubject<number> {
+    return this._tasks_size_subject;
   }
 }
 
