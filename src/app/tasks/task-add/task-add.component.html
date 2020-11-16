@@ -30,16 +30,38 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
+
+      <button mat-icon-button type="submit" (click)="addNewTask()">
+        <mat-icon>send</mat-icon>
+      </button>
     </div>
-    <div fxLayout="row" fxLayoutAlign="space-between center">
+    <div fxLayout="row" fxLayoutAlign="start center">
+      <button mat-icon-button (click)="show_form_url = !show_form_url">
+        <mat-icon style="font-size: 16px" *ngIf="!show_form_url">add</mat-icon>
+        <mat-icon style="font-size: 16px" *ngIf="show_form_url">remove</mat-icon>
+        <span>URL</span>
+      </button>
+      <span style="width: 1.5em"></span>
+      <button mat-icon-button (click)="show_form_notes = !show_form_notes">
+        <mat-icon style="font-size: 16px" *ngIf="!show_form_notes">add</mat-icon>
+        <mat-icon style="font-size: 16px" *ngIf="show_form_notes">remove</mat-icon>
+        <span>Notes</span>
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="space-between center" *ngIf="show_form_url">
       <mat-form-field style="width: 128ch" appearance="fill">
         <mat-label>URL</mat-label>
         <input matInput [formControl]="form_ctrl_url"
             placeholder="https://github.com/wipwd/wwd-tasks.git">
       </mat-form-field>
-      <button mat-icon-button type="submit" (click)="addNewTask()">
-        <mat-icon>send</mat-icon>
-      </button>
+    </div>
+    <div fxLayout="row" *ngIf="show_form_notes">
+      <mat-form-field style="width: 100%" appearance="fill">
+        <mat-label>Notes</mat-label>
+        <textarea matInput [formControl]="form_ctrl_notes"
+            rows="3" matTextareaAutosize></textarea>
+      </mat-form-field>
+
     </div>
   </form>
 

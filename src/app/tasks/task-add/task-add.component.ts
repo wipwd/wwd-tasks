@@ -19,6 +19,10 @@ export class TaskAddComponent implements OnInit {
   public form_ctrl_priority: FormControl;
   public form_ctrl_project: FormControl;
   public form_ctrl_url: FormControl;
+  public form_ctrl_notes: FormControl;
+
+  public show_form_url: boolean = false;
+  public show_form_notes: boolean = false;
 
   public constructor(
     private _fb: FormBuilder,
@@ -29,11 +33,13 @@ export class TaskAddComponent implements OnInit {
     this.form_ctrl_priority = new FormControl("medium");
     this.form_ctrl_project = new FormControl('');
     this.form_ctrl_url = new FormControl('');
+    this.form_ctrl_notes = new FormControl('');
     this.add_task_form_group = this._fb.group({
       title: this.form_ctrl_title,
       priority: this.form_ctrl_priority,
       project: this.form_ctrl_project,
-      url: this.form_ctrl_url
+      url: this.form_ctrl_url,
+      notes: this.form_ctrl_notes
     });
   }
 
@@ -55,13 +61,17 @@ export class TaskAddComponent implements OnInit {
         }
       });
     }
+    const now: Date = new Date();
     const task: TaskItem = {
       title: this.form_ctrl_title.value,
       priority: this.form_ctrl_priority.value,
       project: project_lst,
       url: this.form_ctrl_url.value,
-      date: new Date()
+      date: now
     };
+    if (!!this.form_ctrl_notes.value && this.form_ctrl_notes.value !== "") {
+      task.notes = [{date: now, text: this.form_ctrl_notes.value}];
+    }
     this._tasks_svc.add(task);
     console.log("add new task > ", task);
     this.finished.next(true);
