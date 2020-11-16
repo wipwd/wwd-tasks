@@ -1,0 +1,50 @@
+<div>
+  <h2 mat-dialog-title fxLayout="row" fxLayout="start center">
+    <mat-icon style="font-size: 32px">info</mat-icon>
+    <span style="width: 0.5em"></span>
+    <span>{{item.title}} ({{item.priority}})</span>
+  </h2>
+
+  <mat-dialog-content fxLayout="column">
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <span style="min-width: 30em">Projects: {{item.project}}</span>
+      <span style="min-width: 40em">Created on: {{item.date}}</span>
+    </div>
+
+    <span style="height: 2em"></span>
+    <div fxLayout="column">
+
+      <h3 class="mat-h3">Time Sheet</h3>
+      <div fxLayout="row">
+        <table mat-table style="width: 100%"
+            [dataSource]="item.timer?.intervals">
+
+          <ng-container matColumnDef="interval">
+            <th mat-header-cell *matHeaderCellDef>When?</th>
+            <td mat-cell *matCellDef="let interval">
+              <div fxLayout="column">
+                <span>{{interval.start}}</span>
+                <span>{{interval.end}}</span>
+              </div>
+            </td>
+            <td mat-footer-cell *matFooterCellDef>Total</td>
+          </ng-container>
+
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef>Time Spent</th>
+            <td mat-cell *matCellDef="let interval">{{timeSpent(interval)}}</td>
+            <td mat-footer-cell *matFooterCellDef>{{totalTimeSpent()}}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['interval', 'total']"></tr>
+          <tr mat-row *matRowDef="let interval_row; columns: ['interval',
+          'total'];"></tr>
+          <tr mat-footer-row *matFooterRowDef="['interval', 'total']"></tr>
+        </table>
+      </div>
+
+    </div>
+
+  </mat-dialog-content>
+
+</div>

@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, interval, Subscription } from 'rxjs';
 import { TaskLedgerEntry, TaskService } from 'src/app/services/task-service.service';
 import { TaskEditComponent } from '../task-edit/task-edit.component';
+import { TaskInfoComponent } from '../task-info/task-info.component';
 
 @Component({
   selector: 'app-task-item',
@@ -20,6 +21,7 @@ export class TaskItemComponent implements OnInit {
   public constructor(
     private _tasks_svc: TaskService,
     private _edit_task_dialog: MatDialog,
+    private _task_info_dialog: MatDialog,
   ) { }
 
   public ngOnInit(): void {
@@ -89,6 +91,15 @@ export class TaskItemComponent implements OnInit {
       }
     });
   }
+
+  public openTaskInfo(): void {
+    this._task_info_dialog.open(TaskInfoComponent, {
+      data: {
+        task: this.task
+      }
+    });
+  }
+
 
   public getCreatedSince(): string {
     if (!this.task.item.date) {
@@ -160,7 +171,9 @@ function getTimeSince(date: Date): string {
 }
 
 
-function getTimeDiffStr(diff: number, with_secs: boolean = false): string {
+export function getTimeDiffStr(
+  diff: number, with_secs: boolean = false
+): string {
 
   const month_secs = 2.628e+6; // months in seconds
   const week_secs = 604800; // weeks in seconds

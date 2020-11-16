@@ -38,6 +38,7 @@ import { HelpDialogComponent } from './help-dialog/help-dialog.component';
 import { TaskEditComponent } from './tasks/task-edit/task-edit.component';
 import { ReportsComponent } from './reports/reports/reports.component';
 import { ArchivesListComponent } from './archives/archives-list/archives-list.component';
+import { TaskInfoComponent } from './tasks/task-info/task-info.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { ArchivesListComponent } from './archives/archives-list/archives-list.co
     TaskEditComponent,
     ReportsComponent,
     ArchivesListComponent,
+    TaskInfoComponent,
   ],
   imports: [
     BrowserModule,

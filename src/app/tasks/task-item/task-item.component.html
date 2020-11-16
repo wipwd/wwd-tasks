@@ -1,5 +1,8 @@
 <div fxLayout="row" fxLayoutAlign="space-between center">
   <div class="item-title">
+    <button mat-icon-button (click)="openTaskInfo()">
+      <mat-icon>info</mat-icon>
+    </button>
     <a [href]="task.item.url" target="new" *ngIf="hasURL()">
       <mat-icon class="item-title-icon">open_in_new</mat-icon>
     </a>
