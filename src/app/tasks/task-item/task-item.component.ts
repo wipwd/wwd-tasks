@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, interval, Subscription } from 'rxjs';
 import {
   TaskLedgerEntry, TaskService, getTimeDiffStr
 } from '../../services/task-service.service';
+import { TaskDeleteComponent } from '../task-delete/task-delete.component';
 import { TaskEditComponent } from '../task-edit/task-edit.component';
 import { TaskInfoComponent } from '../task-info/task-info.component';
 
@@ -24,6 +25,7 @@ export class TaskItemComponent implements OnInit {
     private _tasks_svc: TaskService,
     private _edit_task_dialog: MatDialog,
     private _task_info_dialog: MatDialog,
+    private _task_delete_dialog: MatDialog,
   ) { }
 
   public ngOnInit(): void {
@@ -59,7 +61,15 @@ export class TaskItemComponent implements OnInit {
   }
 
   public remove(): void {
-    this._tasks_svc.remove(this.task);
+    const dialogref: MatDialogRef<TaskDeleteComponent> =
+      this._task_delete_dialog.open(TaskDeleteComponent);
+    dialogref.afterClosed().subscribe({
+      next: (result: boolean) => {
+        if (result) {
+          this._tasks_svc.remove(this.task);
+        }
+      }
+    });
   }
 
   public archive(): void {
