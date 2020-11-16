@@ -335,6 +335,7 @@ export class TaskService {
       // move task to in-progress.
       this._moveTo(task, this._ledger_by_name.inprogress);
     }
+    this._stateSave();
   }
 
   public timerPause(task: TaskLedgerEntry): void {

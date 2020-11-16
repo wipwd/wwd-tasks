@@ -143,7 +143,8 @@ export class TaskItemComponent implements OnInit {
   }
 
   public markStop(): void {
-
+    this._tasks_svc.timerStop(this.task);
+    this._stopTimer();
   }
 
   public getRunningFor(): BehaviorSubject<string> {
