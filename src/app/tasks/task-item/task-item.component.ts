@@ -115,7 +115,9 @@ export class TaskItemComponent implements OnInit {
   }
 
   public openTaskNotes(): void {
-    this._task_notes_dialog.open(TaskNotesComponent);
+    this._task_notes_dialog.open(TaskNotesComponent, {
+      data: { task: this.task }
+    });
   }
 
   public getCreatedSince(): string {

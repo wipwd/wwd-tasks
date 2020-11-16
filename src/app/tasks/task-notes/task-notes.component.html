@@ -1,6 +1,6 @@
 <div style="width: 500px">
   <h2 mat-dialog-title fxLayout="row" fxLayoutAlign="space-between center">
-    <span>Notes</span>
+    <span>Notes for '{{task.item.title}}'</span>
     <span style="width: 2em"></span>
     <button mat-icon-button (click)="close()">
       <mat-icon>cancel</mat-icon>
@@ -17,7 +17,8 @@
           <form [formGroup]="add_note_form_group">
             <mat-form-field appearance="fill" style="width: 100%">
               <mat-label>Note</mat-label>
-              <textarea matInput rows="3"></textarea>
+              <textarea matInput required matTextareaAutosize
+                  [formControl]="add_note_form_ctrl" rows="3"></textarea>
             </mat-form-field>
           </form>
           <div fxLayout="row" fxLayoutAlign="end center">
@@ -25,7 +26,8 @@
               Cancel
             </button>
             <span style="width: 10px"></span>
-            <button mat-raised-button color="primary" cdkFocusInitial>Save</button>
+            <button mat-raised-button color="primary"
+                (click)="save()" cdkFocusInitial>Save</button>
           </div>
         </div>
       </mat-tab>
@@ -33,13 +35,17 @@
       <mat-tab label="Notes">
         <div style="min-height: 100px">
           <mat-selection-list [multiple]="false">
-            <mat-list-option (click)="selectNote()">16 November of awful 2020</mat-list-option>
+            <mat-list-option *ngFor="let note of getNotes()" (click)="selectNote(note)">
+              {{note.date}}
+            </mat-list-option>
           </mat-selection-list>
         </div>
       </mat-tab>
 
       <mat-tab label="Note Details" *ngIf="hasSelectedNote()">
-        <p>Note text</p>
+        <p style="white-space: pre-wrap;">{{getSelectedNoteText()}}</p>
+        <mat-divider></mat-divider>
+        <span style="font-size: 14px; font-style: italic;">{{getSelectedNoteDate()}}</span>
       </mat-tab>
     </mat-tab-group>
 

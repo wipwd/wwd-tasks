@@ -403,6 +403,14 @@ export class TaskService {
     });
     return total_milisec;
   }
+
+  public noteAdd(task: TaskLedgerEntry, note: TaskNoteItem): void {
+    if (!task.item.notes) {
+      task.item.notes = [];
+    }
+    task.item.notes.push(note);
+    this._stateSave();
+  }
 }
 
 export function getTimeDiffStr(
