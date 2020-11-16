@@ -15,6 +15,11 @@ export interface TaskTimerState {
   intervals: TaskTimerItem[];
 }
 
+export interface TaskNoteItem {
+  date: Date;
+  text: string;
+}
+
 export interface TaskItem {
   title: string;
   priority: string;
@@ -22,6 +27,7 @@ export interface TaskItem {
   url: string;
   date?: Date;
   timer?: TaskTimerState;
+  notes?: TaskNoteItem[];
 }
 
 export interface TaskLedgerEntry {

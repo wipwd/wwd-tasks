@@ -40,6 +40,7 @@ import { ReportsComponent } from './reports/reports/reports.component';
 import { ArchivesListComponent } from './archives/archives-list/archives-list.component';
 import { TaskInfoComponent } from './tasks/task-info/task-info.component';
 import { TaskDeleteComponent } from './tasks/task-delete/task-delete.component';
+import { TaskNotesComponent } from './tasks/task-notes/task-notes.component';
 
 @NgModule({
   declarations: [
@@ -58,6 +59,7 @@ import { TaskDeleteComponent } from './tasks/task-delete/task-delete.component';
     ArchivesListComponent,
     TaskInfoComponent,
     TaskDeleteComponent,
+    TaskNotesComponent,
   ],
   imports: [
     BrowserModule,

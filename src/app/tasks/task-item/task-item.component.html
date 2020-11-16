@@ -10,6 +10,9 @@
     <button mat-icon-button (click)="editTask()">
       <mat-icon class="item-title-icon">create</mat-icon>
     </button>
+    <button mat-icon-button (click)="openTaskNotes()">
+      <mat-icon class="item-title-icon">speaker_notes</mat-icon>
+    </button>
   </div>
   <span class="item-date">{{getCreatedSince()}}</span>
   <div *ngIf="!isMarkedDone()">

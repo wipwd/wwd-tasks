@@ -7,6 +7,7 @@ import {
 import { TaskDeleteComponent } from '../task-delete/task-delete.component';
 import { TaskEditComponent } from '../task-edit/task-edit.component';
 import { TaskInfoComponent } from '../task-info/task-info.component';
+import { TaskNotesComponent } from '../task-notes/task-notes.component';
 
 @Component({
   selector: 'app-task-item',
@@ -26,6 +27,7 @@ export class TaskItemComponent implements OnInit {
     private _edit_task_dialog: MatDialog,
     private _task_info_dialog: MatDialog,
     private _task_delete_dialog: MatDialog,
+    private _task_notes_dialog: MatDialog
   ) { }
 
   public ngOnInit(): void {
@@ -112,6 +114,9 @@ export class TaskItemComponent implements OnInit {
     });
   }
 
+  public openTaskNotes(): void {
+    this._task_notes_dialog.open(TaskNotesComponent);
+  }
 
   public getCreatedSince(): string {
     if (!this.task.item.date) {
