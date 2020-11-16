@@ -1,9 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {
-  TaskItem, TaskLedgerEntry, TaskTimerItem
+  TaskItem, TaskLedgerEntry, TaskTimerItem, getTimeDiffStr
 } from '../../services/task-service.service';
-import { getTimeDiffStr } from '../task-item/task-item.component';
 
 export interface TaskInfoDialogData {
   task: TaskLedgerEntry;

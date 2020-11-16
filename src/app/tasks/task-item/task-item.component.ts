@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, interval, Subscription } from 'rxjs';
-import { TaskLedgerEntry, TaskService } from 'src/app/services/task-service.service';
+import {
+  TaskLedgerEntry, TaskService, getTimeDiffStr
+} from '../../services/task-service.service';
 import { TaskEditComponent } from '../task-edit/task-edit.component';
 import { TaskInfoComponent } from '../task-info/task-info.component';
 
@@ -168,64 +170,4 @@ function getTimeSince(date: Date): string {
   const now = new Date().getTime();
   const diff = Math.floor((now - date.getTime()) / 1000);
   return `${getTimeDiffStr(diff)} ago`;
-}
-
-
-export function getTimeDiffStr(
-  diff: number, with_secs: boolean = false
-): string {
-
-  const month_secs = 2.628e+6; // months in seconds
-  const week_secs = 604800; // weeks in seconds
-  const day_secs = 86400; // 24h in seconds
-  const hour_secs = 3600;
-  const min_secs = 60;
-
-  const months = Math.floor(diff / month_secs);
-  diff -= months * month_secs;
-
-  const weeks = Math.floor(diff / week_secs);
-  diff -= weeks * week_secs;
-
-  const days = Math.floor(diff / day_secs);
-  diff -= days * day_secs;
-
-  const hours = Math.floor(diff / hour_secs);
-  diff -= hours * hour_secs;
-
-  const mins = Math.floor(diff / min_secs);
-  diff -= mins * min_secs;
-
-
-  const time_lst = [];
-  if (months > 0) {
-      time_lst.push(`${months}mo`);
-  }
-
-  if (weeks > 0) {
-      time_lst.push(`${weeks}wk`);
-  }
-
-  if (days > 0) {
-      time_lst.push(`${days}d`);
-  }
-
-  if (hours > 0) {
-      time_lst.push(`${hours}h`);
-  }
-
-  if (mins > 0) {
-      time_lst.push(`${mins}m`);
-  }
-
-  if (time_lst.length === 0 && !with_secs) {
-      if (diff > 0) {
-          return "about a minute";
-      } else {
-          return "few seconds";
-      }
-  } else if (with_secs) {
-    time_lst.push(`${diff}s`);
-  }
-  return `${time_lst.join(', ')}`;
 }
