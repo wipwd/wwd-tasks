@@ -350,6 +350,17 @@ export class TaskService {
   }
 
   public timerStop(task: TaskLedgerEntry): void {
+    if (!task.item.timer || this.isTimerStopped(task)) {
+      return;
+    }
+    const timer_state: TaskTimerState = task.item.timer;
+    const cur_interval: TaskTimerItem = this.getCurrentTimerInterval(task);
+    timer_state.state = "stopped";
+    cur_interval.end = new Date();
+    if (task.ledger.name !== "backlog") {
+      this._moveTo(task, this._ledger_by_name.backlog);
+    }
+    this._stateSave();
   }
 
   public isTimerRunning(task: TaskLedgerEntry): boolean {
