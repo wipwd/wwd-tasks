@@ -4,6 +4,7 @@ import { ProjectsService } from '../../services/projects-service.service';
 import { ENTER, COMMA } from '@angular/cdk/keycodes';
 import { FormControl } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
+import { WWDTASKS_BUILD_COMMIT, WWDTASKS_BUILD_DATE } from '../../build-info';
 
 @Component({
   selector: 'app-settings-dashboard',
@@ -43,5 +44,13 @@ export class SettingsDashboardComponent implements OnInit {
 
     this.project_form_ctrl.setValue(null);
     console.log("add project: ", event.value);
+  }
+
+  public getBuildCommit(): string {
+    return WWDTASKS_BUILD_COMMIT;
+  }
+
+  public getBuildDate(): string {
+    return WWDTASKS_BUILD_DATE;
   }
 }

@@ -31,4 +31,16 @@
     Ledgers ...
   </mat-expansion-panel>
 
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>Application Information</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div fxLayout="column">
+      <span>Build: {{getBuildCommit()}}</span>
+      <span>Date: {{getBuildDate()}}</span>
+    </div>
+
+  </mat-expansion-panel>
+
 </mat-accordion>
