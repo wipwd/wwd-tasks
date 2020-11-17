@@ -274,6 +274,9 @@ export class TaskService {
     }
     console.assert(!task.item.done);
     task.item.done = new Date();
+    if (this.isTimerRunning(task)) {
+      this.timerStop(task);
+    }
     this._moveTo(task, this._ledger_by_name.done);
   }
 
