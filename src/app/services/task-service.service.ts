@@ -341,6 +341,11 @@ export class TaskService {
       return;
     }
 
+    if (this.hasRunningTimerTask()) {
+      const cur_running: TaskLedgerEntry = this.getRunningTimerTask();
+      this.timerPause(cur_running);
+    }
+
     timer_state.state = "running";
     timer_state.intervals.push({start: new Date(), end: undefined});
     if (task.ledger.name !== "inprogress") {
