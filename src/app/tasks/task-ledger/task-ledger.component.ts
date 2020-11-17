@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import {
   Ledger, TaskLedgerEntry, TaskLedgerMap, TaskService
 } from '../../services/task-service.service';
@@ -9,6 +9,7 @@ declare interface Priority {
   name: string;
   label: string;
   size: BehaviorSubject<string>;
+  size_n: BehaviorSubject<number>;
   enabled: BehaviorSubject<boolean>;
   expanded: BehaviorSubject<boolean>;
 }
@@ -26,18 +27,21 @@ export class TaskLedgerComponent implements OnInit {
     high: {
       name: "high", label: "High",
       size: new BehaviorSubject<string>(""),
+      size_n: new BehaviorSubject<number>(0),
       enabled: new BehaviorSubject<boolean>(false),
       expanded: new BehaviorSubject<boolean>(false),
     },
     medium: {
       name: "medium", label: "Medium",
       size: new BehaviorSubject<string>(""),
+      size_n: new BehaviorSubject<number>(0),
       enabled: new BehaviorSubject<boolean>(false),
       expanded: new BehaviorSubject<boolean>(false),
     },
     low: {
       name: "low", label: "Low",
       size: new BehaviorSubject<string>(""),
+      size_n: new BehaviorSubject<number>(0),
       enabled: new BehaviorSubject<boolean>(false),
       expanded: new BehaviorSubject<boolean>(false),
     }
@@ -54,8 +58,29 @@ export class TaskLedgerComponent implements OnInit {
           return;
         }
         this._updateSizes(task_ledger.tasks);
+        this._maybeOpenPriorities();
       }
     });
+  }
+
+  public _maybeOpenPriorities(): void {
+
+    combineLatest([
+      this.priorities.high.size_n,
+      this.priorities.medium.size_n,
+      this.priorities.low.size_n
+    ]).subscribe({
+      next: (results: number[]) => {
+        if (results[0] > 0) {
+          this.priorities.high.expanded.next(true);
+        } else if (results[1] > 0) {
+          this.priorities.medium.expanded.next(true);
+        } else if (results[2] > 0) {
+          this.priorities.low.expanded.next(true);
+        }
+      }
+    });
+
   }
 
   private _updateSize(prio: string, total: number): void {
@@ -64,6 +89,7 @@ export class TaskLedgerComponent implements OnInit {
       str = `(${total})`;
     }
     this.priorities[prio].size.next(str);
+    this.priorities[prio].size_n.next(total);
     this.priorities[prio].enabled.next(total > 0);
     if (total === 0) {
       this.priorities[prio].expanded.next(false);
