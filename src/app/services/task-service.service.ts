@@ -404,6 +404,24 @@ export class TaskService {
     return total_milisec;
   }
 
+  public getRunningTimerTask(): TaskLedgerEntry|undefined {
+    let running_task: TaskLedgerEntry|undefined = undefined;
+    Object.values(this._ledger_by_name.inprogress.tasks).forEach(
+      (task: TaskLedgerEntry) => {
+        if (!task.item.timer || task.item.timer.state !== "running") {
+          return;
+        }
+        console.assert(!running_task);
+        running_task = task;
+      }
+    );
+    return running_task;
+  }
+
+  public hasRunningTimerTask(): boolean {
+    return !!this.getRunningTimerTask();
+  }
+
   public noteAdd(task: TaskLedgerEntry, note: TaskNoteItem): void {
     if (!task.item.notes) {
       task.item.notes = [];

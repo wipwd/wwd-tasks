@@ -9,6 +9,7 @@ import { FirstTimeDialogComponent } from '../first-time-dialog/first-time-dialog
 import { set as idbset, get as idbget } from 'idb-keyval';
 import { HelpDialogComponent } from '../help-dialog/help-dialog.component';
 import { TaskAddBottomSheetComponent } from '../tasks/task-add/task-add-bottom-sheet/task-add-bottom-sheet.component';
+import { TaskLedgerEntry, TaskService } from '../services/task-service.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,7 +37,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private _breakpoint_observer: BreakpointObserver,
     private _bottom_sheet: MatBottomSheet,
-    private _first_time_dialog: MatDialog
+    private _first_time_dialog: MatDialog,
+    private _tasks_svc: TaskService
   ) {
     this.isHandset$.subscribe({
       next: (result: boolean) => {
@@ -133,5 +135,19 @@ export class DashboardComponent implements OnInit {
     const ref = this._first_time_dialog.open(
       HelpDialogComponent, {closeOnNavigation: false}
     );
+  }
+
+  public pauseCurrentTask(): void {
+    const task: TaskLedgerEntry = this._tasks_svc.getRunningTimerTask();
+    this._tasks_svc.timerPause(task);
+  }
+
+  public stopCurrentTask(): void {
+    const task: TaskLedgerEntry = this._tasks_svc.getRunningTimerTask();
+    this._tasks_svc.timerStop(task);
+  }
+
+  public hasRunningTask(): boolean {
+    return this._tasks_svc.hasRunningTimerTask();
   }
 }
