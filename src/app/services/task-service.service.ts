@@ -28,6 +28,7 @@ export interface TaskItem {
   date?: Date;
   timer?: TaskTimerState;
   notes?: TaskNoteItem[];
+  done?: Date;
 }
 
 export interface TaskLedgerEntry {
@@ -271,6 +272,8 @@ export class TaskService {
     if (!this.canMarkDone(task)) {
       return;
     }
+    console.assert(!task.item.done);
+    task.item.done = new Date();
     this._moveTo(task, this._ledger_by_name.done);
   }
 

@@ -8,7 +8,11 @@
   <mat-dialog-content fxLayout="column">
     <div fxLayout="row" fxLayoutAlign="space-between center">
       <span style="min-width: 30em">Projects: {{item.project}}</span>
-      <span style="min-width: 40em">Created on: {{item.date}}</span>
+      <div fxLayout="column">
+        <span style="min-width: 40em">Created on: {{item.date}}</span>
+        <span style="min-width: 40em"
+            *ngIf="isMarkedDone()">Finished on: {{item.done}}</span>
+      </div>
     </div>
 
     <span style="height: 2em"></span>

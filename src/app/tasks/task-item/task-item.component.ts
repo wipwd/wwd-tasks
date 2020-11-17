@@ -127,6 +127,13 @@ export class TaskItemComponent implements OnInit {
     return `created ${getTimeSince(this.task.item.date)}`;
   }
 
+  public getDoneOn(): string {
+    if (!this.task.item.done) {
+      return "";
+    }
+    return `finished ${getTimeSince(this.task.item.done)}`;
+  }
+
   public isRunning(): boolean {
     return this._tasks_svc.isTimerRunning(this.task);
   }

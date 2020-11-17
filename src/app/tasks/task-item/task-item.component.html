@@ -1,5 +1,6 @@
 <div fxLayout="row" fxLayoutAlign="space-between center">
   <div class="item-title">
+
     <button mat-icon-button (click)="openTaskInfo()">
       <mat-icon>info</mat-icon>
     </button>
@@ -14,7 +15,12 @@
       <mat-icon class="item-title-icon">speaker_notes</mat-icon>
     </button>
   </div>
-  <span class="item-date">{{getCreatedSince()}}</span>
+
+  <div fxLayout="column">
+    <span class="item-date">{{getCreatedSince()}}</span>
+    <span *ngIf="isMarkedDone()" class="item-date">{{getDoneOn()}}</span>
+  </div>
+
   <div *ngIf="!isMarkedDone()">
     <span>{{getRunningFor()|async}}</span>
     <button mat-icon-button *ngIf="!isRunning()"
@@ -36,9 +42,11 @@
       <mat-icon>stop</mat-icon>
     </button>
   </div>
+
   <div fxLayout="row" fxLayoutAlign="space-between center">
     <span>{{getProjects()}}</span>
   </div>
+
   <div>
     <button mat-icon-button *ngIf="hasPrevious()" (click)="movePrevious()"
         matTooltip="To Backlog" matTooltipPosition="above"

@@ -49,4 +49,8 @@ export class TaskInfoComponent implements OnInit {
     return getTimeDiffStr(total_diff, true);
   }
 
+  public isMarkedDone(): boolean {
+    return !!this.item.done;
+  }
+
 }
