@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatBottomSheet, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { TaskAddComponent } from '../tasks/task-add/task-add.component';
 import { MatDialog } from '@angular/material/dialog';
 import { FirstTimeDialogComponent } from '../first-time-dialog/first-time-dialog.component';
 import { set as idbset, get as idbget } from 'idb-keyval';
 import { HelpDialogComponent } from '../help-dialog/help-dialog.component';
+import { TaskAddBottomSheetComponent } from '../tasks/task-add/task-add-bottom-sheet/task-add-bottom-sheet.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -88,11 +89,16 @@ export class DashboardComponent implements OnInit {
     this._is_new_task_bottom_sheet_open = !this._is_new_task_bottom_sheet_open;
 
     if (this.isNewTaskBottomSheetOpen()) {
-      this._bottom_sheet.open(TaskAddComponent);
-      this._bottom_sheet._openedBottomSheetRef.backdropClick().subscribe({
+      const ref: MatBottomSheetRef<TaskAddBottomSheetComponent> =
+        this._bottom_sheet.open(TaskAddBottomSheetComponent);
+      ref.backdropClick().subscribe({
+        next: () => {
+          this._bottom_sheet.dismiss();
+        }
+      });
+      ref.afterDismissed().subscribe({
         next: () => {
           this.toggleNewTaskBottomSheet();
-          this._bottom_sheet.dismiss();
         }
       });
     }

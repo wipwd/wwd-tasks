@@ -41,6 +41,7 @@ import { ArchivesListComponent } from './archives/archives-list/archives-list.co
 import { TaskInfoComponent } from './tasks/task-info/task-info.component';
 import { TaskDeleteComponent } from './tasks/task-delete/task-delete.component';
 import { TaskNotesComponent } from './tasks/task-notes/task-notes.component';
+import { TaskAddBottomSheetComponent } from './tasks/task-add/task-add-bottom-sheet/task-add-bottom-sheet.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { TaskNotesComponent } from './tasks/task-notes/task-notes.component';
     TaskInfoComponent,
     TaskDeleteComponent,
     TaskNotesComponent,
+    TaskAddBottomSheetComponent,
   ],
   imports: [
     BrowserModule,
