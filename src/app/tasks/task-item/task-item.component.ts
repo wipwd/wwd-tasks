@@ -187,6 +187,14 @@ export class TaskItemComponent implements OnInit {
   public getRunningFor(): BehaviorSubject<string> {
     return this._running_for_observer;
   }
+
+  public hasNotes(): boolean {
+    return this._tasks_svc.hasNotes(this.task);
+  }
+
+  public getNumNotes(): number {
+    return this._tasks_svc.getNoteSize(this.task);
+  }
 }
 
 

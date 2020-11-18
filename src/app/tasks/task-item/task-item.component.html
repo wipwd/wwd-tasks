@@ -12,7 +12,13 @@
       <mat-icon class="item-title-icon">create</mat-icon>
     </button>
     <button mat-icon-button (click)="openTaskNotes()">
-      <mat-icon class="item-title-icon">speaker_notes</mat-icon>
+      <mat-icon *ngIf="hasNotes()" class="item-title-icon"
+          [matBadge]="getNumNotes()" matBadgeSize="small">
+        speaker_notes
+      </mat-icon>
+      <mat-icon *ngIf="!hasNotes()" class="item-title-icon">
+        speaker_notes_off
+      </mat-icon>
     </button>
   </div>
 

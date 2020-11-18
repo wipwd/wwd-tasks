@@ -42,6 +42,7 @@ import { TaskInfoComponent } from './tasks/task-info/task-info.component';
 import { TaskDeleteComponent } from './tasks/task-delete/task-delete.component';
 import { TaskNotesComponent } from './tasks/task-notes/task-notes.component';
 import { TaskAddBottomSheetComponent } from './tasks/task-add/task-add-bottom-sheet/task-add-bottom-sheet.component';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @NgModule({
   declarations: [
@@ -90,6 +91,7 @@ import { TaskAddBottomSheetComponent } from './tasks/task-add/task-add-bottom-sh
     MatSelectModule,
     MatDialogModule,
     MatChipsModule,
+    MatBadgeModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

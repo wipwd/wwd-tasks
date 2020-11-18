@@ -440,6 +440,17 @@ export class TaskService {
     task.item.notes.push(note);
     this._stateSave();
   }
+
+  public getNoteSize(task: TaskLedgerEntry): number {
+    if (!task.item.notes) {
+      return 0;
+    }
+    return task.item.notes.length;
+  }
+
+  public hasNotes(task: TaskLedgerEntry): boolean {
+    return this.getNoteSize(task) > 0;
+  }
 }
 
 export function getTimeDiffStr(
