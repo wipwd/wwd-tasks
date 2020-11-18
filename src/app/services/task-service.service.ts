@@ -5,6 +5,12 @@ import {
   get as idbget
 } from 'idb-keyval';
 
+
+export interface TaskExportItem {
+  tasks: IDBTaskItem[];
+  archive: IDBTaskArchiveType;
+}
+
 export interface TaskTimerItem {
   start: Date;
   end?: Date;
@@ -100,6 +106,8 @@ export class TaskService {
     this._ledger_by_name.inprogress.previous = this._ledger_by_name.backlog;
     // 'done' tasks are not movable.
     this._stateLoad();
+    this.exportData().then( (val) => console.log("exported: ", val))
+    .catch((err) => console.log("export error: ", err));
   }
 
   private _stateSave(): void {
@@ -450,6 +458,16 @@ export class TaskService {
 
   public hasNotes(task: TaskLedgerEntry): boolean {
     return this.getNoteSize(task) > 0;
+  }
+
+  public async exportData(): Promise<TaskExportItem> {
+    return new Promise<TaskExportItem>( async (resolve) => {
+      const data: TaskExportItem = {
+        tasks: await idbget("_wwd_tasks"),
+        archive: await idbget("_wwdtasks_archive")
+      };
+      resolve(data);
+    });
   }
 }
 

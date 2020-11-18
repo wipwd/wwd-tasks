@@ -33,6 +33,34 @@
 
   <mat-expansion-panel>
     <mat-expansion-panel-header>
+      <mat-panel-title>Import/Export Data</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <button mat-raised-button (click)="exportData()">Export</button>
+    <button mat-raised-button disabled (click)="importData()" color="warn">
+      Import
+    </button>
+    <div *ngIf="isExporting()">
+      <mat-divider></mat-divider>
+      <span *ngIf="!isExportReady()">Exporting...</span>
+      <div *ngIf="isExportReady()">
+        <span *ngIf="isExportReady()">Ready for Download</span>
+        <div>
+          <mat-divider></mat-divider>
+            <div *ngFor="let stat of getStatistics()">
+              <span>{{stat.name}}: {{stat.size}}</span>
+              <mat-divider></mat-divider>
+            </div>
+        </div>
+        <button mat-raised-button (click)="downloadExport()">
+          Download
+        </button>
+      </div>
+    </div>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
       <mat-panel-title>Application Information</mat-panel-title>
     </mat-expansion-panel-header>
 
