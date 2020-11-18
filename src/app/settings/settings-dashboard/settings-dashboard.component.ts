@@ -9,6 +9,7 @@ import {
   WWDTasksExportDataItem
 } from '../../services/storage-service.service';
 import { WWDTASKS_BUILD_COMMIT, WWDTASKS_BUILD_DATE } from '../../build-info';
+import * as triplesec from 'triplesec/browser/triplesec';
 
 interface ImportExportStatistics {
   name: string;
@@ -29,6 +30,8 @@ export class SettingsDashboardComponent implements OnInit {
   private _exported_data: WWDTasksExportDataItem;
   private _statistics: ImportExportStatistics[];
   private _export_ready: boolean = false;
+  private _encrypted: string;
+  private _decrypted: string;
 
   public constructor(
     private _projects_svc: ProjectsService,
@@ -102,11 +105,35 @@ export class SettingsDashboardComponent implements OnInit {
         { name: "Archived", size: Object.keys(data.tasks.archive).length }
       ];
       this._export_ready = true;
+
+      triplesec.encrypt({
+        data: triplesec.Buffer.from(JSON.stringify(data)),
+        key: triplesec.Buffer.from("foobar")
+      }, (err, buff) => {
+        this._encrypted = buff.toString("hex");
+
+        triplesec.decrypt({
+          data: triplesec.Buffer.from(this._encrypted, "hex"),
+          key: triplesec.Buffer.from("foobar")
+        }, (err2, buff2) => {
+          console.log("dec err: ", err2);
+          this._decrypted = buff2.toString();
+        });
+      });
+
     });
   }
 
   public getStatistics(): ImportExportStatistics[] {
     return this._statistics;
+  }
+
+  public getEncrypted(): string {
+    return this._encrypted;
+  }
+
+  public getDecrypted(): string {
+    return this._decrypted;
   }
 
   public importData(): void {

@@ -55,6 +55,9 @@
         <button mat-raised-button (click)="downloadExport()">
           Download
         </button>
+        <mat-divider></mat-divider>
+        <p>enc: {{getEncrypted()}}</p>
+        <p>dec: {{getDecrypted()}}</p>
       </div>
     </div>
   </mat-expansion-panel>
