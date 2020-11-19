@@ -1,0 +1,59 @@
+<div>
+  <h1 mat-dialog-title>A WORD ON DEVICE SYNC</h1>
+
+  <mat-dialog-content class="mat-typography">
+    <p>
+      We synchronize your devices on a <strong>best effort</strong> basis. We
+      will refuse to sync if we find changes that may conflict.
+    </p>
+
+    <p>
+      All data is encrypted in <strong>your browser</strong> before sending to the
+      server, and decrypted upon receiving. Encryption relies on a user-provided
+      password. Lose the password, lose the data.
+    </p>
+
+    <p>
+      The data is currently kept in Google's firebase. We'll have costs
+      associated with usage. Thus we ask you to only sync when you have to,
+      instead of synchronizing on every single change.
+    </p>
+
+    <p>
+      To synchronize your devices you will have to login using google. We need to
+      ensure the storage is not abused by anonymous entities, so we decided this
+      would be an acceptable required minimum. We don't keep, willingly, any
+      information on you, but some data may be kept. For instance, all data is
+      associated with your user id. But it's kept encrypted, so... there's that.
+    </p>
+
+    <p>
+      Please understand that once you use this feature, you will no longer have
+      full authority over where your data is kept. We were promised somewhere in
+      Europe, but we cannot guarantee more than the fact that the data is
+      encrypted in your browser before being transfered.
+    </p>
+
+    <p>
+      We are also unable to guarantee that the encryption is foolproof, nor that it
+      is unbreakable, now or in the future. We are using a reasonably well
+      established library
+      (<a href="https://keybase.io/triplesec" target="new">keybase's triplesec</a>),
+      but you should not trust software completely, nor should you ever consider that
+      any encryption mechanism will hold secure forever.
+    </p>
+
+    <p>
+      If you do not wish to risk your data, please hit <strong>Cancel</strong>. Otherwise
+      we will assume you are generally okay with what we just explained, and understand
+      that, from now on, your data will be utterly and completely out of your control.
+    </p>
+
+    <p style="text-align: center;"><strong>This action will have to be performed on each sync.</strong></p>
+  </mat-dialog-content>
+
+  <div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="false" cdkFocusInitial>Cancel</button>
+    <button mat-button [mat-dialog-close]="true">I understand, I'm okay.</button>
+  </div>
+</div>

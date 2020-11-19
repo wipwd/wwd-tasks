@@ -1,0 +1,15 @@
+<div fxLayout="column">
+
+  <mat-slide-toggle
+      (change)="changeSyncToggle($event)"
+      [checked]="is_toggled|async">
+    Enable Sync via Google Services
+  </mat-slide-toggle>
+  <span *ngIf="isError()"><strong>Error Logging in.</strong></span>
+  <span *ngIf="isLoggedIn()"><strong>Success Logging In.</strong></span>
+  <span *ngIf="isLoggingIn()"><strong>Logging in...</strong></span>
+  <mat-divider></mat-divider>
+  <div *ngIf="isEnabled()">
+    <p>Do sync</p>
+  </div>
+</div>

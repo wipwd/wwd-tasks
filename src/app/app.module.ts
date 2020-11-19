@@ -49,6 +49,10 @@ import { environment } from '../environments/environment';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 
+import { SettingsDeviceSyncComponent } from './settings/settings-device-sync/settings-device-sync.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { SettingsDeviceSyncDialogComponent } from './settings/settings-device-sync/settings-device-sync-dialog/settings-device-sync-dialog.component';
+
 
 
 @NgModule({
@@ -70,6 +74,8 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
     TaskDeleteComponent,
     TaskNotesComponent,
     TaskAddBottomSheetComponent,
+    SettingsDeviceSyncComponent,
+    SettingsDeviceSyncDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -102,6 +108,7 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireAuthModule,
+    MatSlideToggleModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
