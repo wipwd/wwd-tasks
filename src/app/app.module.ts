@@ -44,6 +44,13 @@ import { TaskNotesComponent } from './tasks/task-notes/task-notes.component';
 import { TaskAddBottomSheetComponent } from './tasks/task-add/task-add-bottom-sheet/task-add-bottom-sheet.component';
 import { MatBadgeModule } from '@angular/material/badge';
 
+import { AngularFireModule } from '@angular/fire';
+import { environment } from '../environments/environment';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -92,6 +99,9 @@ import { MatBadgeModule } from '@angular/material/badge';
     MatDialogModule,
     MatChipsModule,
     MatBadgeModule,
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule,
+    AngularFireAuthModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

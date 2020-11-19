@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "wwd-tasks": {
+      "hosting": {
+        "wwd-tasks": [
+          "wwd-tasks"
+        ]
+      }
+    }
+  }
+}
