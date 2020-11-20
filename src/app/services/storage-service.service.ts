@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
 import {
-  ProjectsExportItem, ProjectsService
+  ImportExportProjectsDataItem, ProjectsService
 } from './projects-service.service';
 import {
-  TaskExportItem, TaskService
+  ImportExportTaskDataItem, TaskService
 } from './task-service.service';
 
-export interface WWDTasksExportDataItem {
-  tasks: TaskExportItem;
-  projects: ProjectsExportItem;
+export interface ImportExportDataItem {
+  timestamp: number;
+  data: {
+    tasks: ImportExportTaskDataItem;
+    projects: ImportExportProjectsDataItem;
+  };
 }
 
 @Injectable({
@@ -21,11 +24,14 @@ export class StorageService {
     private _projects_svc: ProjectsService
   ) { }
 
-  async exportData(): Promise<WWDTasksExportDataItem> {
-    return new Promise<WWDTasksExportDataItem>( async (resolve) => {
-      const export_data: WWDTasksExportDataItem = {
-        tasks: await this._tasks_svc.exportData(),
-        projects: await this._projects_svc.exportData()
+  async exportData(): Promise<ImportExportDataItem> {
+    return new Promise<ImportExportDataItem>( async (resolve) => {
+      const export_data: ImportExportDataItem = {
+        timestamp: new Date().getTime(),
+        data: {
+          tasks: await this._tasks_svc.exportData(),
+          projects: await this._projects_svc.exportData()
+        }
       };
       resolve(export_data);
     });

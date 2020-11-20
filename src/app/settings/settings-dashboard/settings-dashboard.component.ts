@@ -6,7 +6,7 @@ import { FormControl } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import {
   StorageService,
-  WWDTasksExportDataItem
+  ImportExportDataItem
 } from '../../services/storage-service.service';
 import { WWDTASKS_BUILD_COMMIT, WWDTASKS_BUILD_DATE } from '../../build-info';
 import * as triplesec from 'triplesec/browser/triplesec';
@@ -14,10 +14,6 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import firebase from 'firebase/app';
 
-interface ImportExportStatistics {
-  name: string;
-  size: number;
-}
 
 @Component({
   selector: 'app-settings-dashboard',
@@ -29,10 +25,10 @@ export class SettingsDashboardComponent implements OnInit {
   public chip_separator_codes: number[] = [ ENTER, COMMA ];
   public project_form_ctrl: FormControl = new FormControl();
 
-  private _is_exporting: boolean = false;
-  private _exported_data: WWDTasksExportDataItem;
-  private _statistics: ImportExportStatistics[];
-  private _export_ready: boolean = false;
+  // private _is_exporting: boolean = false;
+  // private _exported_data: ImportExportDataItem;
+  // private _statistics: ImportExportStatistics[];
+  // private _export_ready: boolean = false;
   private _encrypted: string;
   private _decrypted: string;
   private _auth_credentials: firebase.auth.UserCredential;
@@ -77,62 +73,6 @@ export class SettingsDashboardComponent implements OnInit {
 
   public getBuildDate(): string {
     return WWDTASKS_BUILD_DATE;
-  }
-
-  public isExporting(): boolean {
-    return this._is_exporting;
-  }
-
-  public isExportReady(): boolean {
-    return this._export_ready;
-  }
-
-  public downloadExport(): void {
-    const blob: Blob = new Blob(
-      [JSON.stringify(this._exported_data)],
-      { type: "application/json"}
-    );
-    const url: string = window.URL.createObjectURL(blob);
-    window.open(url);
-
-    this._export_ready = false;
-    this._exported_data = undefined;
-    this._statistics = undefined;
-    this._is_exporting = false;
-  }
-
-  public exportData(): void {
-    this._is_exporting = true;
-
-    this._storage_svc.exportData().then( (data: WWDTasksExportDataItem) => {
-      this._exported_data = data;
-      this._statistics = [
-        { name: "Projects", size: data.projects.projects.length },
-        { name: "Tasks", size: data.tasks.tasks.length },
-        { name: "Archived", size: Object.keys(data.tasks.archive).length }
-      ];
-      this._export_ready = true;
-
-      triplesec.encrypt({
-        data: triplesec.Buffer.from(JSON.stringify(data)),
-        key: triplesec.Buffer.from("foobar")
-      }, (err, buff) => {
-        this._encrypted = buff.toString("hex");
-
-        triplesec.decrypt({
-          data: triplesec.Buffer.from(this._encrypted, "hex"),
-          key: triplesec.Buffer.from("foobar")
-        }, (err2, buff2) => {
-          console.log("dec err: ", err2);
-          this._decrypted = buff2.toString();
-        });
-      });
-
-    });
-  }
-
-  public getStatistics(): ImportExportStatistics[] {
-    return this._statistics;
   }
 
   public getEncrypted(): string {

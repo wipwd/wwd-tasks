@@ -1,0 +1,30 @@
+<div>
+  <div fxLayout="row">
+
+    <button mat-raised-button (click)="export()">Export</button>
+    <button mat-raised-button (click)="import()" disabled>Import</button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div *ngIf="isExporting()">
+    <mat-divider></mat-divider>
+    <span *ngIf="!isExportReady()">Exporting...</span>
+    <div *ngIf="isExportReady()">
+      <span *ngIf="isExportReady()">Ready for Download</span>
+      <div>
+        <mat-divider></mat-divider>
+          <div *ngFor="let stat of getStatistics()">
+            <span>{{stat.name}}: {{stat.size}}</span>
+            <mat-divider></mat-divider>
+          </div>
+      </div>
+      <button mat-raised-button color="primary"
+          (click)="downloadExportedData()">
+        Download
+      </button>
+      <mat-divider></mat-divider>
+    </div>
+  </div>
+
+</div>

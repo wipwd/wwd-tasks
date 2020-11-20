@@ -1,15 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, timer } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   set as idbset,
   get as idbget
 } from 'idb-keyval';
 
-
-export interface TaskExportItem {
-  tasks: IDBTaskItem[];
-  archive: IDBTaskArchiveType;
-}
 
 export interface TaskTimerItem {
   start: Date;
@@ -63,6 +58,11 @@ interface IDBTaskItem {
 }
 
 declare type IDBTaskArchiveType = {[id: string]: TaskArchiveEntry};
+
+export interface ImportExportTaskDataItem {
+  tasks: IDBTaskItem[];
+  archive: IDBTaskArchiveType;
+}
 
 export declare type TaskLedgerMap = {[id: string]: TaskLedgerEntry};
 
@@ -460,9 +460,9 @@ export class TaskService {
     return this.getNoteSize(task) > 0;
   }
 
-  public async exportData(): Promise<TaskExportItem> {
-    return new Promise<TaskExportItem>( async (resolve) => {
-      const data: TaskExportItem = {
+  public async exportData(): Promise<ImportExportTaskDataItem> {
+    return new Promise<ImportExportTaskDataItem>( async (resolve) => {
+      const data: ImportExportTaskDataItem = {
         tasks: await idbget("_wwd_tasks"),
         archive: await idbget("_wwdtasks_archive")
       };

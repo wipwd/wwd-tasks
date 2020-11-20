@@ -52,6 +52,7 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { SettingsDeviceSyncComponent } from './settings/settings-device-sync/settings-device-sync.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SettingsDeviceSyncDialogComponent } from './settings/settings-device-sync/settings-device-sync-dialog/settings-device-sync-dialog.component';
+import { ImportExportDataComponent } from './settings/import-export-data/import-export-data.component';
 
 
 
@@ -76,6 +77,7 @@ import { SettingsDeviceSyncDialogComponent } from './settings/settings-device-sy
     TaskAddBottomSheetComponent,
     SettingsDeviceSyncComponent,
     SettingsDeviceSyncDialogComponent,
+    ImportExportDataComponent,
   ],
   imports: [
     BrowserModule,

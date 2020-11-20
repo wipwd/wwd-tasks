@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { set as idbset, get as idbget } from 'idb-keyval';
 import { BehaviorSubject } from 'rxjs';
 
-export interface ProjectsExportItem {
+export interface ImportExportProjectsDataItem {
   projects: string[];
 }
 
@@ -67,14 +67,14 @@ export class ProjectsService {
     this._updateSubjects();
   }
 
-  public async exportData(): Promise<ProjectsExportItem> {
-    return new Promise<ProjectsExportItem>( async (resolve) => {
+  public async exportData(): Promise<ImportExportProjectsDataItem> {
+    return new Promise<ImportExportProjectsDataItem>( async (resolve) => {
       let project_data: string[]|undefined =
         await idbget("_wwdtasks_projects");
       if (!project_data) {
         project_data = [];
       }
-      const data: ProjectsExportItem = {
+      const data: ImportExportProjectsDataItem = {
         projects: project_data
       };
       resolve(data);
