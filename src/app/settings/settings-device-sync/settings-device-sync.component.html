@@ -9,7 +9,6 @@
   <span *ngIf="isLoggedIn()"><strong>Success Logging In.</strong></span>
   <span *ngIf="isLoggingIn()"><strong>Logging in...</strong></span>
   <mat-divider></mat-divider>
-  <div *ngIf="isEnabled()">
-    <p>Do sync</p>
+  <div *ngIf="isLoggedIn()">
   </div>
 </div>
