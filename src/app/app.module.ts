@@ -53,6 +53,7 @@ import { SettingsDeviceSyncComponent } from './settings/settings-device-sync/set
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SettingsDeviceSyncDialogComponent } from './settings/settings-device-sync/settings-device-sync-dialog/settings-device-sync-dialog.component';
 import { ImportExportDataComponent } from './settings/import-export-data/import-export-data.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 
@@ -111,6 +112,7 @@ import { ImportExportDataComponent } from './settings/import-export-data/import-
     AngularFirestoreModule,
     AngularFireAuthModule,
     MatSlideToggleModule,
+    MatProgressSpinnerModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
