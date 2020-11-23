@@ -236,8 +236,15 @@ export class SyncService {
       const encrypted_data: string = this._cur_remote_state.data;
       this.decrypt(encrypted_data, passphrase)
       .then( (data: string) => {
+        const imported: ImportExportDataItem = JSON.parse(data);
         console.log("decrypted data: ", data);
-        resolve(true);
+        console.log("imported data: ", imported);
+        this._storage_svc.importData(imported)
+        .then( (result: boolean) => {
+          this._cur_version = this._cur_remote_state.version;
+          resolve(result);
+        })
+        .catch( () => resolve(false));
       })
       .catch( () => resolve(false) );
     });

@@ -485,8 +485,22 @@ export class TaskService {
     });
   }
 
+  private _convertStrToDate(task: TaskItem): void {
+    if (typeof task.date === "string") {
+      const date: Date = new Date(task.date);
+      task.date = date;
+    }
+  }
+
   public async importData(data: ImportExportTaskDataItem): Promise<boolean> {
     return new Promise<boolean>( async (resolve) => {
+      data.tasks.forEach( (idbtask: IDBTaskItem) => {
+        this._convertStrToDate(idbtask.item);
+      });
+      Object.values(data.archive).forEach( (entry: TaskArchiveEntry) => {
+        this._convertStrToDate(entry.item);
+      });
+
       this._stateSaveToDisk(data.tasks, data.archive)
       .then( () => {
         this._stateLoad();
