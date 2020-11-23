@@ -110,6 +110,20 @@ export class TaskService {
     .catch((err) => console.log("export error: ", err));
   }
 
+  private _stateSaveToDisk(
+    tasks: IDBTaskItem[],
+    archives: IDBTaskArchiveType
+  ): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      const promises: Promise<void>[] = [];
+      promises.push(idbset("_wwd_tasks", tasks));
+      promises.push(idbset("_wwdtasks_archive", archives));
+      Promise.all(promises)
+      .then( () => resolve())
+      .catch( () => reject());
+    });
+  }
+
   private _stateSave(): void {
     const tasks: IDBTaskItem[] = [];
     Object.values(this._ledger_by_name).forEach( (ledger: Ledger) => {
@@ -123,13 +137,14 @@ export class TaskService {
       });
     });
     // const tasks_json: string = JSON.stringify(tasks);
-    idbset("_wwd_tasks", tasks);
-    this._archiveStateSave();
+    this._stateSaveToDisk(tasks, this._archived_tasks);
+    // idbset("_wwd_tasks", tasks);
+    // this._archiveStateSave();
   }
 
-  private _archiveStateSave(): void {
-    idbset("_wwdtasks_archive", this._archived_tasks);
-  }
+  // private _archiveStateSave(): void {
+  //   idbset("_wwdtasks_archive", this._archived_tasks);
+  // }
 
   private _stateLoad(): void {
     idbget("_wwd_tasks").then( (value: IDBTaskItem[]|undefined) => {
@@ -467,6 +482,17 @@ export class TaskService {
         archive: await idbget("_wwdtasks_archive")
       };
       resolve(data);
+    });
+  }
+
+  public async importData(data: ImportExportTaskDataItem): Promise<boolean> {
+    return new Promise<boolean>( async (resolve) => {
+      this._stateSaveToDisk(data.tasks, data.archive)
+      .then( () => {
+        this._stateLoad();
+        resolve(true);
+      })
+      .catch( () => resolve(false));
     });
   }
 }

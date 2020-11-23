@@ -36,9 +36,13 @@ export class ProjectsService {
     );
   }
 
+  private _stateSaveToDisk(projects: string[]): Promise<void> {
+    return idbset("_wwdtasks_projects", projects);
+  }
+
   private _stateSave(): void {
     const projects: string[] = Object.values(this._projects);
-    idbset("_wwdtasks_projects", projects);
+    this._stateSaveToDisk(projects);
   }
 
   private _updateSubjects(): void {
@@ -78,6 +82,21 @@ export class ProjectsService {
         projects: project_data
       };
       resolve(data);
+    });
+  }
+
+  // FIXME: we should not be automatically writing and loading if
+  // not instructed that it's okay to do so.
+  public async importData(
+    data: ImportExportProjectsDataItem
+  ): Promise<boolean> {
+    return new Promise<boolean>( (resolve) => {
+      this._stateSaveToDisk(data.projects)
+      .then( () => {
+        this._stateLoad();
+        resolve(true);
+      })
+      .catch( () => resolve(false));
     });
   }
 }

@@ -36,4 +36,21 @@ export class StorageService {
       resolve(export_data);
     });
   }
+
+  async importData(import_data: ImportExportDataItem): Promise<boolean> {
+    return new Promise<boolean>( async (resolve) => {
+
+      // FIXME: we should be loading first, and then committing all services IFF
+      // all services succeed.
+      const promises: Promise<boolean>[] = [];
+      promises.push(this._tasks_svc.importData(import_data.data.tasks));
+      promises.push(this._projects_svc.importData(import_data.data.projects));
+
+      Promise.all(promises).then( (result: boolean[]) => {
+        let success: boolean = true;
+        result.forEach( (v: boolean) => success = success && v);
+        resolve(success);
+      });
+    });
+  }
 }
