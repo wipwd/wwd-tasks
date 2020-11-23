@@ -173,6 +173,8 @@ export class SettingsDeviceSyncComponent implements OnInit {
     const passphrase: string = this.passphrase_form_ctrl.value;
 
     this._is_checking_sync_state = true;
+    this._has_sync_error = false;
+    this._sync_error_msg = "";
     const result: Promise<SyncStateResultItem> =
       this._sync_svc.checkSyncStatus(passphrase);
     result.then( (state: SyncStateResultItem) => {
