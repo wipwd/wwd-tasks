@@ -43,6 +43,9 @@
       </span>
       <mat-spinner [diameter]="30"></mat-spinner>
     </div>
+    <div *ngIf="hasSyncError()">
+      <span><strong>Error: </strong> {{getSyncError()}}</span>
+    </div>
     <div *ngIf="hasState()">
       <h3 class="mat-h3">Current State</h3>
       <span>Local version: {{getSyncState().local_version}}</span>
@@ -54,13 +57,27 @@
         <span>Remote date: {{getSyncState().remote_timestamp}}</span>
       </div>
 
-      <div fxLayout="row">
-        <button mat-icon-button type="button" (click)="pushState()">
-          <mat-icon>cloud_upload</mat-icon>
-        </button>
-        <button mat-icon-button type="button" (click)="pullState()">
-          <mat-icon>cloud_download</mat-icon>
-        </button>
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <div>
+          <button mat-icon-button [disabled]="!canPushState()"
+              type="button" (click)="pushState()">
+            <mat-icon style="font-size: 30px">cloud_upload</mat-icon>
+          </button>
+          <button mat-icon-button [disabled]="!canPullState()"
+              type="button" (click)="pullState()">
+            <mat-icon style="font-size: 30px">cloud_download</mat-icon>
+          </button>
+        </div>
+
+        <span></span>
+
+        <div fxLayout="row" *ngIf="isPullingOrPushing()">
+          <mat-spinner [diameter]="20"></mat-spinner>
+          <span *ngIf="isPushing()">pushing...</span>
+          <span *ngIf="isPulling()">pulling...</span>
+        </div>
+        <mat-icon *ngIf="getPushPullState() === 'success'">check</mat-icon>
+        <mat-icon *ngIf="getPushPullState() === 'error'">cancel</mat-icon>
 
       </div>
     </div>

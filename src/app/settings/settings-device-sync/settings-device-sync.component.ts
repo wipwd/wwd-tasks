@@ -23,7 +23,12 @@ export class SettingsDeviceSyncComponent implements OnInit {
 
   private _is_checking_sync_state: boolean = false;
   private _has_sync_state: boolean = false;
+  private _has_sync_error: boolean = false;
+  private _sync_error_msg: string = "";
   private _sync_state: SyncStateResultItem|undefined = undefined;
+  private _is_pulling_state: boolean = false;
+  private _is_pushing_state: boolean = false;
+  private _push_pull_op_state: string = "";
 
   public passphrase_form_group: FormGroup;
   public passphrase_form_ctrl: FormControl;
@@ -169,11 +174,18 @@ export class SettingsDeviceSyncComponent implements OnInit {
 
     this._is_checking_sync_state = true;
     const result: Promise<SyncStateResultItem> =
-      this._sync_svc.checkSyncStatus();
+      this._sync_svc.checkSyncStatus(passphrase);
     result.then( (state: SyncStateResultItem) => {
       this._sync_state = state;
       this._is_checking_sync_state = false;
       this._has_sync_state = true;
+    })
+    .catch( (err: string) => {
+      this._sync_state = undefined;
+      this._is_checking_sync_state = false;
+      this._has_sync_state = false;
+      this._has_sync_error = true;
+      this._sync_error_msg = err;
     });
   }
 
@@ -189,15 +201,61 @@ export class SettingsDeviceSyncComponent implements OnInit {
     return this._sync_state;
   }
 
+  public hasSyncError(): boolean {
+    return this._has_sync_error;
+  }
+
+  public getSyncError(): string {
+    return this._sync_error_msg;
+  }
+
   public isSynchronizing(): boolean {
     return this.isCheckingState() || this.hasState();
   }
 
   public pushState(): void {
-
+    this._is_pushing_state = true;
+    this._push_pull_op_state = "pushing";
+    this._sync_svc.pushState(this.passphrase_form_ctrl.value)
+    .then( (ret: boolean) => {
+      this._is_pushing_state = false;
+      this._push_pull_op_state = (ret ? "success" : "error");
+      console.log("pushed");
+    });
   }
 
   public pullState(): void {
+    this._is_pulling_state = true;
+    this._push_pull_op_state = "pulling";
+    this._sync_svc.pullState(this.passphrase_form_ctrl.value)
+    .then( (ret: boolean) => {
+      this._is_pulling_state = false;
+      this._push_pull_op_state = (ret ? "success" : "error");
+      console.log("pulled ", ret);
+    });
+  }
 
+  public canPushState(): boolean {
+    return this._sync_svc.canPushState() && !this.isPullingOrPushing();
+  }
+
+  public canPullState(): boolean {
+    return this._sync_svc.canPullState() && !this.isPullingOrPushing();
+  }
+
+  public isPulling(): boolean {
+    return this._is_pulling_state;
+  }
+
+  public isPushing(): boolean {
+    return this._is_pushing_state;
+  }
+
+  public isPullingOrPushing(): boolean {
+    return this.isPulling() || this.isPushing();
+  }
+
+  public getPushPullState(): string {
+    return this._push_pull_op_state;
   }
 }

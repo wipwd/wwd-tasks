@@ -23,6 +23,7 @@ export interface SyncEncryptedItem {
   version: number;
   timestamp: number;
   data: string;
+  control: string;
 }
 
 export interface SyncUser {
@@ -164,13 +165,42 @@ export class SyncService {
     return this.isLoggedIn() && (this._cur_version >= 0);
   }
 
-  public checkSyncStatus(): Promise<SyncStateResultItem> {
+  private async _isCorrectPassphrase(
+    state: SyncEncryptedItem,
+    passphrase: string
+  ): Promise<boolean> {
+    return new Promise<boolean>( (resolve, reject) => {
+      this.decrypt(state.control, passphrase).then(
+        (control: string) => {
+          if (control !== this._user.uid) {
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        }
+      )
+      .catch( (err) => {
+        console.log("unable to decrypt remote state control: ", err);
+        resolve(false);
+      });
+    });
+  }
+
+  public checkSyncStatus(passphrase: string): Promise<SyncStateResultItem> {
     return new Promise<SyncStateResultItem>( (resolve, reject) => {
       const state_loc: string = `wwdtasks/${this._user.uid}/sync/state`;
-      this._firestore.doc(state_loc).get().subscribe({
-        next: (doc: firebase.firestore.DocumentSnapshot<SyncEncryptedItem>) => {
+      this._firestore.doc(state_loc).get().subscribe({ next:
+        async (doc: firebase.firestore.DocumentSnapshot<SyncEncryptedItem>) => {
           const remote_state: SyncEncryptedItem = doc.data();
+
+          if (doc.exists) {
+            if (!(await this._isCorrectPassphrase(remote_state, passphrase))) {
+              reject("incorrect passphrase");
+            }
+          }
+
           this._cur_remote_state = remote_state;
+
           resolve({
             local_version: this._cur_version,
             remote_version: doc.exists ? remote_state.version : -1,
@@ -181,4 +211,70 @@ export class SyncService {
       });
     });
   }
+
+  public canPullState(): boolean {
+    if (!this.isReadyToSync) {
+      return false;
+    }
+    return (
+      !!this._cur_remote_state &&
+      this._cur_remote_state.version > this._cur_version
+    );
+  }
+
+  public canPushState(): boolean {
+    if (!this.isReadyToSync()) {
+      return false;
+    } else if (!this._cur_remote_state) {
+      return true;
+    }
+    return ((this._cur_version + 1) > this._cur_remote_state.version);
+  }
+
+  public pullState(passphrase: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      const encrypted_data: string = this._cur_remote_state.data;
+      this.decrypt(encrypted_data, passphrase)
+      .then( (data: string) => {
+        console.log("decrypted data: ", data);
+        resolve(true);
+      })
+      .catch( () => resolve(false) );
+    });
+  }
+
+  public pushState(passphrase: string): Promise<boolean> {
+    return new Promise<boolean>( async (resolve, reject) => {
+      const pending_version: number = this._cur_version + 1;
+      const exported_data: ImportExportDataItem =
+        await this._storage_svc.exportData();
+
+      const control_to_encrypt: string = this._user.uid;
+      const encrypted_control: string =
+        await this.encrypt(control_to_encrypt, passphrase);
+      const data_to_encrypt: string = JSON.stringify(exported_data);
+      const encrypted_data: string =
+        await this.encrypt(data_to_encrypt, passphrase);
+
+      const item: SyncEncryptedItem = {
+        version: pending_version,
+        timestamp: new Date().getTime(),
+        data: encrypted_data,
+        control: encrypted_control
+      };
+
+      const state_loc: string = `wwdtasks/${this._user.uid}/sync/state`;
+      this._firestore.doc(state_loc).set(item)
+      .then( () => {
+        console.log("wrote to firestore");
+        idbset("_wwdtasks_sync_version", pending_version)
+        .then( () => {
+          this._cur_version = pending_version;
+          resolve(true);
+        });
+      })
+      .catch( () => resolve(false));
+    });
+  }
+
 }
