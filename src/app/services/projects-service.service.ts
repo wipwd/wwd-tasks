@@ -6,6 +6,10 @@ export interface ImportExportProjectsDataItem {
   projects: string[];
 }
 
+export interface ProjectsStorageDataItem {
+  projects: string[];
+}
+
 declare type ProjectsMap = {[id: string]: string};
 
 @Injectable({
@@ -16,9 +20,16 @@ export class ProjectsService {
   private _projects: ProjectsMap = {};
   private _projects_subject: BehaviorSubject<string[]> =
     new BehaviorSubject<string[]>([]);
+  private _storage_subject: BehaviorSubject<ProjectsStorageDataItem|undefined> =
+    new BehaviorSubject<ProjectsStorageDataItem|undefined>(undefined);
 
   public constructor() {
     this._stateLoad();
+  }
+
+  public getStorageObserver(
+  ): BehaviorSubject<ProjectsStorageDataItem|undefined> {
+    return this._storage_subject;
   }
 
   private _stateLoad(): void {
@@ -36,8 +47,9 @@ export class ProjectsService {
     );
   }
 
-  private _stateSaveToDisk(projects: string[]): Promise<void> {
-    return idbset("_wwdtasks_projects", projects);
+  private _stateSaveToDisk(_projects: string[]): Promise<void> {
+    this._storage_subject.next({projects: _projects});
+    return idbset("_wwdtasks_projects", _projects);
   }
 
   private _stateSave(): void {

@@ -66,6 +66,11 @@ export interface ImportExportTaskDataItem {
 
 export declare type TaskLedgerMap = {[id: string]: TaskLedgerEntry};
 
+export interface TasksStorageDataItem {
+  tasks: IDBTaskItem[];
+  archives: IDBTaskArchiveType;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -98,6 +103,10 @@ export class TaskService {
   private _archive_subject: BehaviorSubject<TaskArchiveEntry[]> =
     new BehaviorSubject<TaskArchiveEntry[]>([]);
 
+  private _storage_subject: BehaviorSubject<TasksStorageDataItem|undefined> =
+    new BehaviorSubject<TasksStorageDataItem|undefined>(undefined);
+
+
   public constructor() {
     this._ledger_by_name.backlog.next = this._ledger_by_name.next;
     this._ledger_by_name.next.next = this._ledger_by_name.inprogress;
@@ -110,14 +119,19 @@ export class TaskService {
     .catch((err) => console.log("export error: ", err));
   }
 
+  public getStorageObserver(): BehaviorSubject<TasksStorageDataItem|undefined> {
+    return this._storage_subject;
+  }
+
   private _stateSaveToDisk(
-    tasks: IDBTaskItem[],
-    archives: IDBTaskArchiveType
+    _tasks: IDBTaskItem[],
+    _archives: IDBTaskArchiveType
   ): Promise<void> {
+    this._storage_subject.next({tasks: _tasks, archives: _archives});
     return new Promise<void>( (resolve, reject) => {
       const promises: Promise<void>[] = [];
-      promises.push(idbset("_wwd_tasks", tasks));
-      promises.push(idbset("_wwdtasks_archive", archives));
+      promises.push(idbset("_wwd_tasks", _tasks));
+      promises.push(idbset("_wwdtasks_archive", _archives));
       Promise.all(promises)
       .then( () => resolve())
       .catch( () => reject());
