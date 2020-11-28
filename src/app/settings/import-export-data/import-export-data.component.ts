@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectsStorageDataItem } from 'src/app/services/projects-service.service';
-import { ImportExportDataItem, ImportExportStorageItem, StorageItem, StorageService } from 'src/app/services/storage-service.service';
-import { TasksStorageDataItem } from 'src/app/services/task-service.service';
+import { ProjectsStorageDataItem } from '../../services/projects-service.service';
+import {
+  ImportExportStorageItem, StorageItem, StorageService
+} from '../../services/storage-service.service';
+import { TasksStorageDataItem } from '../../services/task-service.service';
 
 interface ImportExportStatistics {
   name: string;
