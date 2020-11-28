@@ -114,8 +114,6 @@ export class TaskService {
     this._ledger_by_name.inprogress.next = this._ledger_by_name.done;
     this._ledger_by_name.inprogress.previous = this._ledger_by_name.backlog;
     // 'done' tasks are not movable.
-    this.exportData().then( (val) => console.log("exported: ", val))
-    .catch((err) => console.log("export error: ", err));
   }
 
   public getStorageObserver(): BehaviorSubject<TasksStorageDataItem|undefined> {
@@ -153,6 +151,7 @@ export class TaskService {
       if (!(task.ledger in this._ledger_by_name)) {
         return;
       }
+      this._convertStrToDate(task.item);
       this._ledger_by_name[task.ledger].tasks[task.id] = {
         id: task.id,
         item: task.item,
@@ -457,16 +456,6 @@ export class TaskService {
     return this.getNoteSize(task) > 0;
   }
 
-  public async exportData(): Promise<ImportExportTaskDataItem> {
-    return new Promise<ImportExportTaskDataItem>( async (resolve) => {
-      const data: ImportExportTaskDataItem = {
-        tasks: await idbget("_wwd_tasks"),
-        archive: await idbget("_wwdtasks_archive")
-      };
-      resolve(data);
-    });
-  }
-
   private _convertStrToDate(task: TaskItem): void {
     if (typeof task.date === "string") {
       const date: Date = new Date(task.date);
@@ -474,23 +463,6 @@ export class TaskService {
     }
   }
 
-  // public async importData(data: ImportExportTaskDataItem): Promise<boolean> {
-  //   return new Promise<boolean>( async (resolve) => {
-  //     data.tasks.forEach( (idbtask: IDBTaskItem) => {
-  //       this._convertStrToDate(idbtask.item);
-  //     });
-  //     Object.values(data.archive).forEach( (entry: TaskArchiveEntry) => {
-  //       this._convertStrToDate(entry.item);
-  //     });
-
-  //     this._stateSaveToDisk(data.tasks, data.archive)
-  //     .then( () => {
-  //       this._stateLoad();
-  //       resolve(true);
-  //     })
-  //     .catch( () => resolve(false));
-  //   });
-  // }
 }
 
 export function getTimeDiffStr(

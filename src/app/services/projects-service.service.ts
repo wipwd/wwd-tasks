@@ -73,33 +73,4 @@ export class ProjectsService {
     this._stateSave();
     this._updateSubjects();
   }
-
-  public async exportData(): Promise<ImportExportProjectsDataItem> {
-    return new Promise<ImportExportProjectsDataItem>( async (resolve) => {
-      let project_data: string[]|undefined =
-        await idbget("_wwdtasks_projects");
-      if (!project_data) {
-        project_data = [];
-      }
-      const data: ImportExportProjectsDataItem = {
-        projects: project_data
-      };
-      resolve(data);
-    });
-  }
-
-  // FIXME: we should not be automatically writing and loading if
-  // not instructed that it's okay to do so.
-  public async importData(
-    data: ImportExportProjectsDataItem
-  ): Promise<boolean> {
-    return new Promise<boolean>( (resolve) => {
-      // this._stateSaveToDisk(data.projects)
-      // .then( () => {
-      //   this._stateLoad();
-      //   resolve(true);
-      // })
-      // .catch( () => resolve(false));
-    });
-  }
 }

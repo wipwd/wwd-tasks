@@ -10,13 +10,6 @@ import * as triplesec from 'triplesec/browser/triplesec';
 import { Mutex } from 'async-mutex';
 import { set as idbset, get as idbget, del as idbdel } from 'idb-keyval';
 
-export interface ImportExportDataItem {
-  timestamp: number;
-  data: {
-    tasks: ImportExportTaskDataItem;
-    projects: ImportExportProjectsDataItem;
-  };
-}
 
 export interface StorageDataItem {
   tasks?: TasksStorageDataItem;
@@ -28,6 +21,11 @@ export interface StorageItem {
   timestamp: number;
   hash: string;
   data: StorageDataItem;
+}
+
+export interface ImportExportStorageItem {
+  state: StorageItem;
+  ledger: string[];
 }
 
 @Injectable({
@@ -182,33 +180,30 @@ export class StorageService {
     return sha.to_hex();
   }
 
-  async exportData(): Promise<ImportExportDataItem> {
-    return new Promise<ImportExportDataItem>( async (resolve) => {
-      const export_data: ImportExportDataItem = {
-        timestamp: new Date().getTime(),
-        data: {
-          tasks: await this._tasks_svc.exportData(),
-          projects: await this._projects_svc.exportData()
-        }
-      };
-      resolve(export_data);
+  public async exportData(): Promise<ImportExportStorageItem> {
+    return new Promise<ImportExportStorageItem>( (resolve) => {
+      this._state_mutex.acquire()
+      .then( () => {
+        resolve({
+          state: this._current_state,
+          ledger: this._state_ledger
+        });
+      })
+      .finally( () => this._state_mutex.release() );
     });
   }
 
-  async importData(import_data: ImportExportDataItem): Promise<boolean> {
-    return new Promise<boolean>( async (resolve) => {
-
-      // FIXME: we should be loading first, and then committing all services IFF
-      // all services succeed.
-      const promises: Promise<boolean>[] = [];
-      // promises.push(this._tasks_svc.importData(import_data.data.tasks));
-      // promises.push(this._projects_svc.importData(import_data.data.projects));
-
-      // Promise.all(promises).then( (result: boolean[]) => {
-      //   let success: boolean = true;
-      //   result.forEach( (v: boolean) => success = success && v);
-      //   resolve(success);
-      // });
+  public async importData(imported: ImportExportStorageItem): Promise<boolean> {
+    return new Promise<boolean>( (resolve) => {
+      this._state_mutex.acquire()
+      .then( () => {
+        this._state_ledger = imported.ledger;
+        this._current_state = imported.state;
+      })
+      .finally( () => {
+        this._state_mutex.release();
+        this._commitState().then( () => this._initState() );
+      });
     });
   }
 
