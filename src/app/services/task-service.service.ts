@@ -114,7 +114,6 @@ export class TaskService {
     this._ledger_by_name.inprogress.next = this._ledger_by_name.done;
     this._ledger_by_name.inprogress.previous = this._ledger_by_name.backlog;
     // 'done' tasks are not movable.
-    this._stateLoad();
     this.exportData().then( (val) => console.log("exported: ", val))
     .catch((err) => console.log("export error: ", err));
   }
@@ -123,58 +122,27 @@ export class TaskService {
     return this._storage_subject;
   }
 
-  private _stateSaveToDisk(
-    _tasks: IDBTaskItem[],
-    _archives: IDBTaskArchiveType
-  ): Promise<void> {
-    this._storage_subject.next({tasks: _tasks, archives: _archives});
-    return new Promise<void>( (resolve, reject) => {
-      const promises: Promise<void>[] = [];
-      promises.push(idbset("_wwd_tasks", _tasks));
-      promises.push(idbset("_wwdtasks_archive", _archives));
-      Promise.all(promises)
-      .then( () => resolve())
-      .catch( () => reject());
-    });
-  }
-
   private _stateSave(): void {
-    const tasks: IDBTaskItem[] = [];
+    const _tasks: IDBTaskItem[] = [];
     Object.values(this._ledger_by_name).forEach( (ledger: Ledger) => {
       const ledgername: string = ledger.name;
       Object.values(ledger.tasks).forEach( (entry: TaskLedgerEntry) => {
-        tasks.push({
+        _tasks.push({
           id: entry.id,
           item: entry.item,
           ledger: ledgername
         });
       });
     });
-    // const tasks_json: string = JSON.stringify(tasks);
-    this._stateSaveToDisk(tasks, this._archived_tasks);
-    // idbset("_wwd_tasks", tasks);
-    // this._archiveStateSave();
+    this._storage_subject.next({
+      archives: this._archived_tasks,
+      tasks: _tasks
+    });
   }
 
-  // private _archiveStateSave(): void {
-  //   idbset("_wwdtasks_archive", this._archived_tasks);
-  // }
-
-  private _stateLoad(): void {
-    idbget("_wwd_tasks").then( (value: IDBTaskItem[]|undefined) => {
-      if (!value) {
-        return;
-      }
-      this._loadTasks(value);
-    });
-    idbget("_wwdtasks_archive").then(
-      (value: IDBTaskArchiveType|undefined) => {
-        if (!value) {
-          return;
-        }
-        this._loadArchive(value);
-      }
-    );
+  public stateLoad(data: TasksStorageDataItem): void {
+    this._loadTasks(data.tasks);
+    this._loadArchive(data.archives);
   }
 
   private _loadTasks(tasks: IDBTaskItem[]): void {
@@ -506,23 +474,23 @@ export class TaskService {
     }
   }
 
-  public async importData(data: ImportExportTaskDataItem): Promise<boolean> {
-    return new Promise<boolean>( async (resolve) => {
-      data.tasks.forEach( (idbtask: IDBTaskItem) => {
-        this._convertStrToDate(idbtask.item);
-      });
-      Object.values(data.archive).forEach( (entry: TaskArchiveEntry) => {
-        this._convertStrToDate(entry.item);
-      });
+  // public async importData(data: ImportExportTaskDataItem): Promise<boolean> {
+  //   return new Promise<boolean>( async (resolve) => {
+  //     data.tasks.forEach( (idbtask: IDBTaskItem) => {
+  //       this._convertStrToDate(idbtask.item);
+  //     });
+  //     Object.values(data.archive).forEach( (entry: TaskArchiveEntry) => {
+  //       this._convertStrToDate(entry.item);
+  //     });
 
-      this._stateSaveToDisk(data.tasks, data.archive)
-      .then( () => {
-        this._stateLoad();
-        resolve(true);
-      })
-      .catch( () => resolve(false));
-    });
-  }
+  //     this._stateSaveToDisk(data.tasks, data.archive)
+  //     .then( () => {
+  //       this._stateLoad();
+  //       resolve(true);
+  //     })
+  //     .catch( () => resolve(false));
+  //   });
+  // }
 }
 
 export function getTimeDiffStr(

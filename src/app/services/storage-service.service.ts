@@ -83,6 +83,8 @@ export class StorageService {
 
       await this._loadState();
       this._is_init = true;
+
+      this._tasks_svc.stateLoad(this._current_state.data.tasks);
     })
     .finally( () => this._state_mutex.release());
   }
