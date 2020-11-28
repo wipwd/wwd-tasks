@@ -59,11 +59,6 @@ export interface IDBTaskItem {
 
 export declare type IDBTaskArchiveType = {[id: string]: TaskArchiveEntry};
 
-export interface ImportExportTaskDataItem {
-  tasks: IDBTaskItem[];
-  archive: IDBTaskArchiveType;
-}
-
 export declare type TaskLedgerMap = {[id: string]: TaskLedgerEntry};
 
 export interface TasksStorageDataItem {

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import {
-  ImportExportProjectsDataItem, ProjectsService, ProjectsStorageDataItem
+  ProjectsService, ProjectsStorageDataItem
 } from './projects-service.service';
 import {
-  ImportExportTaskDataItem, TaskService, TasksStorageDataItem,
+  TaskService, TasksStorageDataItem,
   IDBTaskItem, IDBTaskArchiveType
 } from './task-service.service';
 import * as triplesec from 'triplesec/browser/triplesec';
