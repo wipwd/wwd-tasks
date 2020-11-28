@@ -128,11 +128,14 @@ export class StorageService {
   }
 
   private async _commitState(): Promise<void> {
+    console.log("committing state...");
     this._state_mutex.acquire()
     .then( async () => {
       if (!this._is_init) {
+        console.log("storage not init");
         return;
       }
+      console.log("preparing to commit state");
       const old_hash: string = this._current_state.hash;
       this._current_state.timestamp = new Date().getTime();
       const data_str: string = JSON.stringify(this._current_state.data);
