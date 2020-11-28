@@ -23,38 +23,29 @@ export class ProjectsService {
   private _storage_subject: BehaviorSubject<ProjectsStorageDataItem|undefined> =
     new BehaviorSubject<ProjectsStorageDataItem|undefined>(undefined);
 
-  public constructor() {
-    this._stateLoad();
-  }
+  public constructor() { }
 
   public getStorageObserver(
   ): BehaviorSubject<ProjectsStorageDataItem|undefined> {
     return this._storage_subject;
   }
 
-  private _stateLoad(): void {
-    idbget("_wwdtasks_projects").then(
-      (value: string[]|undefined) => {
-        if (!value) {
-          return;
-        }
-        this._projects = {};
-        value.forEach( (name: string) => {
-          this._projects[name] = name;
-        });
-        this._updateSubjects();
-      }
-    );
+  public stateLoad(data: ProjectsStorageDataItem): void {
+    this._stateLoad(data.projects);
   }
 
-  private _stateSaveToDisk(_projects: string[]): Promise<void> {
-    this._storage_subject.next({projects: _projects});
-    return idbset("_wwdtasks_projects", _projects);
+  private _stateLoad(projects: string[]): void {
+    projects.forEach( (name: string) => {
+      this._projects[name] = name;
+    });
+    this._updateSubjects();
   }
 
   private _stateSave(): void {
-    const projects: string[] = Object.values(this._projects);
-    this._stateSaveToDisk(projects);
+    const _projects: string[] = Object.values(this._projects);
+    this._storage_subject.next({
+      projects: _projects
+    });
   }
 
   private _updateSubjects(): void {
@@ -103,12 +94,12 @@ export class ProjectsService {
     data: ImportExportProjectsDataItem
   ): Promise<boolean> {
     return new Promise<boolean>( (resolve) => {
-      this._stateSaveToDisk(data.projects)
-      .then( () => {
-        this._stateLoad();
-        resolve(true);
-      })
-      .catch( () => resolve(false));
+      // this._stateSaveToDisk(data.projects)
+      // .then( () => {
+      //   this._stateLoad();
+      //   resolve(true);
+      // })
+      // .catch( () => resolve(false));
     });
   }
 }
