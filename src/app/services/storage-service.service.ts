@@ -3,7 +3,8 @@ import {
   ImportExportProjectsDataItem, ProjectsService, ProjectsStorageDataItem
 } from './projects-service.service';
 import {
-  ImportExportTaskDataItem, TaskService, TasksStorageDataItem
+  ImportExportTaskDataItem, TaskService, TasksStorageDataItem,
+  IDBTaskItem, IDBTaskArchiveType
 } from './task-service.service';
 import * as triplesec from 'triplesec/browser/triplesec';
 import { Mutex } from 'async-mutex';
@@ -41,7 +42,7 @@ export class StorageService {
   private _state_mutex: Mutex = new Mutex();
   private _is_init: boolean = false;
 
-  public STORE_VERSION: number = 1;
+  public STORE_VERSION: number = 2;
 
   public constructor(
     private _tasks_svc: TaskService,
@@ -71,10 +72,30 @@ export class StorageService {
   private _initState(): void {
     this._state_mutex.acquire()
     .then( async () => {
+
+      const cur_version: number = await idbget("_wwdtasks_version");
+      if (cur_version > this.STORE_VERSION) {
+        console.error(`store version ${cur_version} higher than application's`);
+        return;
+      } else if (cur_version < this.STORE_VERSION) {
+        await this._upgradeStore(cur_version);
+      }
+
       await this._loadState();
       this._is_init = true;
     })
     .finally( () => this._state_mutex.release());
+  }
+
+  private async _upgradeStore(version: number): Promise<void> {
+    return new Promise<void>( (resolve) => {
+      if (version === 1) {
+        // initial store version, with state kept in individual keys.
+        this._upgradeFromV1().then( (data: StorageDataItem) => {
+          this._upgradeToV2(data).then( () => resolve() );
+        });
+      }
+    });
   }
 
   private async _loadState(): Promise<void> {
@@ -174,13 +195,73 @@ export class StorageService {
       // FIXME: we should be loading first, and then committing all services IFF
       // all services succeed.
       const promises: Promise<boolean>[] = [];
-      promises.push(this._tasks_svc.importData(import_data.data.tasks));
-      promises.push(this._projects_svc.importData(import_data.data.projects));
+      // promises.push(this._tasks_svc.importData(import_data.data.tasks));
+      // promises.push(this._projects_svc.importData(import_data.data.projects));
 
-      Promise.all(promises).then( (result: boolean[]) => {
-        let success: boolean = true;
-        result.forEach( (v: boolean) => success = success && v);
-        resolve(success);
+      // Promise.all(promises).then( (result: boolean[]) => {
+      //   let success: boolean = true;
+      //   result.forEach( (v: boolean) => success = success && v);
+      //   resolve(success);
+      // });
+    });
+  }
+
+
+  private _upgradeFromV1(): Promise<StorageDataItem> {
+    return new Promise<StorageDataItem>( async (resolve) => {
+      console.assert(this._state_mutex.isLocked());
+      let instore_tasks: IDBTaskItem[]|undefined = await idbget("_wwd_tasks");
+      if (!instore_tasks) {
+        instore_tasks = [];
+      }
+
+      let instore_archives: IDBTaskArchiveType|undefined =
+        await idbget("_wwdtasks_archive");
+      if (!instore_archives) {
+        instore_archives = {};
+      }
+
+      let instore_projects: string[]|undefined =
+        await idbget("_wwdtasks_projects");
+      if (!instore_projects) {
+        instore_projects = [];
+      }
+
+      const data: StorageDataItem = {
+        tasks: {
+          tasks: instore_tasks,
+          archives: instore_archives
+        },
+        projects: {
+          projects: instore_projects
+        }
+      };
+      idbset("_wwdtasks_version", this.STORE_VERSION).then(() => resolve(data));
+    });
+  }
+
+  private _upgradeToV2(original_data: StorageDataItem): Promise<void> {
+    return new Promise<void>( async (resolve) => {
+      console.assert(this._state_mutex.isLocked());
+      const data_str: string = JSON.stringify(original_data);
+      const data_hash: string = this.hash(data_str);
+
+      const new_state: StorageItem = {
+        data: original_data,
+        timestamp: new Date().getTime(),
+        hash: data_hash,
+        store_version: this.STORE_VERSION
+      };
+      const new_state_ledger: string[] = [data_hash];
+      const promises = [
+        idbset("_wwdtasks_state", data_hash),
+        idbset(`_wwdtasks_${data_hash}`, new_state),
+        idbset("_wwdtasks_ledger", new_state_ledger),
+        idbset("_wwdtasks_version", this.STORE_VERSION)
+      ];
+      Promise.all(promises).then( () => {
+        console.log("upgraded state from v1 to v2");
+        resolve();
       });
     });
   }

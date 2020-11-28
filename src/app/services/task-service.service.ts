@@ -51,13 +51,13 @@ export interface Ledger {
   tasks: TaskLedgerMap;
 }
 
-interface IDBTaskItem {
+export interface IDBTaskItem {
   id: string;
   item: TaskItem;
   ledger: string;
 }
 
-declare type IDBTaskArchiveType = {[id: string]: TaskArchiveEntry};
+export declare type IDBTaskArchiveType = {[id: string]: TaskArchiveEntry};
 
 export interface ImportExportTaskDataItem {
   tasks: IDBTaskItem[];
