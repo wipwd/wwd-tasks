@@ -37,24 +37,34 @@
         </button>
       </form>
     </div>
-    <div *ngIf="isCheckingState()" style="margin: 20px" fxLayout="row">
+    <div *ngIf="isCheckingStatus()" style="margin: 20px" fxLayout="row">
       <span style="padding-right: 15px; font-size: 24px">
-        Checking state
+        Checking Status
       </span>
       <mat-spinner [diameter]="30"></mat-spinner>
     </div>
     <div *ngIf="hasSyncError()">
       <span><strong>Error: </strong> {{getSyncError()}}</span>
     </div>
-    <div *ngIf="hasState()">
+    <div *ngIf="hasStatus()">
       <h3 class="mat-h3">Current State</h3>
-      <span>Local version: {{getSyncState().local_version}}</span>
-      <span *ngIf="!getSyncState().has_remote_state">
-        Remote state not available
-      </span>
-      <div *ngIf="getSyncState().has_remote_state" fxLayout="column">
-        <span>Remote version: {{getSyncState().remote_version}}</span>
-        <span>Remote date: {{getSyncState().remote_timestamp}}</span>
+      <div fxLayout="row">
+        <span>Local version:</span>
+        <span>{{getSyncStatus().local.state.hash}}</span>
+      </div>
+      <div fxLayout="row">
+        <span>Remote version:</span>
+        <span *ngIf="hasRemoteState()">{{getSyncStatus().remote.version}}</span>
+        <span *ngIf="!hasRemoteState()">none</span>
+      </div>
+      <div fxLayout="row" *ngIf="hasRemoteState()">
+        <span *ngIf="isConflict()"><strong>Conflict</strong></span>
+        <span *ngIf="isLocalAhead()">
+          <strong>Local ahead {{getOffBy()}} versions</strong>
+        </span>
+        <span *ngIf="isFastForward()">
+          <strong>Local can be fast-forwarded, behind {{getOffBy()}} versions</strong>
+        </span>
       </div>
 
       <div fxLayout="row" fxLayoutAlign="space-between center">

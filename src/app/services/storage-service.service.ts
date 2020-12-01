@@ -71,6 +71,7 @@ export class StorageService {
     this._state_mutex.acquire()
     .then( async () => {
 
+      console.log("mutex > acquire > _initState");
       const cur_version: number = await idbget("_wwdtasks_version");
       if (cur_version > this.STORE_VERSION) {
         console.error(`store version ${cur_version} higher than application's`);
@@ -79,13 +80,17 @@ export class StorageService {
         await this._upgradeStore(cur_version);
       }
 
+      console.log("_initState > loading state");
       await this._loadState();
       this._is_init = true;
 
       this._tasks_svc.stateLoad(this._current_state.data.tasks);
       this._projects_svc.stateLoad(this._current_state.data.projects);
     })
-    .finally( () => this._state_mutex.release());
+    .finally( () => {
+      console.log("mutex > release > _initState");
+      this._state_mutex.release();
+    });
   }
 
   private async _upgradeStore(version: number): Promise<void> {
@@ -107,6 +112,7 @@ export class StorageService {
 
       const state_hash: string|undefined = await idbget("_wwdtasks_state");
       if (!state_hash) {
+        resolve();
         return;
       }
       Promise.all([
@@ -132,6 +138,7 @@ export class StorageService {
     console.log("committing state...");
     this._state_mutex.acquire()
     .then( async () => {
+      console.log("mutex > acquire > _commitState");
       if (!this._is_init) {
         console.log("storage not init");
         return;
@@ -158,7 +165,10 @@ export class StorageService {
         }
       );
     })
-    .finally( () => this._state_mutex.release() );
+    .finally( () => {
+      console.log("mutex > release > _commitState");
+      this._state_mutex.release();
+    });
   }
 
   private async _handleTaskData(item: TasksStorageDataItem): Promise<void> {
@@ -184,30 +194,50 @@ export class StorageService {
     return new Promise<ImportExportStorageItem>( (resolve) => {
       this._state_mutex.acquire()
       .then( () => {
+        console.log("mutex > acquire > exportData");
         resolve({
           state: this._current_state,
           ledger: this._state_ledger
         });
       })
-      .finally( () => this._state_mutex.release() );
+      .finally( () => {
+        console.log("mutex > release > exportData");
+        this._state_mutex.release();
+      });
     });
   }
 
   public async importData(imported: ImportExportStorageItem): Promise<boolean> {
     return new Promise<boolean>( (resolve) => {
+      console.log("importing data, begin");
+      console.log(" mutex locked: ", this._state_mutex.isLocked());
       this._state_mutex.acquire()
       .then( () => {
+        console.log("mutex > acquire > importData");
+        console.log("importing data");
         this._state_ledger = imported.ledger;
         this._current_state = imported.state;
+        resolve(true);
       })
       .finally( () => {
         this._state_mutex.release();
+        console.log("mutex > release > importData");
+        console.log("committing and initing state");
         this._commitState().then( () => this._initState() );
       });
     });
   }
 
+  public getState(): StorageItem {
+    return this._current_state;
+  }
 
+  public getStateLedger(): string[] {
+    return this._state_ledger;
+  }
+
+  // upgrade store formats
+  //
   private _upgradeFromV1(): Promise<StorageDataItem> {
     return new Promise<StorageDataItem>( async (resolve) => {
       console.assert(this._state_mutex.isLocked());

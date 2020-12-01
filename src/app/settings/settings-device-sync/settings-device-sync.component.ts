@@ -5,7 +5,9 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { SettingsDeviceSyncDialogComponent } from './settings-device-sync-dialog/settings-device-sync-dialog.component';
 import firebase from 'firebase/app';
-import { SyncService, SyncStateResultItem, SyncUser } from '../../services/sync-service.service';
+import {
+  SyncResultItem, SyncService, SyncStateResultItem, SyncUser, SyncStatus
+} from '../../services/sync-service.service';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 
@@ -21,11 +23,11 @@ export class SettingsDeviceSyncComponent implements OnInit {
   private _is_logging_in: boolean = false;
   private _logging_in_state: string = "";
 
-  private _is_checking_sync_state: boolean = false;
-  private _has_sync_state: boolean = false;
+  private _is_checking_sync_status: boolean = false;
+  private _has_sync_status: boolean = false;
   private _has_sync_error: boolean = false;
   private _sync_error_msg: string = "";
-  private _sync_state: SyncStateResultItem|undefined = undefined;
+  private _sync_status: SyncStatus|undefined = undefined;
   private _is_pulling_state: boolean = false;
   private _is_pushing_state: boolean = false;
   private _push_pull_op_state: string = "";
@@ -172,35 +174,41 @@ export class SettingsDeviceSyncComponent implements OnInit {
     }
     const passphrase: string = this.passphrase_form_ctrl.value;
 
-    this._is_checking_sync_state = true;
-    this._has_sync_error = false;
-    this._sync_error_msg = "";
-    const result: Promise<SyncStateResultItem> =
-      this._sync_svc.checkSyncStatus(passphrase);
-    result.then( (state: SyncStateResultItem) => {
-      this._sync_state = state;
-      this._is_checking_sync_state = false;
-      this._has_sync_state = true;
-    })
-    .catch( (err: string) => {
-      this._sync_state = undefined;
-      this._is_checking_sync_state = false;
-      this._has_sync_state = false;
-      this._has_sync_error = true;
-      this._sync_error_msg = err;
+    this._sync_svc.initSync(passphrase).subscribe({
+      next: (result: SyncResultItem) => {
+        if (!result) {
+          return;
+        }
+
+        if (!!result.error) {
+          this._has_sync_error = true;
+          if (result.error.incorrect_passphrase) {
+            this._sync_error_msg = "Incorrect Passphrase";
+          } else if (result.error.needs_login) {
+            this._sync_error_msg = "Requires log in";
+          } else {
+            this._sync_error_msg = "Unknown error occurred";
+          }
+          return;
+        }
+        this._sync_status = result.status;
+        this._is_checking_sync_status = false;
+        this._has_sync_error = false;
+        this._has_sync_status = true;
+      }
     });
   }
 
-  public isCheckingState(): boolean {
-    return this._is_checking_sync_state;
+  public isCheckingStatus(): boolean {
+    return this._is_checking_sync_status;
   }
 
-  public hasState(): boolean {
-    return this._has_sync_state;
+  public hasStatus(): boolean {
+    return this._has_sync_status && !!this._sync_status;
   }
 
-  public getSyncState(): SyncStateResultItem {
-    return this._sync_state;
+  public getSyncStatus(): SyncStatus {
+    return this._sync_status;
   }
 
   public hasSyncError(): boolean {
@@ -212,29 +220,60 @@ export class SettingsDeviceSyncComponent implements OnInit {
   }
 
   public isSynchronizing(): boolean {
-    return this.isCheckingState() || this.hasState();
+    return this.isCheckingStatus() || this.hasStatus();
+  }
+
+  public hasRemoteState(): boolean {
+    return this.hasStatus() && !!this._sync_status.remote;
+  }
+
+  public isConflict(): boolean {
+    return (
+      this.hasStatus() &&
+      !!this._sync_status.conflict && this._sync_status.conflict
+    );
+  }
+
+  public isLocalAhead(): boolean {
+    return (
+      this.hasStatus() &&
+      !!this._sync_status.ahead && this._sync_status.ahead
+    );
+  }
+
+  public isFastForward(): boolean {
+    return (
+      this.hasStatus() &&
+      !!this._sync_status.fastforward && this._sync_status.fastforward
+    );
+  }
+
+  public getOffBy(): number {
+    if (!this.hasStatus() || !this._sync_status.offby) {
+      return -1;
+    }
+    return (
+      this.isFastForward() || this.isLocalAhead() ?
+        this._sync_status.offby : -1
+    );
   }
 
   public pushState(): void {
     this._is_pushing_state = true;
     this._push_pull_op_state = "pushing";
     this._sync_svc.pushState(this.passphrase_form_ctrl.value)
-    .then( (ret: boolean) => {
-      this._is_pushing_state = false;
-      this._push_pull_op_state = (ret ? "success" : "error");
-      console.log("pushed");
-    });
+    .then(() => this._push_pull_op_state = "success")
+    .catch(() =>  this._push_pull_op_state = "error")
+    .finally(() => this._is_pushing_state = false);
   }
 
   public pullState(): void {
     this._is_pulling_state = true;
     this._push_pull_op_state = "pulling";
-    this._sync_svc.pullState(this.passphrase_form_ctrl.value)
-    .then( (ret: boolean) => {
-      this._is_pulling_state = false;
-      this._push_pull_op_state = (ret ? "success" : "error");
-      console.log("pulled ", ret);
-    });
+    this._sync_svc.pullState()
+    .then(() => this._push_pull_op_state = "success")
+    .catch(() => this._push_pull_op_state = "error")
+    .finally(() => this._is_pulling_state = false);
   }
 
   public canPushState(): boolean {

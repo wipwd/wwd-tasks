@@ -1,29 +1,35 @@
 import { Injectable } from '@angular/core';
 import {
-  ImportExportDataItem,
+  ImportExportStorageItem,
+  StorageItem,
   StorageService
 } from './storage-service.service';
 import * as triplesec from 'triplesec/browser/triplesec';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
 import firebase from 'firebase/app';
-import { BehaviorSubject } from 'rxjs';
 import {
   set as idbset,
   get as idbget
 } from 'idb-keyval';
+import { BehaviorSubject } from 'rxjs';
 
 export interface SyncItem {
   version: number;
   timestamp: number;
-  data: ImportExportDataItem;
+  data: ImportExportStorageItem;
 }
 
 export interface SyncEncryptedItem {
-  version: number;
+  version: string;
   timestamp: number;
   data: string;
-  control: string;
+}
+
+export interface SyncDecryptedItem {
+  version: string;
+  timestamp: number;
+  data: ImportExportStorageItem;
 }
 
 export interface SyncUser {
@@ -31,17 +37,42 @@ export interface SyncUser {
   name: string;
 }
 
-interface SyncWriteResultItem {
-  conflict?: boolean;
-  success?: boolean;
-  error?: boolean;
-}
-
 export interface SyncStateResultItem {
-  local_version: number;
-  remote_version: number;
+  local_version: string;
+  remote_version: string;
   remote_timestamp: number;
   has_remote_state: boolean;
+}
+
+interface RemoteState {
+  decrypted: SyncDecryptedItem;
+  version: string;
+  timestamp: number;
+  state: StorageItem;
+  ledger: string[];
+}
+
+export interface SyncStatus {
+  remote?: RemoteState;
+  local: {
+    state: StorageItem;
+    ledger: string[];
+  };
+  conflict?: boolean;
+  ahead?: boolean;
+  fastforward?: boolean;
+  match?: boolean;
+  offby?: number;
+}
+
+interface SyncError {
+  incorrect_passphrase?: boolean;
+  needs_login?: boolean;
+}
+
+export interface SyncResultItem {
+  status?: SyncStatus;
+  error?: SyncError;
 }
 
 @Injectable({
@@ -51,12 +82,17 @@ export class SyncService {
 
   private _is_logged_in: boolean = false;
   private _user: firebase.User|undefined = undefined;
-  private _is_ready: boolean = false;
 
   // synchronization
   private _is_synchronizing: boolean = false;
-  private _cur_version: number = -1;
-  private _cur_remote_state: SyncEncryptedItem|undefined = undefined;
+  private _is_obtaining_state: boolean = false;
+  private _has_sync_error: boolean = false;
+  private _has_sync_status: boolean = false;
+  private _sync_status?: SyncStatus = undefined;
+  private _sync_error?: SyncError = undefined;
+
+  private _sync_subject: BehaviorSubject<SyncResultItem|undefined> =
+    new BehaviorSubject<SyncResultItem|undefined>(undefined);
 
 
   public constructor(
@@ -74,11 +110,6 @@ export class SyncService {
           this._is_logged_in = false;
           this._user = undefined;
         }
-      }
-    );
-    idbget("_wwdtasks_sync_version").then(
-      (version: number | undefined) => {
-        this._cur_version = (!!version ? version : 0);
       }
     );
   }
@@ -155,132 +186,299 @@ export class SyncService {
    *  we have enough of the mechanism working. Additionally, something smarter
    *  requires some more awareness of other services, such as the task service,
    *  which would be overkill for a proof-of-concept.
+   *
+   * Improved approach (as of Nov 28, 2020):
+   *
+   *  Our state now includes a version ledger, an array of past version's
+   *  hashes, on which we can rely to ascertain whether the remote state is
+   *  further along, behind, or conflicting with the current state.
+   *
+   *  In a nutshell, we are going to grab the remote state and check the
+   *  version. If the unencrypted version matches any version we know, then we
+   *  can assume we are ahead of the remote state; otherwise we may either be
+   *  behind or conflicting. To ascertain which case, we will need to decrypt
+   *  the remote state, and check the remote version ledger. Should our hash
+   *  exist in the remote ledger, we know we are behind, and will fast-forward
+   *  to the remote state; otherwise, we are in conflict and can't do anything
+   *  at this point.
    */
 
   public isSynchronizing(): boolean {
     return this._is_synchronizing;
   }
 
-  public isReadyToSync(): boolean {
-    return this.isLoggedIn() && (this._cur_version >= 0);
-  }
-
-  private async _isCorrectPassphrase(
-    state: SyncEncryptedItem,
-    passphrase: string
-  ): Promise<boolean> {
-    return new Promise<boolean>( (resolve, reject) => {
-      this.decrypt(state.control, passphrase).then(
-        (control: string) => {
-          if (control !== this._user.uid) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        }
-      )
-      .catch( (err) => {
-        console.log("unable to decrypt remote state control: ", err);
-        resolve(false);
-      });
-    });
-  }
-
-  public checkSyncStatus(passphrase: string): Promise<SyncStateResultItem> {
-    return new Promise<SyncStateResultItem>( (resolve, reject) => {
+  private _obtainRemoteEncryptedState(): Promise<SyncEncryptedItem> {
+    return new Promise<SyncEncryptedItem>( (resolve, reject) => {
       const state_loc: string = `wwdtasks/${this._user.uid}/sync/state`;
-      this._firestore.doc(state_loc).get().subscribe({ next:
-        async (doc: firebase.firestore.DocumentSnapshot<SyncEncryptedItem>) => {
-          const remote_state: SyncEncryptedItem = doc.data();
-
-          if (doc.exists) {
-            if (!(await this._isCorrectPassphrase(remote_state, passphrase))) {
-              reject("incorrect passphrase");
-            }
+      this._firestore.doc(state_loc).get().subscribe({
+        next: (doc: firebase.firestore.DocumentSnapshot<SyncEncryptedItem>) => {
+          if (!doc.exists) {
+            reject();
+          } else {
+            resolve(doc.data());
           }
-
-          this._cur_remote_state = remote_state;
-
-          resolve({
-            local_version: this._cur_version,
-            remote_version: doc.exists ? remote_state.version : -1,
-            remote_timestamp: doc.exists ? remote_state.timestamp : -1,
-            has_remote_state: doc.exists
-          });
         }
       });
     });
+  }
+
+  private _decryptState(
+    encrypted: SyncEncryptedItem, passphrase: string
+  ): Promise<SyncDecryptedItem> {
+    return new Promise<SyncDecryptedItem>( (resolve, reject) => {
+      const encrypted_data: string = encrypted.data;
+      this.decrypt(encrypted_data, passphrase)
+      .then( (decrypted_data: string) => {
+        const item: ImportExportStorageItem = JSON.parse(decrypted_data);
+        resolve({
+          data: item,
+          version: item.state.hash,
+          timestamp: item.state.timestamp
+        });
+      })
+      .catch( (err) => reject(err));
+    });
+  }
+
+  private _encryptState(
+    plain: ImportExportStorageItem,
+    passphrase: string
+  ): Promise<SyncEncryptedItem> {
+    return new Promise<SyncEncryptedItem>( (resolve, reject) => {
+      const plain_data: string = JSON.stringify(plain);
+      this.encrypt(plain_data, passphrase).then( (encrypted_data: string) => {
+        const encrypted_item: SyncEncryptedItem = {
+          data: encrypted_data,
+          timestamp: plain.state.timestamp,
+          version: plain.state.hash
+        };
+        resolve(encrypted_item);
+      })
+      .catch( (err) => reject(err));
+    });
+  }
+
+  private _preprocessRemoteState(
+    item: SyncDecryptedItem, status: SyncStatus
+  ): void {
+
+    const remote_state: RemoteState = {
+      decrypted: item,
+      version: item.version,
+      timestamp: item.timestamp,
+      state: item.data.state,
+      ledger: item.data.ledger
+    };
+
+    status.remote = remote_state;
+
+    const our_version: string = status.local.state.hash;
+
+    if (remote_state.version === our_version) {
+      // same version, nothing to do.
+      status.match = true;
+    } else if (
+      remote_state.ledger.includes(our_version) ||
+      our_version === ""
+    ) {
+      // fast-forward
+      const idx: number = remote_state.ledger.indexOf(our_version);
+      status.fastforward = true;
+      status.offby = remote_state.ledger.length - idx - 1;
+    } else if (status.local.ledger.includes(remote_state.version)) {
+      // remote is behind.
+      const idx: number = status.local.ledger.indexOf(remote_state.version);
+      status.ahead = true;
+      status.offby = status.local.ledger.length - idx - 1;
+    } else {
+      // conflict.
+      // todo: check for last shared state.
+      status.conflict = true;
+    }
+  }
+
+  private async _obtainSyncStatus(passphrase: string): Promise<SyncStatus> {
+
+    return new Promise<SyncStatus>( (resolve, reject) => {
+
+      const status: SyncStatus = {
+        local: {
+          state: this._storage_svc.getState(),
+          ledger: this._storage_svc.getStateLedger()
+        }
+      };
+
+      // FIXME: rate limit obtaining remote state.
+      this._obtainRemoteEncryptedState()
+      .then( (encrypted_item: SyncEncryptedItem) => {
+
+        this._decryptState(encrypted_item, passphrase)
+        .then( (decrypted_item: SyncDecryptedItem) => {
+          // decrypted
+          this._preprocessRemoteState(decrypted_item, status);
+          resolve(status);
+        })
+        .catch( () => {
+          // incorrect passphrase
+          const error: SyncError = {incorrect_passphrase: true};
+          reject(error);
+        });
+      })
+      .catch( () => {
+        // no such item
+        resolve(status);
+      });
+    });
+  }
+
+  public initSync(
+    passphrase: string
+  ): BehaviorSubject<SyncResultItem|undefined> {
+    if (!this.isLoggedIn()) {
+      this._has_sync_error = true;
+      this._sync_error = {needs_login: true};
+      this._sync_subject.next({error: this._sync_error});
+      return this._sync_subject;
+    }
+
+    if (this._is_obtaining_state) {
+      return this._sync_subject;
+    }
+    this._is_obtaining_state = true;
+    this._sync_status = undefined;
+    this._sync_error = undefined;
+    this._has_sync_error = false;
+    this._has_sync_status = false;
+
+    this._obtainSyncStatus(passphrase)
+    .then( (status: SyncStatus) => {
+      this._sync_status = status;
+      this._sync_error = undefined;
+      this._has_sync_error = false;
+      this._has_sync_status = true;
+    })
+    .catch( (error: SyncError) => {
+      this._sync_status = undefined;
+      this._sync_error = error;
+      this._has_sync_status = false;
+      this._has_sync_error = true;
+    })
+    .finally( () => {
+      this._is_obtaining_state = false;
+      this._sync_subject.next({
+        status: this._sync_status,
+        error: this._sync_error
+      });
+    });
+    return this._sync_subject;
+  }
+
+  public isObtainingState(): boolean {
+    return this._is_obtaining_state;
+  }
+
+  public hasSyncState(): boolean {
+    return (
+      !this.isObtainingState() &&
+      this._has_sync_status && this._sync_status !== undefined &&
+      !this._has_sync_error
+    );
+  }
+
+  public hasRemoteState(): boolean {
+    return (
+      this.hasSyncState() &&
+      !!this._sync_status.remote
+    );
+  }
+
+  public canFastForward(): boolean {
+    return (
+      this.hasSyncState() &&
+      this.hasRemoteState() &&
+      !!this._sync_status.fastforward &&
+      this._sync_status.fastforward
+    );
+  }
+
+  public isAhead(): boolean {
+    return (
+      this.hasSyncState() &&
+      this.hasRemoteState() &&
+      !!this._sync_status.ahead &&
+      this._sync_status.ahead
+    );
+  }
+
+  public hasConflict(): boolean {
+    return (
+      this.hasSyncState() &&
+      this.hasRemoteState() &&
+      !!this._sync_status.conflict &&
+      this._sync_status.conflict
+    );
+  }
+
+  public hasError(): boolean {
+    return (!this.isObtainingState() && this._has_sync_error);
+  }
+
+  public isReadyToSync(): boolean {
+    return (
+      this.isLoggedIn() && this.hasSyncState() && (
+        this.canFastForward() || this.isAhead() || !this.hasRemoteState()
+      )
+    );
   }
 
   public canPullState(): boolean {
-    if (!this.isReadyToSync) {
-      return false;
-    }
     return (
-      !!this._cur_remote_state &&
-      this._cur_remote_state.version > this._cur_version
+      this.isReadyToSync() && this.hasRemoteState() && this.canFastForward()
     );
   }
 
   public canPushState(): boolean {
-    if (!this.isReadyToSync()) {
-      return false;
-    } else if (!this._cur_remote_state) {
-      return true;
-    }
-    return ((this._cur_version + 1) > this._cur_remote_state.version);
+    return (
+      this.isReadyToSync() && (this.isAhead() || !this.hasRemoteState())
+    );
   }
 
-  public pullState(passphrase: string): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      const encrypted_data: string = this._cur_remote_state.data;
-      this.decrypt(encrypted_data, passphrase)
-      .then( (data: string) => {
-        const imported: ImportExportDataItem = JSON.parse(data);
-        console.log("decrypted data: ", data);
-        console.log("imported data: ", imported);
-        this._storage_svc.importData(imported)
-        .then( (result: boolean) => {
-          this._cur_version = this._cur_remote_state.version;
-          resolve(result);
-        })
-        .catch( () => resolve(false));
+  private _pushState(encrypted: SyncEncryptedItem): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      const state_loc: string = `wwdtasks/${this._user.uid}/sync/state`;
+      this._firestore.doc(state_loc).set(encrypted)
+      .then( () => {
+        console.log(`pushed state ${encrypted.version}`);
+        resolve();
       })
-      .catch( () => resolve(false) );
+      .catch( (err) => reject(err));
     });
   }
 
-  public pushState(passphrase: string): Promise<boolean> {
-    return new Promise<boolean>( async (resolve, reject) => {
-      const pending_version: number = this._cur_version + 1;
-      const exported_data: ImportExportDataItem =
-        await this._storage_svc.exportData();
-
-      const control_to_encrypt: string = this._user.uid;
-      const encrypted_control: string =
-        await this.encrypt(control_to_encrypt, passphrase);
-      const data_to_encrypt: string = JSON.stringify(exported_data);
-      const encrypted_data: string =
-        await this.encrypt(data_to_encrypt, passphrase);
-
-      const item: SyncEncryptedItem = {
-        version: pending_version,
-        timestamp: new Date().getTime(),
-        data: encrypted_data,
-        control: encrypted_control
-      };
-
-      const state_loc: string = `wwdtasks/${this._user.uid}/sync/state`;
-      this._firestore.doc(state_loc).set(item)
-      .then( () => {
-        console.log("wrote to firestore");
-        idbset("_wwdtasks_sync_version", pending_version)
-        .then( () => {
-          this._cur_version = pending_version;
-          resolve(true);
-        });
+  public pushState(passphrase: string): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      this._storage_svc.exportData()
+      .then( (exported: ImportExportStorageItem) => {
+        return this._encryptState(exported, passphrase);
       })
-      .catch( () => resolve(false));
+      .then( (encrypted_item: SyncEncryptedItem) => {
+        return this._pushState(encrypted_item);
+      })
+      .then( () => resolve())
+      .catch( (err) => reject(err));
+    });
+  }
+
+  public pullState(): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      if (!this.hasSyncState() || !this.hasRemoteState()) {
+        reject();
+        return;
+      }
+      const remote_item: SyncDecryptedItem = this._sync_status.remote.decrypted;
+      this._storage_svc.importData(remote_item.data)
+      .then(() => resolve())
+      .catch(() => reject());
     });
   }
 
