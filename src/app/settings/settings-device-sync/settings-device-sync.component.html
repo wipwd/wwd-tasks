@@ -58,7 +58,7 @@
         <span *ngIf="!hasRemoteState()">none</span>
       </div>
       <div fxLayout="row" *ngIf="hasRemoteState()">
-        <span *ngIf="isConflict()"><strong>Conflict</strong></span>
+        <span *ngIf="hasConflict()"><strong>Conflict</strong></span>
         <span *ngIf="isLocalAhead()">
           <strong>Local ahead {{getOffBy()}} versions</strong>
         </span>

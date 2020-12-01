@@ -426,14 +426,15 @@ export class SyncService {
   public isReadyToSync(): boolean {
     return (
       this.isLoggedIn() && this.hasSyncState() && (
-        this.canFastForward() || this.isAhead() || !this.hasRemoteState()
+        this.canFastForward() || this.isAhead() || this.hasConflict() ||
+        !this.hasRemoteState()
       )
     );
   }
 
   public canPullState(): boolean {
     return (
-      this.isReadyToSync() && this.hasRemoteState() && this.canFastForward()
+      this.isReadyToSync() && this.hasRemoteState() && !this.isAhead()
     );
   }
 

@@ -54,6 +54,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SettingsDeviceSyncDialogComponent } from './settings/settings-device-sync/settings-device-sync-dialog/settings-device-sync-dialog.component';
 import { ImportExportDataComponent } from './settings/import-export-data/import-export-data.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SettingsDeviceSyncValidatePullDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-pull-dialog/settings-device-sync-validate-pull-dialog.component';
 
 
 
@@ -79,6 +80,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     SettingsDeviceSyncComponent,
     SettingsDeviceSyncDialogComponent,
     ImportExportDataComponent,
+    SettingsDeviceSyncValidatePullDialogComponent,
   ],
   imports: [
     BrowserModule,

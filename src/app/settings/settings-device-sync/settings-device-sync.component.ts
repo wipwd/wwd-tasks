@@ -9,6 +9,7 @@ import {
   SyncResultItem, SyncService, SyncStateResultItem, SyncUser, SyncStatus
 } from '../../services/sync-service.service';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { SettingsDeviceSyncValidatePullDialogComponent } from './settings-device-sync-validate-pull-dialog/settings-device-sync-validate-pull-dialog.component';
 
 
 @Component({
@@ -227,7 +228,7 @@ export class SettingsDeviceSyncComponent implements OnInit {
     return this.hasStatus() && !!this._sync_status.remote;
   }
 
-  public isConflict(): boolean {
+  public hasConflict(): boolean {
     return (
       this.hasStatus() &&
       !!this._sync_status.conflict && this._sync_status.conflict
@@ -268,12 +269,33 @@ export class SettingsDeviceSyncComponent implements OnInit {
   }
 
   public pullState(): void {
+
+    if (this.hasConflict()) {
+      this._validatePullState();
+    } else {
+      this._pullState();
+    }
+  }
+
+  private _pullState(): void {
     this._is_pulling_state = true;
     this._push_pull_op_state = "pulling";
     this._sync_svc.pullState()
     .then(() => this._push_pull_op_state = "success")
     .catch(() => this._push_pull_op_state = "error")
     .finally(() => this._is_pulling_state = false);
+  }
+
+  private _validatePullState(): void {
+    const dialogref =
+      this._confirm_dialog.open(SettingsDeviceSyncValidatePullDialogComponent);
+    dialogref.afterClosed().subscribe({
+      next: (result: boolean) => {
+        if (!!result && result === true) {
+          this._pullState();
+        }
+      }
+    });
   }
 
   public canPushState(): boolean {

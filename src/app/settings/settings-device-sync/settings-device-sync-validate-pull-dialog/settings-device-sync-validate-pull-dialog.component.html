@@ -1,0 +1,13 @@
+<div>
+  <h1 mat-dialog-title>Are you sure?</h1>
+
+  <mat-dialog-content>
+    <p>Pulling during a state of conflict will destroy your current state.</p>
+    <p>Are you sure you want to proceed?</p>
+  </mat-dialog-content>
+
+  <div mat-dialog-actions>
+    <button mat-button [mat-dialog-close]="false" cdkFocusInitial>No</button>
+    <button mat-button [mat-dialog-close]="true">Yes</button>
+  </div>
+</div>
