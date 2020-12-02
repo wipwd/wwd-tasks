@@ -67,10 +67,11 @@ export class StorageService {
     });
   }
 
-  private _initState(): void {
-    this._state_mutex.acquire()
-    .then( async () => {
-
+  private async _initStateSafe(): Promise<void> {
+    return new Promise<void>( async (resolve) => {
+      if (!this._state_mutex.isLocked()) {
+        throw new Error("state mutex must be locked");
+      }
       console.log("mutex > acquire > _initState");
       const cur_version: number = await idbget("_wwdtasks_version");
       if (cur_version > this.STORE_VERSION) {
@@ -86,6 +87,14 @@ export class StorageService {
 
       this._tasks_svc.stateLoad(this._current_state.data.tasks);
       this._projects_svc.stateLoad(this._current_state.data.projects);
+      resolve();
+    });
+  }
+
+  private _initState(): void {
+    this._state_mutex.acquire()
+    .then( async () => {
+      await this._initStateSafe();
     })
     .finally( () => {
       console.log("mutex > release > _initState");
@@ -134,40 +143,66 @@ export class StorageService {
     });
   }
 
-  private async _commitState(): Promise<void> {
-    console.log("committing state...");
-    this._state_mutex.acquire()
-    .then( async () => {
-      console.log("mutex > acquire > _commitState");
-      if (!this._is_init) {
-        console.log("storage not init");
-        return;
-      }
-      console.log("preparing to commit state");
-      const old_hash: string = this._current_state.hash;
-      this._current_state.timestamp = new Date().getTime();
-      const data_str: string = JSON.stringify(this._current_state.data);
-      const data_hash: string = this.hash(data_str);
-      this._current_state.hash = data_hash;
-      this._state_ledger.push(data_hash);
+  private async _commitStateSafe(
+    old_hash: string,
+    new_state: StorageItem,
+    new_ledger?: string[]
+  ): Promise<void> {
 
+    return new Promise<void>( (resolve, reject) => {
+
+      if (!this._state_mutex.isLocked()) {
+        throw new Error("state mutex must be locked");
+      }
+      console.log(`commit state safely > old: ${old_hash}, new: `, new_state);
+      const data_str: string = JSON.stringify(new_state.data);
+      const data_hash: string = this.hash(data_str);
+      new_state.hash = data_hash;
+
+      const new_state_ledger: string[] = (
+        !!new_ledger ? [...new_ledger] : [...this._state_ledger]
+      );
+      new_state_ledger.push(data_hash);
+
+      console.log("preparing to commit state");
       const promises = [
         idbset("_wwdtasks_state", data_hash),
-        idbset(`_wwdtasks_${data_hash}`, this._current_state),
-        idbset("_wwdtasks_ledger", this._state_ledger)
+        idbset(`_wwdtasks_${data_hash}`, new_state),
+        idbset("_wwdtasks_ledger", new_state_ledger)
       ];
       if (!!old_hash && old_hash !== "") {
         promises.push(idbdel(`_wwdtasks_${old_hash}`));
       }
-      Promise.all(promises).then(
-        () => {
-          console.log(`committed state ${data_hash}`);
+      Promise.all(promises)
+      .then(() => {
+        console.log(`wrote new state ${data_hash} to storage`);
+        this._state_ledger = new_ledger;
+        this._current_state = new_state;
+        resolve();
+      })
+      .catch(() => reject());
+    });
+  }
+
+  private async _commitState(): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      console.log("committing state...");
+      this._state_mutex.acquire()
+      .then( async () => {
+        console.log("mutex > acquire > _commitState");
+        if (!this._is_init) {
+          console.log("storage not init");
+          return;
         }
-      );
-    })
-    .finally( () => {
-      console.log("mutex > release > _commitState");
-      this._state_mutex.release();
+        const old_hash: string = this._current_state.hash;
+        this._commitStateSafe(old_hash, this._current_state, this._state_ledger)
+        .then(() => resolve())
+        .catch(() => reject());
+      })
+      .finally( () => {
+        console.log("mutex > release > _commitState");
+        this._state_mutex.release();
+      });
     });
   }
 
@@ -215,15 +250,23 @@ export class StorageService {
       .then( () => {
         console.log("mutex > acquire > importData");
         console.log("importing data");
-        this._state_ledger = imported.ledger;
-        this._current_state = imported.state;
-        resolve(true);
+
+        const current_hash: string = (
+          !!this._current_state ? this._current_state.hash : ""
+        );
+        return this._commitStateSafe(
+          current_hash, imported.state, imported.ledger
+        );
       })
+      .then( () => {
+        console.log("initing state");
+        return this._initStateSafe();
+      })
+      .then(() => resolve(true))
+      .catch(() => resolve(false))
       .finally( () => {
         this._state_mutex.release();
         console.log("mutex > release > importData");
-        console.log("committing and initing state");
-        this._commitState().then( () => this._initState() );
       });
     });
   }
