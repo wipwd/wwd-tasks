@@ -19,6 +19,7 @@ import { SettingsDeviceSyncValidatePullDialogComponent } from './settings-device
 })
 export class SettingsDeviceSyncComponent implements OnInit {
 
+  private _is_enabling: boolean = false;
   private _enabled: boolean = false;
   private _is_error: boolean = false;
   private _is_logging_in: boolean = false;
@@ -74,6 +75,7 @@ export class SettingsDeviceSyncComponent implements OnInit {
 
   private _disableSync(): void {
     this._enabled = false;
+    this._is_enabling = false;
     this.is_toggled.next(false);
     console.log("disable sync");
   }
@@ -97,6 +99,7 @@ export class SettingsDeviceSyncComponent implements OnInit {
         console.log("credentials: ", credentials);
         this._is_logging_in = false;
         this._logging_in_state = "success";
+        this._is_enabling = false;
       }
     ).catch( () => {
       this._is_logging_in = false;
@@ -111,6 +114,7 @@ export class SettingsDeviceSyncComponent implements OnInit {
     console.log("change: ", event);
     if (event.checked) {
       this.is_toggled.next(true);
+      this._is_enabling = true;
       if (!this.isLoggedIn()) {
         this._showSyncDialog();
       } else {
@@ -124,8 +128,7 @@ export class SettingsDeviceSyncComponent implements OnInit {
 
   public logout(): void {
     this._sync_svc.logout();
-    this.is_toggled.next(false);
-    this._logging_in_state = "";
+    this._disableSync();
   }
 
   public getInfo(): Observable<string> {
@@ -153,6 +156,10 @@ export class SettingsDeviceSyncComponent implements OnInit {
     return this._enabled && this.isLoggedIn();
   }
 
+  public isEnabling(): boolean {
+    return this._is_enabling;
+  }
+
   public isLoggingIn(): boolean {
     return this._is_logging_in;
   }
@@ -174,6 +181,7 @@ export class SettingsDeviceSyncComponent implements OnInit {
       return;
     }
     const passphrase: string = this.passphrase_form_ctrl.value;
+    this._is_checking_sync_status = true;
 
     this._sync_svc.initSync(passphrase).subscribe({
       next: (result: SyncResultItem) => {
@@ -181,6 +189,7 @@ export class SettingsDeviceSyncComponent implements OnInit {
           return;
         }
 
+        this._is_checking_sync_status = false;
         if (!!result.error) {
           this._has_sync_error = true;
           if (result.error.incorrect_passphrase) {
@@ -193,7 +202,6 @@ export class SettingsDeviceSyncComponent implements OnInit {
           return;
         }
         this._sync_status = result.status;
-        this._is_checking_sync_status = false;
         this._has_sync_error = false;
         this._has_sync_status = true;
       }

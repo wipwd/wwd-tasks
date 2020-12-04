@@ -35,6 +35,7 @@ export interface SyncDecryptedItem {
 export interface SyncUser {
   uid: string;
   name: string;
+  email?: string;
 }
 
 export interface SyncStateResultItem {
@@ -130,7 +131,8 @@ export class SyncService {
   public getUser(): SyncUser {
     return {
       uid: (!!this._user ? this._user.uid : ""),
-      name: (!!this._user ? this._user.displayName : "")
+      name: (!!this._user ? this._user.displayName : ""),
+      email: (!!this._user ? this._user.email : "")
     };
   }
 

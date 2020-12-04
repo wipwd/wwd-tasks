@@ -1,94 +1,146 @@
 <div fxLayout="column">
 
-  <div *ngIf="isLoggedIn()">
-    <span>User: {{getLoggedUser().name}}</span>
-    <button mat-stroked-button type="button" (click)="logout()">Logout</button>
-    <mat-divider></mat-divider>
-  </div>
-
   <mat-slide-toggle
       (change)="changeSyncToggle($event)"
       [checked]="is_toggled|async">
     Enable Sync via Google Services
   </mat-slide-toggle>
-  <span *ngIf="getState() === 'error'">
-    <strong>Error Logging in.</strong>
-  </span>
-  <span *ngIf="getState() === 'success'">
-    <strong>Success Logging In.</strong>
-  </span>
-  <span *ngIf="getState() === 'inprogress'">
-    <strong>Logging in...</strong>
-  </span>
-  <mat-divider></mat-divider>
-  <div *ngIf="isEnabled()">
 
-    <div *ngIf="!isSynchronizing()" fxLayout="row" fxLayoutAlign="start center">
-      <form [formGroup]="passphrase_form_group">
-        <mat-form-field appearance="fill" style="width: 450px">
-          <mat-label>Passphrase</mat-label>
-          <input matInput type="password"
-              [formControl]="passphrase_form_ctrl" required>
-        </mat-form-field>
-        <span style="width: 20px"></span>
-        <button mat-raised-button
-            type="submit" color="warn" (click)="startSync()">
-          Synchronize
-        </button>
-      </form>
-    </div>
-    <div *ngIf="isCheckingStatus()" style="margin: 20px" fxLayout="row">
-      <span style="padding-right: 15px; font-size: 24px">
-        Checking Status
-      </span>
-      <mat-spinner [diameter]="30"></mat-spinner>
-    </div>
-    <div *ngIf="hasSyncError()">
-      <span><strong>Error: </strong> {{getSyncError()}}</span>
-    </div>
-    <div *ngIf="hasStatus()">
-      <h3 class="mat-h3">Current State</h3>
-      <div fxLayout="row">
-        <span>Local version:</span>
-        <span>{{getSyncStatus().local.state.hash}}</span>
-      </div>
-      <div fxLayout="row">
-        <span>Remote version:</span>
-        <span *ngIf="hasRemoteState()">{{getSyncStatus().remote.version}}</span>
-        <span *ngIf="!hasRemoteState()">none</span>
-      </div>
-      <div fxLayout="row" *ngIf="hasRemoteState()">
-        <span *ngIf="hasConflict()"><strong>Conflict</strong></span>
-        <span *ngIf="isLocalAhead()">
-          <strong>Local ahead {{getOffBy()}} versions</strong>
-        </span>
-        <span *ngIf="isFastForward()">
-          <strong>Local can be fast-forwarded, behind {{getOffBy()}} versions</strong>
-        </span>
+  <!-- <div style="margin: 50px; border: 1px dashed black; background-color:
+  paleturquoise;" fxLayout="column">
+    <h3>DEBUG</h3>
+    <mat-divider></mat-divider>
+    <span>logged in: {{isLoggedIn()}}</span>
+    <span>enabled: {{isEnabled()}}</span>
+    <span>state: {{getState()}}</span>
+    <span>enabling: {{isEnabling()}}</span>
+  </div> -->
+
+  <div style="margin: 20px" fxLayout="column">
+
+    <div *ngIf="isEnabled() || isEnabling() || isError()">
+
+      <div *ngIf="isLoggedIn()"
+        class="mat-elevation-z1"
+        style="background-color: palegreen;">
+        <div
+            style="text-align: center; padding: 10px;"
+            fxLayout="row" fxLayoutAlign="space-between center">
+          <span><strong>Logged in as {{getLoggedUser().name}} <
+          {{getLoggedUser().email}} ></strong></span>
+          <span></span>
+          <button mat-raised-button type="button" color="warn" (click)="logout()">Logout</button>
+        </div>
       </div>
 
-      <div fxLayout="row" fxLayoutAlign="space-between center">
-        <div>
-          <button mat-icon-button [disabled]="!canPushState()"
-              type="button" (click)="pushState()">
-            <mat-icon style="font-size: 30px">cloud_upload</mat-icon>
-          </button>
-          <button mat-icon-button [disabled]="!canPullState()"
-              type="button" (click)="pullState()">
-            <mat-icon style="font-size: 30px">cloud_download</mat-icon>
-          </button>
+      <div *ngIf="!isLoggedIn()">
+        <div *ngIf="getState() === 'error'"
+            class="mat-elevation-z1"
+            style="background-color: tomato">
+          <div style="text-align: center; padding: 10px;">
+            <span><strong>Error Logging in.</strong></span>
+          </div>
         </div>
 
-        <span></span>
+        <div *ngIf="getState() === 'inprogress'"
+            class="mat-elevation-z1"
+            style="background-color: palegoldenrod">
+          <div style="text-align: center; padding: 10px;">
+            <span><strong>Logging in...</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <div fxLayout="row" *ngIf="isPullingOrPushing()">
+    <div *ngIf="isEnabled()" style="margin-top: 2em;">
+
+      <div fxLayout="row">
+        <h3 class="mat-h3">Obtain & Synchronize Local and Remote State</h3>
+
+        <div *ngIf="isCheckingStatus()" style="margin-left: 20px">
           <mat-spinner [diameter]="20"></mat-spinner>
-          <span *ngIf="isPushing()">pushing...</span>
-          <span *ngIf="isPulling()">pulling...</span>
         </div>
-        <mat-icon *ngIf="getPushPullState() === 'success'">check</mat-icon>
-        <mat-icon *ngIf="getPushPullState() === 'error'">cancel</mat-icon>
+      </div>
 
+      <div *ngIf="!isSynchronizing()"
+          fxLayout="column"
+          style="margin: 20px">
+        <div fxLayout="row" fxLayoutAlign="start center">
+          <span style="width: 20%; margin-right: 2em;">
+            <strong>
+              Obtaining and synchronizing state requires a passphrase. At the
+              moment, this password can not be changed after pushing state for the
+              first time.
+            </strong>
+          </span>
+          <form [formGroup]="passphrase_form_group">
+            <mat-form-field appearance="fill" style="width: 450px">
+              <mat-label>Remote Passphrase</mat-label>
+              <input matInput type="password"
+                  [formControl]="passphrase_form_ctrl" required>
+            </mat-form-field>
+            <button mat-raised-button
+                style="margin-left: 2em;"
+                type="submit" color="warn" (click)="startSync()">
+              Check Status
+            </button>
+          </form>
+        </div>
+        <div *ngIf="hasSyncError()"
+            class="mat-elevation-z1" style="background-color: tomato;">
+          <div style="padding: 10px; text-align: center">
+            <span>
+              <strong>Error: {{getSyncError()}}</strong>
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div *ngIf="hasStatus()">
+        <h3 class="mat-h3">Current State</h3>
+        <div fxLayout="row">
+          <span>Local version:</span>
+          <span>{{getSyncStatus().local.state.hash}}</span>
+        </div>
+        <div fxLayout="row">
+          <span>Remote version:</span>
+          <span *ngIf="hasRemoteState()">{{getSyncStatus().remote.version}}</span>
+          <span *ngIf="!hasRemoteState()">none</span>
+        </div>
+        <div fxLayout="row" *ngIf="hasRemoteState()">
+          <span *ngIf="hasConflict()"><strong>Conflict</strong></span>
+          <span *ngIf="isLocalAhead()">
+            <strong>Local ahead {{getOffBy()}} versions</strong>
+          </span>
+          <span *ngIf="isFastForward()">
+            <strong>Local can be fast-forwarded, behind {{getOffBy()}} versions</strong>
+          </span>
+        </div>
+
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <div>
+            <button mat-icon-button [disabled]="!canPushState()"
+                type="button" (click)="pushState()">
+              <mat-icon style="font-size: 30px">cloud_upload</mat-icon>
+            </button>
+            <button mat-icon-button [disabled]="!canPullState()"
+                type="button" (click)="pullState()">
+              <mat-icon style="font-size: 30px">cloud_download</mat-icon>
+            </button>
+          </div>
+
+          <span></span>
+
+          <div fxLayout="row" *ngIf="isPullingOrPushing()">
+            <mat-spinner [diameter]="20"></mat-spinner>
+            <span *ngIf="isPushing()">pushing...</span>
+            <span *ngIf="isPulling()">pulling...</span>
+          </div>
+          <mat-icon *ngIf="getPushPullState() === 'success'">check</mat-icon>
+          <mat-icon *ngIf="getPushPullState() === 'error'">cancel</mat-icon>
+        </div>
       </div>
     </div>
 
