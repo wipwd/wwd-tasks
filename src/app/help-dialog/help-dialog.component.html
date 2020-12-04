@@ -3,56 +3,93 @@
 
   <mat-dialog-content class="mat-typography">
 
-    <h3>What is <i>Tasks</i>?</h3>
-    <p>
-      This project aims at providing a user-side, browser-based task tracker,
-      following somewhat of a Kanban methodology.
-    </p>
+    <mat-accordion multiple>
 
-    <h3>What is <i>Kanban</i></h3>
-    <p>
-      Somewhere else you may find a far better explanation on what Kanban is,
-      but in general terms it is a lean methodology to manage work. It may take
-      many forms, but typically you'll have cards (in our case, tasks), which
-      travel between different stages of a pipeline.
-    </p>
-    <p>
-      In our case, tasks will travel from a <i>Backlog</i> stage towards a
-      <i>Done</i> stage. Tasks won't be able to travel back to previous stages,
-      unless directly to the backlog for further assessment. Only tasks in the
-      <i>Done</i> stage won't be able to move at all -- they are done, afterall.
-    </p>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          What is Tasks?
+        </mat-expansion-panel-header>
+        <p>
+          This project aims at providing a user-side, browser-based task tracker,
+          following somewhat of a Kanban methodology.
+        </p>
+      </mat-expansion-panel>
 
-    <h3>What do you mean by <i>Browser-based</i>?</h3>
-    <p>
-      Essentially, nothing is kept on the server aside from the files required
-      to run the application. The whole application in run in your browser, and
-      all data is kept in the browser as well.
-    </p>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          What is Kanban?
+        </mat-expansion-panel-header>
+        <p>
+          Somewhere else you may find a far better explanation on what Kanban is,
+          but in general terms it is a lean methodology to manage work. It may take
+          many forms, but typically you'll have cards (in our case, tasks), which
+          travel between different stages of a pipeline.
+        </p>
+        <p>
+          In our case, tasks will travel from a <i>Backlog</i> stage towards a
+          <i>Done</i> stage. Tasks won't be able to travel back to previous stages,
+          unless directly to the backlog for further assessment. Only tasks in the
+          <i>Done</i> stage won't be able to move at all -- they are done, afterall.
+        </p>
+      </mat-expansion-panel>
 
-    <h3>Where is my data kept?</h3>
-    <p>
-      In your browser. Ultimately this means your computer. In broad strokes,
-      the data is kept in storage dedicated by your browser to this application,
-      and is local and specific to that browser and that application: other
-      browsers won't be able to access that information, nor will other
-      applications or sites.
-    </p>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          What do you mean by Browser-based?
+        </mat-expansion-panel-header>
+        <p>
+          Essentially, nothing is kept on the server aside from the files required
+          to run the application. The whole application in run in your browser, and
+          all data is kept in the browser as well.
+        </p>
 
-    <h3>Can I see my tasks on my phone or other computer?</h3>
-    <p>
-      Simply put, no.
-    </p>
-    <p>
-      Because of the nature of this application, all your data is kept in
-      the browser you are using. This means there is no synchronization
-      between devices. It's a trade-off between your privacy and usability.
-    </p>
-    <p>
-      If we were to support multiple device sync, then we would have to
-      store your data somewhere. That would likely mean on a server somewhere.
-      And that defeats our current purpose.
-    </p>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          Where is my data kept?
+        </mat-expansion-panel-header>
+        <p>
+          In your browser. Ultimately this means your computer. In broad strokes,
+          the data is kept in storage dedicated by your browser to this application,
+          and is local and specific to that browser and that application: other
+          browsers won't be able to access that information, nor will other
+          applications or sites.
+        </p>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          Can I see my tasks on my phone or other computer?
+        </mat-expansion-panel-header>
+
+        <p>Sort of.</p>
+        <p>
+          Given the local nature of this application, we do not share state
+          with a server that is capable of synchronizing multiple clients in
+          real time.
+        </p>
+        <p>
+          Instead, what we chose to do is allow you, the user, while being
+          properly informed of how your data is going to be kept, to explicitly
+          choose to synchronize your data with an external third-party storage service.
+        </p>
+        <p>
+          This synchronization is not real-time. You will have to do it each
+          time you want to save your current state to a third-party remote site.
+          This can be used as a backup, or to synchronize other devices
+          by pulling your state from said third-party storage.
+        </p>
+        <p>
+          You can find the synchronization feature in Settings.
+        </p>
+
+      </mat-expansion-panel>
+
+    </mat-accordion>
+
+    <h3></h3>
+
 
   </mat-dialog-content>
   <div mat-dialog-actions>
