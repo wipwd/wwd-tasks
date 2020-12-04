@@ -267,6 +267,27 @@ export class SettingsDeviceSyncComponent implements OnInit {
     );
   }
 
+  public getLocalVersion(): string {
+    return this._sync_status.local.state.hash;
+  }
+
+  public getRemoteVersion(): string {
+    return (this.hasRemoteState() ? this._sync_status.remote.version : "");
+  }
+
+  public getLocalDate(): string {
+    const ts: number = this._sync_status.local.state.timestamp;
+    return (new Date(ts).toUTCString());
+  }
+
+  public getRemoteDate(): string {
+    if (!this.hasRemoteState()) {
+      return "";
+    }
+    const ts: number = this._sync_status.remote.timestamp;
+    return (new Date(ts).toUTCString());
+  }
+
   public pushState(): void {
     this._is_pushing_state = true;
     this._push_pull_op_state = "pushing";
