@@ -456,6 +456,20 @@ export class TaskService {
       const date: Date = new Date(task.date);
       task.date = date;
     }
+    if (!!task.done && typeof task.done === "string") {
+      const date: Date = new Date(task.done);
+      task.done = date;
+    }
+    if (!!task.timer) {
+      task.timer.intervals.forEach( (item: TaskTimerItem) => {
+        if (!!item.start && typeof item.start === "string") {
+          item.start = new Date(item.start);
+        }
+        if (!!item.end && typeof item.end === "string") {
+          item.end = new Date(item.end);
+        }
+      });
+    }
   }
 
 }
