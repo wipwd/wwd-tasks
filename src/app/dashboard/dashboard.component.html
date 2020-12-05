@@ -116,20 +116,27 @@
         <mat-icon *ngIf="!isNewTaskOpen()">add_circle_outline</mat-icon>
         <mat-icon *ngIf="isNewTaskOpen()">highlight_off</mat-icon>
       </button>
-      <div *ngIf="hasRunningTask()">
-        <span style="padding-left: 2em"></span>
-        <button mat-icon-button type="button"
-            (click)="pauseCurrentTask()"
-            matTooltip="Pause Current Task" matTooltipPosition="below"
-            [matTooltipDisabled]="isHandset$|async">
-          <mat-icon>pause_circle_outline</mat-icon>
-        </button>
-        <button mat-icon-button type="button"
-            matTooltip="Stop Current Task" matTooltipPosition="below"
-            [matTooltipDisabled]="isHandset$|async"
-            (click)="stopCurrentTask()">
-          <mat-icon>stop</mat-icon>
-        </button>
+      <div *ngIf="hasRunningTask()" fxLayout="row" fxLayoutAlign="start center">
+        <span style="padding-left: 2em; padding-right: 1em">></span>
+        <div fxLayout="column" fxLayoutAlign="start center">
+          <div fxLayout="row" fxLayoutAlign="start center">
+            <span>{{getCurrentTaskTitle()}}</span>
+            <span style="padding-left: 2em;"></span>
+            <button mat-icon-button type="button"
+                (click)="pauseCurrentTask()"
+                matTooltip="Pause Current Task" matTooltipPosition="below"
+                [matTooltipDisabled]="isHandset$|async">
+              <mat-icon>pause_circle_outline</mat-icon>
+            </button>
+            <button mat-icon-button type="button"
+                matTooltip="Stop Current Task" matTooltipPosition="below"
+                [matTooltipDisabled]="isHandset$|async"
+                (click)="stopCurrentTask()">
+              <mat-icon>stop</mat-icon>
+            </button>
+          </div>
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
       </div>
     </mat-toolbar>
 

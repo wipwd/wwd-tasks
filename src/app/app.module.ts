@@ -56,6 +56,7 @@ import { ImportExportDataComponent } from './settings/import-export-data/import-
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SettingsDeviceSyncValidatePullDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-pull-dialog/settings-device-sync-validate-pull-dialog.component';
 import { SettingsDeviceSyncValidatePushDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-push-dialog/settings-device-sync-validate-push-dialog.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 
 
@@ -117,6 +118,7 @@ import { SettingsDeviceSyncValidatePushDialogComponent } from './settings/settin
     AngularFireAuthModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

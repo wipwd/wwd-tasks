@@ -150,4 +150,9 @@ export class DashboardComponent implements OnInit {
   public hasRunningTask(): boolean {
     return this._tasks_svc.hasRunningTimerTask();
   }
+
+  public getCurrentTaskTitle(): string {
+    const task: TaskLedgerEntry = this._tasks_svc.getRunningTimerTask();
+    return task.item.title;
+  }
 }
