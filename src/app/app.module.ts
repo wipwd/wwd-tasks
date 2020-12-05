@@ -57,6 +57,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SettingsDeviceSyncValidatePullDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-pull-dialog/settings-device-sync-validate-pull-dialog.component';
 import { SettingsDeviceSyncValidatePushDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-push-dialog/settings-device-sync-validate-push-dialog.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { WeeklyReportComponent } from './reports/weekly-report/weekly-report.component';
 
 
 
@@ -84,6 +85,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     ImportExportDataComponent,
     SettingsDeviceSyncValidatePullDialogComponent,
     SettingsDeviceSyncValidatePushDialogComponent,
+    WeeklyReportComponent,
   ],
   imports: [
     BrowserModule,

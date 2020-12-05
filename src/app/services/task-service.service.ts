@@ -66,6 +66,7 @@ export interface TasksStorageDataItem {
   archives: IDBTaskArchiveType;
 }
 
+export declare type TaskItemMap = {[id: string]: TaskItem};
 
 @Injectable({
   providedIn: 'root'
@@ -80,6 +81,8 @@ export class TaskService {
   };
   private _ledger_by_taskid: {[id: string]: Ledger} = {};
   private _archived_tasks: {[id: string]: TaskArchiveEntry} = {};
+
+  private _all_tasks: TaskItemMap = {};
 
   private _ledger_subjects: {[id: string]: BehaviorSubject<Ledger>} = {
     backlog: new BehaviorSubject<Ledger>({} as Ledger),
@@ -101,6 +104,8 @@ export class TaskService {
   private _storage_subject: BehaviorSubject<TasksStorageDataItem|undefined> =
     new BehaviorSubject<TasksStorageDataItem|undefined>(undefined);
 
+  private _all_tasks_subject: BehaviorSubject<TaskItemMap> =
+    new BehaviorSubject<TaskItemMap>({});
 
   public constructor() {
     this._ledger_by_name.backlog.next = this._ledger_by_name.next;
@@ -138,6 +143,8 @@ export class TaskService {
   public stateLoad(data: TasksStorageDataItem): void {
     this._loadTasks(data.tasks);
     this._loadArchive(data.archives);
+
+    this._loadAllTasks(data);
   }
 
   private _loadTasks(tasks: IDBTaskItem[]): void {
@@ -171,6 +178,24 @@ export class TaskService {
     this._updateArchiveSubject();
   }
 
+  private _loadAllTasks(data: TasksStorageDataItem): void {
+    const tasks_data: IDBTaskItem[] = data.tasks;
+    const archives_data: IDBTaskArchiveType = data.archives;
+
+    this._all_tasks = {};
+    tasks_data.forEach( (task_item: IDBTaskItem) => {
+      this._all_tasks[task_item.id] = task_item.item;
+    });
+
+    Object.keys(archives_data).forEach( (task_id: string) => {
+      this._all_tasks[task_id] = archives_data[task_id].item;
+    });
+
+    const num_tasks: number = Object.keys(this._all_tasks).length;
+    console.log(`loaded ${num_tasks} tasks`);
+    this._updateAllTasksSubject();
+  }
+
   private _updateLedgerSubjects(ledger: Ledger): void {
     this._ledger_subjects[ledger.name].next(ledger);
     this._ledger_size_subjects[ledger.name].next(
@@ -182,6 +207,10 @@ export class TaskService {
     this._archive_subject.next(
       Object.values(this._archived_tasks).reverse()
     );
+  }
+
+  private _updateAllTasksSubject(): void {
+    this._all_tasks_subject.next(this._all_tasks);
   }
 
   private _removeFromLedgers(task: TaskLedgerEntry): void {
@@ -211,9 +240,17 @@ export class TaskService {
     this._ledger_by_taskid[taskid] = this._ledger_by_name.backlog;
     this._stateSave();
     this._updateLedgerSubjects(this._ledger_by_name.backlog);
+
+    // adding a new task, add to all tasks as well.
+    this._all_tasks[taskid] = task;
+    this._updateAllTasksSubject();
   }
 
-  public remove(task: string|TaskLedgerEntry): void {
+  public remove(task: TaskLedgerEntry): void {
+    if (typeof task === "string") {
+      throw new Error("task can't be of type string!");
+    }
+    /*
     if (typeof task === "string") {
       if (!(task in this._ledger_by_taskid)) {
         return;  // assume task does not exist.
@@ -224,6 +261,12 @@ export class TaskService {
     } else {
       this._remove(task);
     }
+    */
+    this._remove(task);
+    // we are actively removing a task through this path, so remove it from all
+    // tasks too.
+    delete this._all_tasks[task.id];
+    this._updateAllTasksSubject();
   }
 
   public archive(task: TaskLedgerEntry): void {
@@ -314,6 +357,14 @@ export class TaskService {
 
   public getArchive(): BehaviorSubject<TaskArchiveEntry[]> {
     return this._archive_subject;
+  }
+
+  public getAllTasksRaw(): TaskItemMap {
+    return this._all_tasks;
+  }
+
+  public getAllTasks(): BehaviorSubject<TaskItemMap> {
+    return this._all_tasks_subject;
   }
 
   public updateTask(task: TaskLedgerEntry, item: TaskItem): void {
