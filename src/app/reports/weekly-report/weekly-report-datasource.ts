@@ -3,7 +3,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { map } from 'rxjs/operators';
 import { Observable, merge, BehaviorSubject, Subscription } from 'rxjs';
-import { TaskItem, TaskItemMap, TaskService } from '../../services/task-service.service';
+import { TaskItem, TaskItemMap, TaskService, TaskTimerItem } from '../../services/task-service.service';
 
 export interface WeeklyTaskItem {
   task: TaskItem;
@@ -38,18 +38,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
 
     this._all_tasks_subscription = this._tasks_svc.getAllTasks().subscribe({
       next: (all_tasks: TaskItemMap) => {
-        const new_tasks: WeeklyTaskItem[] = [];
-        Object.values(all_tasks).forEach( (item: TaskItem) => {
-          new_tasks.push({
-            task: item,
-            spent_seconds: 0,
-            created: false,
-            finished: false,
-            workedon: true
-          });
-        });
-        this._weekly_tasks = [...new_tasks];
-        this._weekly_tasks_subject.next(this._weekly_tasks);
+        this._processTasks(all_tasks);
       }
     });
 
@@ -96,6 +85,80 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
         default: return 0;
       }
     });
+  }
+
+  private _processTasks(taskmap: TaskItemMap): void {
+
+    const monday: Date = new Date();
+    const sunday: Date = new Date();
+    monday.setDate(0);
+    sunday.setDate(6);
+
+    const tasks: WeeklyTaskItem[] = [];
+
+    Object.values(taskmap).forEach( (taskitem: TaskItem) => {
+
+      const _spent: number =
+        this._calcTimeSpent(taskitem, monday, sunday);
+      const _created: boolean =
+        this._wasCreatedBetween(taskitem, monday, sunday);
+      const _finished: boolean =
+        this._wasFinishedBetween(taskitem, monday, sunday);
+
+      if (!_created && !_finished && _spent <= 0) {
+        // we don't want this task.
+        return;
+      }
+
+      const task: WeeklyTaskItem = {
+        task: taskitem,
+        spent_seconds: _spent,
+        created: _created,
+        finished: _finished,
+        workedon: (_spent > 0)
+      };
+      tasks.push(task);
+    });
+
+    this._weekly_tasks = [...tasks];
+    this._weekly_tasks_subject.next(tasks);
+  }
+
+  private _wasCreatedBetween(item: TaskItem, start: Date, end: Date): boolean {
+    return (!!item.date && item.date >= start && item.date <= end);
+  }
+
+  private _wasFinishedBetween(item: TaskItem, start: Date, end: Date): boolean {
+    return (!!item.done && item.done >= start && item.done <= end);
+  }
+
+  private _calcTimeSpent(item: TaskItem, start: Date, end: Date): number {
+    if (!item.timer) {
+      return 0;
+    }
+    const now: Date = new Date();
+    const nowish: Date = (end > now ? now : end);
+    let spent: number = 0;
+    item.timer.intervals.forEach( (interval: TaskTimerItem) => {
+      if (!interval.start) {
+        return;
+      }
+
+      if (!!interval.end && (interval.end < start || interval.end > end)) {
+        return;
+      }
+
+      if (!!interval.start && typeof interval.start === "string") {
+        console.error("wrong date format -- string found!");
+        console.error("task: ", item);
+      }
+
+      const interval_end: Date = (!!interval.end ? interval.end : nowish);
+      if (!!interval.start) {
+        spent += end.getTime() - interval.start.getTime();
+      }
+    });
+    return Math.floor(spent / 1000);
   }
 
   public getSize(): number {
