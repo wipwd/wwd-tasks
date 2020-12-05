@@ -155,7 +155,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
 
       const interval_end: Date = (!!interval.end ? interval.end : nowish);
       if (!!interval.start) {
-        spent += end.getTime() - interval.start.getTime();
+        spent += interval_end.getTime() - interval.start.getTime();
       }
     });
     return Math.floor(spent / 1000);
