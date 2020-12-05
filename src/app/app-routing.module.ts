@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ArchivesListComponent } from './archives/archives-list/archives-list.component';
-import { ReportsComponent } from './reports/reports/reports.component';
+import { ReportsComponent } from './reports/reports.component';
 import { SettingsDashboardComponent } from './settings/settings-dashboard/settings-dashboard.component';
 import { TaskLedgerComponent } from './tasks/task-ledger/task-ledger.component';
 import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer/task-organizer.component';
