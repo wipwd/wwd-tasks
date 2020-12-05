@@ -537,10 +537,12 @@ export function getTimeDiffStr(
   }
 
   if (time_lst.length === 0 && !with_secs) {
-      if (diff > 0) {
-          return "about a minute";
+      if (diff > 0 && diff < 30) {
+        return "less than a minute";
+      } else if (diff > 0 && diff >= 30) {
+        return "about a minute";
       } else {
-          return "few seconds";
+        return "just a second";
       }
   } else if (with_secs) {
     time_lst.push(`${diff}s`);
