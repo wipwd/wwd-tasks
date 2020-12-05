@@ -9,6 +9,7 @@ import {
 import * as triplesec from 'triplesec/browser/triplesec';
 import { Mutex } from 'async-mutex';
 import { set as idbset, get as idbget, del as idbdel } from 'idb-keyval';
+import { rejects } from 'assert';
 
 
 export interface StorageDataItem {
@@ -39,6 +40,7 @@ export class StorageService {
   private _state_ledger: string[] = [];
   private _state_mutex: Mutex = new Mutex();
   private _is_init: boolean = false;
+  private _is_error_state: boolean = false;
 
   public STORE_VERSION: number = 2;
 
@@ -68,7 +70,7 @@ export class StorageService {
   }
 
   private async _initStateSafe(): Promise<void> {
-    return new Promise<void>( async (resolve) => {
+    return new Promise<void>( async (resolve, reject) => {
       if (!this._state_mutex.isLocked()) {
         throw new Error("state mutex must be locked");
       }
@@ -82,12 +84,23 @@ export class StorageService {
       }
 
       console.log("_initState > loading state");
-      await this._loadState();
-      this._is_init = true;
+      this._loadState()
+      .then( () => {
+        this._is_init = true;
 
-      this._tasks_svc.stateLoad(this._current_state.data.tasks);
-      this._projects_svc.stateLoad(this._current_state.data.projects);
-      resolve();
+        console.log("_initState > current state: ", this._current_state);
+
+        this._tasks_svc.stateLoad(this._current_state.data.tasks);
+        this._projects_svc.stateLoad(this._current_state.data.projects);
+        resolve();
+      })
+      .catch( (err: string) => {
+        console.error(`_initStateSafe > error: ${err}`);
+        console.error("_initStateSafe > marking store with error!");
+        this._is_error_state = true;
+        this._is_init = false;
+        reject();
+      });
     });
   }
 
@@ -114,16 +127,18 @@ export class StorageService {
   }
 
   private async _loadState(): Promise<void> {
-    return new Promise<void>( async (resolve) => {
+    return new Promise<void>( async (resolve, reject) => {
       if (!this._state_mutex.isLocked()) {
         throw new Error("can't load state without protection from mutex");
       }
 
       const state_hash: string|undefined = await idbget("_wwdtasks_state");
       if (!state_hash) {
-        resolve();
+        console.log("_loadState > state hash not available");
+        reject("state hash not available/found");
         return;
       }
+      console.log(`_loadState > loading state ${state_hash}`);
       Promise.all([
         idbget(`_wwdtasks_${state_hash}`),
         idbget("_wwdtasks_ledger")
@@ -132,7 +147,8 @@ export class StorageService {
         const state: StorageItem|undefined = result[0];
         const ledger: string[]|undefined = result[1];
         if (!state || !ledger) {
-          resolve();
+          console.error("_loadState > state or ledger not found");
+          reject("state or ledger not found");
           return;
         }
         this._current_state = state;
@@ -154,6 +170,13 @@ export class StorageService {
       if (!this._state_mutex.isLocked()) {
         throw new Error("state mutex must be locked");
       }
+
+      if (!new_state) {
+        console.error("_commitStateSafe > attempting committing empty state");
+        reject();
+        return;
+      }
+
       console.log(`commit state safely > old: ${old_hash}, new: `, new_state);
       const data_str: string = JSON.stringify(new_state.data);
       const data_hash: string = this.hash(data_str);
