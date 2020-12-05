@@ -173,7 +173,9 @@ export class TaskService {
   private _loadArchive(archive: IDBTaskArchiveType): void {
     this._archived_tasks = {};
     Object.keys(archive).forEach( (key: string) => {
-      this._archived_tasks[key] = archive[key];
+      const entry: TaskArchiveEntry = archive[key];
+      this._convertStrToDate(entry.item);
+      this._archived_tasks[key] = entry;
     });
     this._updateArchiveSubject();
   }
