@@ -442,7 +442,7 @@ export class SyncService {
 
   public canPushState(): boolean {
     return (
-      this.isReadyToSync() && (this.isAhead() || !this.hasRemoteState())
+      this.isReadyToSync() && (!this.canFastForward() || !this.hasRemoteState())
     );
   }
 

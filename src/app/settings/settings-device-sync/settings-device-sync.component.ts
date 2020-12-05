@@ -10,6 +10,7 @@ import {
 } from '../../services/sync-service.service';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { SettingsDeviceSyncValidatePullDialogComponent } from './settings-device-sync-validate-pull-dialog/settings-device-sync-validate-pull-dialog.component';
+import { SettingsDeviceSyncValidatePushDialogComponent } from './settings-device-sync-validate-push-dialog/settings-device-sync-validate-push-dialog.component';
 
 
 @Component({
@@ -289,6 +290,14 @@ export class SettingsDeviceSyncComponent implements OnInit {
   }
 
   public pushState(): void {
+    if (this.hasConflict()) {
+      this._validatePushState();
+    } else {
+      this._pushState();
+    }
+  }
+
+  private _pushState(): void {
     this._is_pushing_state = true;
     this._push_pull_op_state = "pushing";
     this._sync_svc.pushState(this.passphrase_form_ctrl.value)
@@ -322,6 +331,18 @@ export class SettingsDeviceSyncComponent implements OnInit {
       next: (result: boolean) => {
         if (!!result && result === true) {
           this._pullState();
+        }
+      }
+    });
+  }
+
+  private _validatePushState(): void {
+    const dialogref =
+      this._confirm_dialog.open(SettingsDeviceSyncValidatePushDialogComponent);
+    dialogref.afterClosed().subscribe({
+      next: (result: boolean) => {
+        if (!!result && result === true) {
+          this._pushState();
         }
       }
     });

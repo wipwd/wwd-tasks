@@ -55,6 +55,7 @@ import { SettingsDeviceSyncDialogComponent } from './settings/settings-device-sy
 import { ImportExportDataComponent } from './settings/import-export-data/import-export-data.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SettingsDeviceSyncValidatePullDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-pull-dialog/settings-device-sync-validate-pull-dialog.component';
+import { SettingsDeviceSyncValidatePushDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-push-dialog/settings-device-sync-validate-push-dialog.component';
 
 
 
@@ -81,6 +82,7 @@ import { SettingsDeviceSyncValidatePullDialogComponent } from './settings/settin
     SettingsDeviceSyncDialogComponent,
     ImportExportDataComponent,
     SettingsDeviceSyncValidatePullDialogComponent,
+    SettingsDeviceSyncValidatePushDialogComponent,
   ],
   imports: [
     BrowserModule,
