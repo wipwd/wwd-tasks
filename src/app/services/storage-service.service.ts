@@ -74,7 +74,6 @@ export class StorageService {
       if (!this._state_mutex.isLocked()) {
         throw new Error("state mutex must be locked");
       }
-      console.log("mutex > acquire > _initState");
       const cur_version: number = await idbget("_wwdtasks_version");
       if (cur_version > this.STORE_VERSION) {
         console.error(`store version ${cur_version} higher than application's`);
@@ -107,6 +106,7 @@ export class StorageService {
   private _initState(): void {
     this._state_mutex.acquire()
     .then( async () => {
+      console.log("mutex > acquire > _initState");
       await this._initStateSafe();
     })
     .finally( () => {
@@ -180,6 +180,13 @@ export class StorageService {
       console.log(`commit state safely > old: ${old_hash}, new: `, new_state);
       const data_str: string = JSON.stringify(new_state.data);
       const data_hash: string = this.hash(data_str);
+
+      if (data_hash === old_hash) {
+        console.log(`commit state safely > no state changes (old: ${old_hash}, new: ${data_hash}) -- idempotent`);
+        resolve();
+        return;
+      }
+
       new_state.hash = data_hash;
 
       const new_state_ledger: string[] = (

@@ -127,10 +127,12 @@ export class TaskService {
         });
       });
     });
-    this._storage_subject.next({
+    const new_state: TasksStorageDataItem = {
       archives: this._archived_tasks,
       tasks: _tasks
-    });
+    };
+    console.log("tasks-svc > notify new state: ", new_state);
+    this._storage_subject.next(new_state);
   }
 
   public stateLoad(data: TasksStorageDataItem): void {
@@ -329,6 +331,7 @@ export class TaskService {
   }
 
   public timerStart(task: TaskLedgerEntry): void {
+    console.log("task-svc > timer start on ", task);
     if (!task.item.timer) {
       task.item.timer = { state: "stopped", intervals: [] };
     }
@@ -342,7 +345,7 @@ export class TaskService {
 
     if (this.hasRunningTimerTask()) {
       const cur_running: TaskLedgerEntry = this.getRunningTimerTask();
-      this.timerPause(cur_running);
+      this._timerPause(cur_running);
     }
 
     timer_state.state = "running";
@@ -350,12 +353,16 @@ export class TaskService {
     if (task.ledger.name !== "inprogress") {
       // move task to in-progress.
       this._moveTo(task, this._ledger_by_name.inprogress);
+    } else {
+      // _moveTo() will save state
+      this._stateSave();
     }
-    this._stateSave();
   }
 
-  public timerPause(task: TaskLedgerEntry): void {
+  private _timerPause(task: TaskLedgerEntry): void {
+    console.log("task-svc > timer pause on ", task);
     if (!task.item.timer || !this.isTimerRunning(task)) {
+      console.error("task-svc > can't pause task that has not been started");
       // can't pause a task that has not been started.
       return;
     }
@@ -363,11 +370,17 @@ export class TaskService {
     timer_state.state = "paused";
     const cur_interval: TaskTimerItem = this.getCurrentTimerInterval(task);
     cur_interval.end = new Date();
+  }
+
+  public timerPause(task: TaskLedgerEntry): void {
+    this._timerPause(task);
     this._stateSave();
   }
 
   public timerStop(task: TaskLedgerEntry): void {
+    console.log("task-svc > timer stop on ", task);
     if (!task.item.timer || this.isTimerStopped(task)) {
+      console.error("task-svc > can't stop task that has not been started");
       return;
     }
     const timer_state: TaskTimerState = task.item.timer;
@@ -376,8 +389,10 @@ export class TaskService {
     cur_interval.end = new Date();
     if (task.ledger.name !== "backlog") {
       this._moveTo(task, this._ledger_by_name.backlog);
+    } else {
+      // _moveTo() will save state
+      this._stateSave();
     }
-    this._stateSave();
   }
 
   public isTimerRunning(task: TaskLedgerEntry): boolean {
