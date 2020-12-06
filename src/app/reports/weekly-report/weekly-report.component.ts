@@ -62,4 +62,8 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
       !this.isInProgress(item) && !this.isDone(item)
     );
   }
+
+  public getTimeSpent(item: WeeklyTaskItem): string {
+    return getTimeDiffStr(item.spent_seconds);
+  }
 }
