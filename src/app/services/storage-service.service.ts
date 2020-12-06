@@ -69,6 +69,32 @@ export class StorageService {
     });
   }
 
+  private async _initStorage(): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      const new_state: StorageItem = {
+        timestamp: new Date().getTime(),
+        hash: "",
+        data: {
+          tasks: this._tasks_svc.getInitState(),
+          projects: this._projects_svc.getInitState()
+        }
+      };
+
+      this._commitStateSafe("", new_state, [])
+      .then( () => {
+        return idbset("_wwdtasks_version", this.STORE_VERSION);
+      })
+      .then( () => {
+        console.log(`initiated storage state version ${this.STORE_VERSION}`);
+        resolve();
+      })
+      .catch( (err) => {
+        console.error("error initiating first storage state: ", err);
+        reject(err);
+      });
+    });
+  }
+
   private async _initStateSafe(): Promise<void> {
     return new Promise<void>( async (resolve, reject) => {
       if (!this._state_mutex.isLocked()) {
@@ -80,6 +106,9 @@ export class StorageService {
         return;
       } else if (cur_version < this.STORE_VERSION) {
         await this._upgradeStore(cur_version);
+      } else if (cur_version === undefined) {
+        console.log("first run, initiate storage");
+        await this._initStorage();
       }
 
       console.log("_initState > loading state");
@@ -188,6 +217,7 @@ export class StorageService {
       }
 
       new_state.hash = data_hash;
+      new_state.timestamp = new Date().getTime();
 
       const new_state_ledger: string[] = (
         !!new_ledger ? [...new_ledger] : [...this._state_ledger]

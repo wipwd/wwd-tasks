@@ -61,8 +61,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private _doFirstRun(): void {
-    const dialogref = this._first_time_dialog.open(FirstTimeDialogComponent);
-    idbset("_wwdtasks_version", 1);
+    this._first_time_dialog.open(FirstTimeDialogComponent);
   }
 
   public isExpanded(): boolean {

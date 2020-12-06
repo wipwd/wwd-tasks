@@ -26,6 +26,10 @@ export class ProjectsService {
     return this._storage_subject;
   }
 
+  public getInitState(): ProjectsStorageDataItem {
+    return this._getCurrentState();
+  }
+
   public stateLoad(data: ProjectsStorageDataItem): void {
     this._stateLoad(data.projects);
   }
@@ -37,11 +41,15 @@ export class ProjectsService {
     this._updateSubjects();
   }
 
+  private _getCurrentState(): ProjectsStorageDataItem {
+    return {
+      projects: Object.values(this._projects)
+    };
+  }
+
   private _stateSave(): void {
-    const _projects: string[] = Object.values(this._projects);
-    this._storage_subject.next({
-      projects: _projects
-    });
+    const cur_state: ProjectsStorageDataItem = this._getCurrentState();
+    this._storage_subject.next(cur_state);
   }
 
   private _updateSubjects(): void {

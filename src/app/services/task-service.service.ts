@@ -120,7 +120,11 @@ export class TaskService {
     return this._storage_subject;
   }
 
-  private _stateSave(): void {
+  public getInitState(): TasksStorageDataItem {
+    return this._getCurrentState();
+  }
+
+  private _getCurrentState(): TasksStorageDataItem {
     const _tasks: IDBTaskItem[] = [];
     Object.values(this._ledger_by_name).forEach( (ledger: Ledger) => {
       const ledgername: string = ledger.name;
@@ -136,6 +140,11 @@ export class TaskService {
       archives: this._archived_tasks,
       tasks: _tasks
     };
+    return new_state;
+  }
+
+  private _stateSave(): void {
+    const new_state: TasksStorageDataItem = this._getCurrentState();
     console.log("tasks-svc > notify new state: ", new_state);
     this._storage_subject.next(new_state);
   }
