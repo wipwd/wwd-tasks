@@ -16,7 +16,7 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
   @ViewChild(MatTable) public table: MatTable<WeeklyTaskItem>;
 
   public data_source: WeeklyReportDataSource;
-  public displayedColumns = ['title', 'spent'];
+  public displayedColumns = ["status", "prio", "title", "spent"];
 
   public constructor(
     private _tasks_svc: TaskService
@@ -32,5 +32,34 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
     this.data_source.sort = this.sort;
     this.data_source.paginator = this.paginator;
     this.table.dataSource = this.data_source;
+  }
+
+  public isDone(item: WeeklyTaskItem): boolean {
+    return item.finished;
+  }
+
+  public isInProgress(item: WeeklyTaskItem): boolean {
+    return item.workedon && !this.isDone(item);
+  }
+
+  public wasOnlyCreated(item: WeeklyTaskItem): boolean {
+    return item.created && !this.isDone(item) && !this.isInProgress(item);
+  }
+
+  public isPrioRed(item: WeeklyTaskItem): boolean {
+    return (
+      item.task.priority === "high" &&
+      !this.isDone(item) && !this.isInProgress(item)
+    );
+  }
+
+  public isPrioAmber(item: WeeklyTaskItem): boolean {
+    return (
+      item.task.priority === "high" &&
+      this.isInProgress(item)
+    ) || (
+      item.task.priority === "medium" &&
+      !this.isInProgress(item) && !this.isDone(item)
+    );
   }
 }

@@ -82,6 +82,8 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
       switch (this.sort.active) {
         case 'title': return compare(a.task.title, b.task.title, isAsc);
         case 'spent': return compare(a.spent_seconds, b.spent_seconds, isAsc);
+        case 'status': return compareStatus(a, b, isAsc);
+        case 'prio': return comparePrio(a, b, isAsc);
         default: return 0;
       }
     });
@@ -172,4 +174,79 @@ function compare(
   isAsc: boolean
 ): number {
   return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+}
+
+enum PrioEnum {
+  none = 0,
+  low = 1,
+  medium = 2,
+  high = 3
+}
+
+enum RAGEnum {
+  none = 0,
+  green = 1,
+  amber = 2,
+  red = 3
+}
+
+function getPrio(v: string): number {
+  switch (v) {
+    case "high": return PrioEnum.high;
+    case "medium": return PrioEnum.medium;
+    case "low": return PrioEnum.low;
+  }
+  return PrioEnum.none;
+}
+
+function getRAG(item: WeeklyTaskItem): number {
+  const prio: PrioEnum = getPrio(item.task.priority);
+  if (prio === PrioEnum.high && !item.finished && !item.workedon) {
+    return RAGEnum.red;
+  } else if (
+    (prio === PrioEnum.high && item.workedon && !item.finished) ||
+    (prio === PrioEnum.medium && !item.finished && !item.workedon)
+  ) {
+    return RAGEnum.amber;
+  } else {
+    return RAGEnum.green;
+  }
+}
+
+enum StatusEnum {
+  none = 0,
+  finished = 1,
+  inprogress = 2,
+  created = 3
+}
+
+function getStatus(item: WeeklyTaskItem): number {
+  if (item.created && !item.finished && !item.workedon) {
+    return StatusEnum.created;
+  } else if (item.finished) {
+    return StatusEnum.finished;
+  } else if (item.workedon && !item.finished) {
+    return StatusEnum.inprogress;
+  }
+  return StatusEnum.none;
+}
+
+function compareStatus(
+  a: WeeklyTaskItem,
+  b: WeeklyTaskItem,
+  isAsc: boolean
+): number {
+  const a_status: number = getStatus(a);
+  const b_status: number = getStatus(b);
+  return compare(a_status, b_status, isAsc);
+}
+
+function comparePrio(
+  a: WeeklyTaskItem,
+  b: WeeklyTaskItem,
+  isAsc: boolean
+): number {
+  const a_prio: number = getRAG(a);
+  const b_prio: number = getRAG(b);
+  return compare(a_prio, b_prio, isAsc);
 }
