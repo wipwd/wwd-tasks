@@ -22,6 +22,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   private _weekly_tasks_subject: BehaviorSubject<WeeklyTaskItem[]> =
     new BehaviorSubject<WeeklyTaskItem[]>([]);
   private _all_tasks_subscription: Subscription;
+  private _total_time_spent: number = 0;
 
   constructor(
     private _tasks_svc: TaskService
@@ -97,6 +98,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
     sunday.setDate(6);
 
     const tasks: WeeklyTaskItem[] = [];
+    let total_time_spent: number = 0;
 
     Object.values(taskmap).forEach( (taskitem: TaskItem) => {
 
@@ -120,10 +122,12 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
         workedon: (_spent > 0)
       };
       tasks.push(task);
+      total_time_spent += _spent;
     });
 
     this._weekly_tasks = [...tasks];
     this._weekly_tasks_subject.next(tasks);
+    this._total_time_spent = total_time_spent;
   }
 
   private _wasCreatedBetween(item: TaskItem, start: Date, end: Date): boolean {
@@ -165,6 +169,10 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
 
   public getSize(): number {
     return this._weekly_tasks.length;
+  }
+
+  public getTotalSpentTime(): number {
+    return this._total_time_spent;
   }
 }
 

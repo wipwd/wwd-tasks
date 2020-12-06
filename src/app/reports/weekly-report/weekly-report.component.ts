@@ -2,7 +2,7 @@ import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
-import { TaskService } from 'src/app/services/task-service.service';
+import { getTimeDiffStr, TaskService } from 'src/app/services/task-service.service';
 import { WeeklyReportDataSource, WeeklyTaskItem } from './weekly-report-datasource';
 
 @Component({
@@ -65,5 +65,9 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
 
   public getTimeSpent(item: WeeklyTaskItem): string {
     return getTimeDiffStr(item.spent_seconds);
+  }
+
+  public getTotalTimeSpent(): string {
+    return getTimeDiffStr(this.data_source.getTotalSpentTime());
   }
 }
