@@ -58,6 +58,7 @@ import { SettingsDeviceSyncValidatePullDialogComponent } from './settings/settin
 import { SettingsDeviceSyncValidatePushDialogComponent } from './settings/settings-device-sync/settings-device-sync-validate-push-dialog/settings-device-sync-validate-push-dialog.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WeeklyReportComponent } from './reports/weekly-report/weekly-report.component';
+import { TaskAddManuallyComponent } from './tasks/task-add/task-add-manually/task-add-manually.component';
 
 
 
@@ -86,6 +87,7 @@ import { WeeklyReportComponent } from './reports/weekly-report/weekly-report.com
     SettingsDeviceSyncValidatePullDialogComponent,
     SettingsDeviceSyncValidatePushDialogComponent,
     WeeklyReportComponent,
+    TaskAddManuallyComponent,
   ],
   imports: [
     BrowserModule,
