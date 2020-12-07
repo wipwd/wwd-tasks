@@ -1,8 +1,33 @@
 <div>
-  <ng-template *ngTemplateOutlet="addtask"></ng-template>
-</div>
+  <h3 class="mat-h3">Add Task to Backlog</h3>
+  <mat-divider></mat-divider>
 
+  <mat-tab-group mat-align-tabs="start">
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        Add Task
+      </ng-template>
+      <ng-template matTabContent *ngTemplateOutlet="addtask"></ng-template>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        From github
+      </ng-template>
+      <ng-template matTabContent *ngTemplateOutlet="addgithub"></ng-template>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>
 
 <ng-template #addtask>
   <app-task-add-manually (finished)="mayClose($event)"></app-task-add-manually>
+</ng-template>
+
+
+<ng-template #addgithub>
+  <app-task-add-from-github (finished)="mayClose($event)">
+  </app-task-add-from-github>
 </ng-template>

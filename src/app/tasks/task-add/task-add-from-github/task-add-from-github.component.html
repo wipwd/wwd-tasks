@@ -1,0 +1,24 @@
+<div fxLayout="row" fxLayoutAlign="start center">
+  <form [formGroup]="add_task_form_group">
+    <mat-form-field style="width: 64ch;" appearance="fill">
+      <mat-label>URL</mat-label>
+      <input matInput [formControl]="form_ctrl_url" required>
+      <mat-error *ngIf="form_ctrl_url.invalid">{{getURLErrorMessage()}}</mat-error>
+    </mat-form-field>
+
+    <span style="width: 12px;"></span>
+
+    <mat-form-field style="width: 15ch;" appearance="fill">
+      <mat-label>Priority</mat-label>
+      <mat-select [formControl]="form_ctrl_priority" value="medium" required>
+        <mat-option value="high">High</mat-option>
+        <mat-option value="medium">Medium</mat-option>
+        <mat-option value="low">Low</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-icon-button type="submit" (click)="addNewTask()">
+      <mat-icon>send</mat-icon>
+    </button>
+  </form>
+</div>
