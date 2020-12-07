@@ -64,6 +64,9 @@ export class ProjectsService {
     if (!name || name === "") {
       return;
     }
+    if (name in this._projects) {
+      return;
+    }
     this._projects[name] = name;
     this._stateSave();
     this._updateSubjects();
