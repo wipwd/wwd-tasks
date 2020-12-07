@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { GithubService } from '../../../services/github-service.service';
 
 @Component({
   selector: 'app-task-add-from-github',
@@ -19,7 +20,8 @@ export class TaskAddFromGithubComponent implements OnInit {
     new RegExp("https://github.com/([\\w-_]+)/([\\w-_]+)/pull/(\\d+)[/.]*");
 
   public constructor(
-    private _fb: FormBuilder
+    private _fb: FormBuilder,
+    private _github: GithubService
   ) {
     this.form_ctrl_url = new FormControl("", [
       Validators.required,
@@ -60,6 +62,9 @@ export class TaskAddFromGithubComponent implements OnInit {
 
     console.log(`pull request ${org}/${repo} #${pullnum}`);
     console.log(`add new task from github > url: ${url}, prio: ${prio}`);
+
+    this._github.addPullRequest(org, repo, +pullnum, prio);
+    this.finished.next(true);
   }
 
   public getURLErrorMessage(): string {
