@@ -9,9 +9,12 @@
     <div fxLayout="row" fxLayoutAlign="space-between center">
       <span style="min-width: 30em">Projects: {{item.project}}</span>
       <div fxLayout="column">
-        <span style="min-width: 40em">Created on: {{item.date}}</span>
-        <span style="min-width: 40em"
-            *ngIf="isMarkedDone()">Finished on: {{item.done}}</span>
+        <span style="min-width: 40em">
+          Created on: {{item.date.toUTCString()}}
+        </span>
+        <span style="min-width: 40em" *ngIf="isMarkedDone()">
+          Finished on: {{item.done.toUTCString()}}
+        </span>
       </div>
     </div>
 
@@ -30,12 +33,12 @@
                 <div fxLayout="row" fxLayoutAlign="start center">
                   <mat-icon>play_arrow</mat-icon>
                   <span style="width: 10px"></span>
-                  <span>{{interval.start}}</span>
+                  <span>{{interval.start.toUTCString()}}</span>
                 </div>
                 <div fxLayout="row" fxLayoutAlign="start center">
                   <mat-icon>stop</mat-icon>
                   <span style="width: 10px"></span>
-                  <span>{{interval.end}}</span>
+                  <span>{{interval.end.toUTCString()}}</span>
                 </div>
               </div>
             </td>
