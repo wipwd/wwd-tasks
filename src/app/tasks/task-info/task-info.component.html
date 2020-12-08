@@ -7,16 +7,19 @@
 
   <mat-dialog-content fxLayout="column">
     <div fxLayout="row" fxLayoutAlign="space-between center">
-      <span style="min-width: 30em">Projects: {{item.project}}</span>
+      <span style="min-width: 30em">
+        <strong>Projects:</strong> {{item.project}}
+      </span>
       <div fxLayout="column">
         <span style="min-width: 40em">
-          Created on: {{item.date.toUTCString()}}
+          <strong>Created on:</strong> {{item.date.toUTCString()}}
         </span>
         <span style="min-width: 40em" *ngIf="isMarkedDone()">
-          Finished on: {{item.done.toUTCString()}}
+          <strong>Finished on:</strong> {{item.done.toUTCString()}}
         </span>
       </div>
     </div>
+    <mat-divider></mat-divider>
 
     <span style="height: 2em"></span>
     <div fxLayout="column">
