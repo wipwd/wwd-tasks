@@ -92,10 +92,9 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
 
   private _processTasks(taskmap: TaskItemMap): void {
 
-    const monday: Date = new Date();
-    const sunday: Date = new Date();
-    monday.setDate(0);
-    sunday.setDate(6);
+    const week: {monday: Date, sunday: Date} = getCurrentWeek();
+    const monday: Date = week.monday;
+    const sunday: Date = week.sunday;
 
     const tasks: WeeklyTaskItem[] = [];
     let total_time_spent: number = 0;
@@ -257,4 +256,19 @@ function comparePrio(
   const a_prio: number = getRAG(a);
   const b_prio: number = getRAG(b);
   return compare(a_prio, b_prio, isAsc);
+}
+
+
+export function getWeek(date: Date): {monday: Date, sunday: Date} {
+  const _monday: Date = new Date(date);
+  const _sunday: Date = new Date(date);
+
+  _monday.setDate(date.getDate() - (date.getDay() - 1));
+  _sunday.setDate(_monday.getDate() + 6);
+
+  return {monday: _monday, sunday: _sunday};
+}
+
+export function getCurrentWeek(): {monday: Date, sunday: Date} {
+  return getWeek(new Date());
 }

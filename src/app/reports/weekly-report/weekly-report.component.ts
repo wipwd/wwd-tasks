@@ -3,7 +3,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { getTimeDiffStr, TaskService } from 'src/app/services/task-service.service';
-import { WeeklyReportDataSource, WeeklyTaskItem } from './weekly-report-datasource';
+import { getCurrentWeek, WeeklyReportDataSource, WeeklyTaskItem } from './weekly-report-datasource';
 
 @Component({
   selector: 'app-weekly-report',
@@ -69,5 +69,19 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
 
   public getTotalTimeSpent(): string {
     return getTimeDiffStr(this.data_source.getTotalSpentTime());
+  }
+
+  private _getYMDStr(date: Date): string {
+    const year: number = date.getUTCFullYear();
+    const month: number = date.getUTCMonth();
+    const day: number = date.getUTCDate();
+    return `${year}-${month}-${day}`;
+  }
+
+  public getWeekString(): string {
+    const week: {monday: Date, sunday: Date} = getCurrentWeek();
+    const monday: string = this._getYMDStr(week.monday);
+    const sunday: string = this._getYMDStr(week.sunday);
+    return `(${monday} to ${sunday})`;
   }
 }
