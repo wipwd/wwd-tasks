@@ -44,7 +44,8 @@
                   <span style="width: 10px"></span>
                   <span>{{interval.start.toUTCString()}}</span>
                 </div>
-                <div fxLayout="row" fxLayoutAlign="start center">
+                <div *ngIf="!!interval.end"
+                    fxLayout="row" fxLayoutAlign="start center">
                   <mat-icon>stop</mat-icon>
                   <span style="width: 10px"></span>
                   <span>{{interval.end.toUTCString()}}</span>
