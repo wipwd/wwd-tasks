@@ -113,7 +113,7 @@
       <button mat-icon-button type="button"
           (click)="toggleNewTask()"
           cdkOverlayOrigin #trigger="cdkOverlayOrigin">
-        <mat-icon *ngIf="!isNewTaskOpen()">add_circle_outline</mat-icon>
+        <mat-icon *ngIf="!isNewTaskOpen()">library_add</mat-icon>
         <mat-icon *ngIf="isNewTaskOpen()">highlight_off</mat-icon>
       </button>
       <div *ngIf="hasRunningTask()" fxLayout="row" fxLayoutAlign="start center">
