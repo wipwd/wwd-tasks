@@ -26,6 +26,12 @@
 
       <h3 class="mat-h3">Time Sheet</h3>
       <div fxLayout="row">
+
+      <div fxLayout="row" fxLayoutAlign="center center"
+          *ngIf="!item.timer || item.timer.intervals.length === 0">
+        <span><strong>No entries</strong></span>
+      </div>
+      <div fxLayout="row" *ngIf="item.timer?.intervals.length > 0">
         <table mat-table style="width: 100%"
             [dataSource]="item.timer?.intervals">
 
