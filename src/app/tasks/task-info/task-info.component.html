@@ -27,8 +27,16 @@
             <th mat-header-cell *matHeaderCellDef>When?</th>
             <td mat-cell *matCellDef="let interval">
               <div fxLayout="column">
-                <span>{{interval.start}}</span>
-                <span>{{interval.end}}</span>
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <mat-icon>play_arrow</mat-icon>
+                  <span style="width: 10px"></span>
+                  <span>{{interval.start}}</span>
+                </div>
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <mat-icon>stop</mat-icon>
+                  <span style="width: 10px"></span>
+                  <span>{{interval.end}}</span>
+                </div>
               </div>
             </td>
             <td mat-footer-cell *matFooterCellDef>Total</td>
