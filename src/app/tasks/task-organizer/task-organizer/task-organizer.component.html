@@ -4,7 +4,9 @@
     <ng-template mat-tab-label>
       {{ledger.label}} {{getLedgerSize(ledger.name)|async}}
     </ng-template>
-    <app-task-ledger [ledger]="ledger.name"></app-task-ledger>
+    <ng-template matTabContent>
+      <app-task-ledger [ledger]="ledger.name"></app-task-ledger>
+    </ng-template>
   </mat-tab>
 
 </mat-tab-group>
