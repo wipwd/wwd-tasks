@@ -142,8 +142,4 @@ export class TaskInfoComponent implements OnInit {
   public cancelNewEntry(): void {
     this.toggleAddNewEntry();
   }
-
-  private _addNewEntry(from: Date, until: Date): void {
-
-  }
 }
