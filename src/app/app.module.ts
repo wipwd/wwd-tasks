@@ -60,6 +60,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WeeklyReportComponent } from './reports/weekly-report/weekly-report.component';
 import { TaskAddManuallyComponent } from './tasks/task-add/task-add-manually/task-add-manually.component';
 import { TaskAddFromGithubComponent } from './tasks/task-add/task-add-from-github/task-add-from-github.component';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 
 
@@ -125,6 +127,8 @@ import { TaskAddFromGithubComponent } from './tasks/task-add/task-add-from-githu
     MatSlideToggleModule,
     MatProgressSpinnerModule,
     MatProgressBarModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

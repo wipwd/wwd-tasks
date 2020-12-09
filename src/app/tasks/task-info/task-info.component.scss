@@ -1,0 +1,29 @@
+#timesheet-add-button.mat-icon-button {
+  line-height: 28px;
+}
+
+.spacer {
+  width: 20px;
+}
+
+.time-label-divider {
+  padding-bottom: 5px;
+  border-color: black;
+}
+
+.time-label {
+  font-size: small;
+}
+
+.time-input-field {
+  width: 7ch;
+}
+
+.time-input-field-divider {
+  @extend .spacer;
+  text-align: center;
+}
+
+.add-entry-container {
+  padding-bottom: 1.5em;
+}

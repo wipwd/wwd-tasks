@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, timer } from 'rxjs';
 import {
   set as idbset,
   get as idbget
@@ -390,6 +390,20 @@ export class TaskService {
     actual_task.item = item;
     this._stateSave();
     this._updateLedgerSubjects(ledger);
+  }
+
+
+  public addTimerEntry(task: TaskLedgerEntry, from: Date, until: Date): void {
+    console.log("task-svc > add timer entry on ", task);
+    console.log("task-svc > from: ", from, " until: ", until);
+
+    if (!task.item.timer) {
+      task.item.timer = { state: "stopped", intervals: [] };
+    }
+    task.item.timer.intervals.push({
+      start: from, end: until
+    });
+    this._stateSave();
   }
 
   public timerStart(task: TaskLedgerEntry): void {

@@ -24,8 +24,91 @@
     <span style="height: 2em"></span>
     <div fxLayout="column">
 
-      <h3 class="mat-h3">Time Sheet</h3>
-      <div fxLayout="row">
+      <div fxLayout="row" fxLayoutAlign="start">
+        <h3 class="mat-h3">Time Sheet</h3>
+        <span style="width: 50px"></span>
+        <button mat-icon-button id="timesheet-add-button"
+            fxLayout="row" fxLayoutAlign="start top"
+            (click)="toggleAddNewEntry()">
+          <mat-icon *ngIf="!isAddNewEntry()">add_circle_outline</mat-icon>
+          <mat-icon *ngIf="isAddNewEntry()">highlight_off</mat-icon>
+          <span>add entry</span>
+        </button>
+      </div>
+
+      <div *ngIf="isAddNewEntry()" class="add-entry-container">
+
+        <form [formGroup]="add_entry_form_group"
+            fxLayout="row" fxLayoutAlign="start center">
+
+          <mat-icon>pending_actions</mat-icon>
+
+          <span class="spacer"></span>
+          <div fxLayout="row" fxLayoutAlign="start end" class="foobar">
+            <mat-form-field appearance="fill">
+              <mat-label>When</mat-label>
+              <mat-date-range-input
+                  [rangePicker]="whenPicker"
+                  [formGroup]="date_picker_form_group"
+                  [dateFilter]="datePickerFilter">
+                <input matStartDate placeholder="from" formControlName="from">
+                <input matEndDate placeholder="to" formControlName="to">
+              </mat-date-range-input>
+              <mat-datepicker-toggle matSuffix [for]="whenPicker">
+              </mat-datepicker-toggle>
+              <mat-date-range-picker #whenPicker></mat-date-range-picker>
+            </mat-form-field>
+
+            <span class="spacer"></span>
+            <div fxLayout="column" [formGroup]="time_from_form_group">
+              <span class="time-label">from</span>
+              <mat-divider class="time-label-divider"></mat-divider>
+              <div fxLayout="row" fxLayoutAlign="start center">
+                <mat-form-field appearance="fill" class="time-input-field">
+                  <input matInput type="number" min="0" max="24" placeholder="h"
+                      formControlName="hour">
+                </mat-form-field>
+                <h3 class="time-input-field-divider">:</h3>
+                <mat-form-field appearance="fill" class="time-input-field">
+                  <input matInput type="number" min="0" max="59" placeholder="m"
+                      formControlName="minutes">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <span class="spacer"></span>
+            <div fxLayout="column" [formGroup]="time_until_form_group">
+              <span class="time-label">until</span>
+              <mat-divider class="time-label-divider"></mat-divider>
+              <div fxLayout="row" fxLayoutAlign="start center">
+                <mat-form-field appearance="fill" class="time-input-field">
+                  <input matInput type="number" min="0" max="24" placeholder="h"
+                      formControlName="hour">
+                </mat-form-field>
+                <h3 class="time-input-field-divider">:</h3>
+                <mat-form-field appearance="fill" class="time-input-field">
+                  <input matInput type="number" min="0" max="59" placeholder="m"
+                      formControlName="minutes">
+                </mat-form-field>
+              </div>
+            </div>
+
+          </div>
+
+          <span class="spacer"></span>
+          <div>
+            <button mat-icon-button type="submit" (click)="addNewEntry()">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button type="button"
+                (click)="cancelNewEntry()" cdkFocusInitial>
+              <mat-icon>clear</mat-icon>
+            </button>
+          </div>
+
+        </form>
+
+      </div>
 
       <div fxLayout="row" fxLayoutAlign="center center"
           *ngIf="!item.timer || item.timer.intervals.length === 0">
