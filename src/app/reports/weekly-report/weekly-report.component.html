@@ -1,5 +1,11 @@
 <mat-card class="mat-elevation-z8">
-  <mat-card-title>Weekly Report {{getWeekString()}}</mat-card-title>
+  <mat-card-title fxLayout="row" fxLayoutAlign="start center">
+    <span>Weekly Report {{getWeekString()}}</span>
+    <span style="width: 20px"></span>
+    <button mat-icon-button type="button" (click)="downloadAsRAG()">
+      <mat-icon>save_alt</mat-icon>
+    </button>
+  </mat-card-title>
   <div mat-card-content>
     <table mat-table class="full-width-table" matSort aria-label="Tasks">
 

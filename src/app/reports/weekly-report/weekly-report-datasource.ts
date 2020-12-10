@@ -173,6 +173,10 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   public getTotalSpentTime(): number {
     return this._total_time_spent;
   }
+
+  public getTasks(): WeeklyTaskItem[] {
+    return this._weekly_tasks;
+  }
 }
 
 function compare(
