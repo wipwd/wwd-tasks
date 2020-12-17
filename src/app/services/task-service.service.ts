@@ -444,8 +444,10 @@ export class TaskService {
     }
     const timer_state: TaskTimerState = task.item.timer;
     timer_state.state = "paused";
-    const cur_interval: TaskTimerItem = this.getCurrentTimerInterval(task);
-    cur_interval.end = new Date();
+    const cur_interval: TaskTimerItem[] = this.getCurrentTimerIntervals(task);
+    cur_interval.forEach( (entry: TaskTimerItem) => {
+      entry.end = new Date();
+    })
   }
 
   public timerPause(task: TaskLedgerEntry): void {
@@ -460,9 +462,11 @@ export class TaskService {
       return;
     }
     const timer_state: TaskTimerState = task.item.timer;
-    const cur_interval: TaskTimerItem = this.getCurrentTimerInterval(task);
+    const cur_interval: TaskTimerItem[] = this.getCurrentTimerIntervals(task);
     timer_state.state = "stopped";
-    cur_interval.end = new Date();
+    cur_interval.forEach( (entry: TaskTimerItem) => {
+      entry.end = new Date();
+    })
     if (task.ledger.name !== "backlog") {
       this._moveTo(task, this._ledger_by_name.backlog);
     } else {
@@ -483,13 +487,21 @@ export class TaskService {
     return !!task.item.timer && task.item.timer.state === "stopped";
   }
 
-  public getCurrentTimerInterval(
+  public getCurrentTimerIntervals(
     task: TaskLedgerEntry
-  ): TaskTimerItem|undefined {
+  ): TaskTimerItem[]|undefined {
     if (!task.item.timer || task.item.timer.intervals.length === 0) {
       return undefined;
     }
-    return task.item.timer.intervals[task.item.timer.intervals.length - 1];
+
+    const current: TaskTimerItem[] = [];
+    task.item.timer.intervals.forEach( (entry: TaskTimerItem) => {
+      if (!!entry.start && !entry.end) {
+        current.push(entry);
+      }
+    });
+
+    return current;
   }
 
   public getTimerTotal(task: TaskLedgerEntry): number {
