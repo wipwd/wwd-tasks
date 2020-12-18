@@ -10,21 +10,7 @@ class ReportEntry {
 
   private _children: ReportEntry[] = [];
 
-  public constructor(private _value: string) {
-
-  }
-
-  public length(): number {
-    return this._value.length;
-  }
-
-  public getChildrenLength(): number {
-    let max_len: number = 0;
-    this._children.forEach( (entry: ReportEntry) => {
-      max_len = Math.max(max_len, entry.length());
-    });
-    return max_len;
-  }
+  public constructor(private _value: string) { }
 
   public add(value: string): ReportEntry {
     const entry: ReportEntry = new ReportEntry(value);
@@ -206,19 +192,6 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
     return `(${monday} to ${sunday})`;
   }
 
-  private _getTaskRAGInfo(item: WeeklyTaskItem): string {
-    let str: string = `  * ${item.task.title} [${item.task.priority}]\n`;
-    if (!!item.task.url && item.task.url !== "") {
-      str += `      - ${item.task.url}\n`;
-    }
-    if (!!item.task.notes && item.task.notes.length > 0) {
-      item.task.notes.forEach( (note: TaskNoteItem) => {
-        str += `      - ${note.text}\n`;
-      });
-    }
-    return str;
-  }
-
   public downloadAsRAG(): void {
     const rag = { red: [], amber: [], green: [] };
 
@@ -231,21 +204,6 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
       } else {
         rag.green.push(task);
       }
-    });
-
-    let red_str: string = "";
-    rag.red.forEach( (e: WeeklyTaskItem) => {
-      red_str += this._getTaskRAGInfo(e);
-    });
-
-    let amber_str: string = "";
-    rag.amber.forEach( (e: WeeklyTaskItem) => {
-      amber_str += this._getTaskRAGInfo(e);
-    });
-
-    let green_str: string = "";
-    rag.green.forEach( (e: WeeklyTaskItem) => {
-      green_str += this._getTaskRAGInfo(e);
     });
 
     const now: moment.Moment = moment();
