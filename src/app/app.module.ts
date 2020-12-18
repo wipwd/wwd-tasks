@@ -61,7 +61,9 @@ import { WeeklyReportComponent } from './reports/weekly-report/weekly-report.com
 import { TaskAddManuallyComponent } from './tasks/task-add/task-add-manually/task-add-manually.component';
 import { TaskAddFromGithubComponent } from './tasks/task-add/task-add-from-github/task-add-from-github.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+// import { MatNativeDateModule } from '@angular/material/core';
+import { MatMomentDateModule, MAT_MOMENT_DATE_ADAPTER_OPTIONS, MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 
 
 
@@ -128,9 +130,17 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatProgressSpinnerModule,
     MatProgressBarModule,
     MatDatepickerModule,
-    MatNativeDateModule,
+    MatMomentDateModule,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: DateAdapter, useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE]
+    },
+    { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    { provide: MAT_DATE_LOCALE, useValue: 'pt' },
+    { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUTC: true } }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {
