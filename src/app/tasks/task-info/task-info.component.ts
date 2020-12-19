@@ -1,6 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BehaviorSubject } from 'rxjs';
+import { ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskItem, TaskLedgerEntry, TaskTimerItem, getTimeDiffStr, TaskService
 } from '../../services/task-service.service';
@@ -20,6 +22,10 @@ export class TaskInfoComponent implements OnInit {
   public task: TaskLedgerEntry;
   public item: TaskItem;
 
+  // edit mode
+  public edit_form_group: FormGroup;
+
+  // timesheet add entry
   public add_entry_form_group: FormGroup;
   // date picker form group
   public date_picker_form_group: FormGroup;
@@ -28,12 +34,16 @@ export class TaskInfoComponent implements OnInit {
 
   private _is_add_new_entry: boolean = false;
 
+  // edit mode
+  private _is_edit_mode: boolean = false;
+
 
   public constructor(
     @Inject(MAT_DIALOG_DATA) private _data: TaskInfoDialogData,
     private _dialog_ref: MatDialogRef<TaskInfoComponent>,
     private _fb: FormBuilder,
-    private _tasks_svc: TaskService
+    private _tasks_svc: TaskService,
+    private _projects_svc: ProjectsService
   ) {
     this.task = this._data.task;
     this.item = this.task.item;
@@ -63,6 +73,12 @@ export class TaskInfoComponent implements OnInit {
       daterange: this.date_picker_form_group,
       from: this.time_from_form_group,
       until: this.time_until_form_group
+    });
+
+    this.edit_form_group = this._fb.group({
+      title: new FormControl(this.task.item.title, Validators.required),
+      priority: new FormControl(this.task.item.priority, Validators.required),
+      projects: new FormControl(this.task.item.project)
     });
   }
 
@@ -140,5 +156,38 @@ export class TaskInfoComponent implements OnInit {
 
   public cancelNewEntry(): void {
     this.toggleAddNewEntry();
+  }
+
+  public editMode(): void {
+    this._is_edit_mode = true;
+  }
+
+  public saveEditValues(): void {
+    this._is_edit_mode = false;
+
+    const title: string = this.edit_form_group.get("title").value;
+    const priority: string = this.edit_form_group.get("priority").value;
+    const projects: string[] = this.edit_form_group.get("projects").value;
+
+    if (!title || title === "" || !priority || priority === "" || !projects) {
+      return;
+    }
+
+    if (!Array.isArray(projects)) {
+      throw new Error("projects field expected to be an array");
+    }
+
+    this.task.item.title = title;
+    this.task.item.priority = priority;
+    this.task.item.project = projects;
+    this._tasks_svc.updateTask(this.task, this.task.item);
+  }
+
+  public isEditMode(): boolean {
+    return this._is_edit_mode;
+  }
+
+  public getProjects(): BehaviorSubject<string[]> {
+    return this._projects_svc.getProjects();
   }
 }

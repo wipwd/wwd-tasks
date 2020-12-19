@@ -1,27 +1,84 @@
-<div>
-  <h2 mat-dialog-title fxLayout="row" fxLayout="start center">
-    <mat-icon style="font-size: 32px">info</mat-icon>
-    <span style="width: 0.5em"></span>
-    <span>{{item.title}} ({{item.priority}})</span>
-  </h2>
+<div style="width: 1000px">
 
+  <!-- title -->
+  <div mat-dialog-title>
+    <div fxLayout="row" fxLayoutAlign="space-between center"
+        *ngIf="isEditMode()"
+        [formGroup]="edit_form_group">
+      <mat-form-field style="min-width: 64ch;">
+        <input matInput formControlName="title"/>
+      </mat-form-field>
+      <span></span>
+      <mat-form-field style="width: 9ch;">
+        <mat-select formControlName="priority">
+          <mat-option value="high">high</mat-option>
+          <mat-option value="medium">medium</mat-option>
+          <mat-option value="low">low</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span></span>
+      <button mat-mini-fab (click)="saveEditValues()">
+        <mat-icon>save</mat-icon>
+      </button>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="space-between center"
+        *ngIf="!isEditMode()">
+      <span>{{item.title}} ({{item.priority}})</span>
+      <span style="width: 0.5em"></span>
+      <button mat-mini-fab (click)="editMode()">
+        <mat-icon>create</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- dialog content -->
   <mat-dialog-content fxLayout="column">
+
+    <!-- first row (project / created / finished) -->
     <div fxLayout="row" fxLayoutAlign="space-between center">
-      <span style="min-width: 30em">
-        <strong>Projects:</strong> {{item.project}}
-      </span>
+
+      <!-- projects -->
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <!-- view / read-only -->
+        <div *ngIf="!isEditMode()">
+          <span style="min-width: 30em">
+            <strong>Projects:</strong> {{item.project}}
+          </span>
+        </div>
+        <!-- edit -->
+        <div *ngIf="isEditMode()" [formGroup]="edit_form_group">
+          <mat-form-field>
+            <mat-select multiple formControlName="projects">
+              <mat-option
+                  *ngFor="let project of getProjects()|async"
+                  [value]="project">
+                {{project}}
+              </mat-option>            
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- created / finished -->
       <div fxLayout="column">
-        <span style="min-width: 40em">
+        <span>
           <strong>Created on:</strong> {{item.date.toUTCString()}}
         </span>
-        <span style="min-width: 40em" *ngIf="isMarkedDone()">
+        <span *ngIf="isMarkedDone()">
           <strong>Finished on:</strong> {{item.done.toUTCString()}}
         </span>
       </div>
     </div>
-    <mat-divider></mat-divider>
 
+    <!-- divider -->
+    <div style="padding-top: 10px">
+      <mat-divider></mat-divider>
+    </div>
+
+    <!-- spacer -->
     <span style="height: 2em"></span>
+
+    <!-- timesheet -->
     <div fxLayout="column">
 
       <div fxLayout="row" fxLayoutAlign="start">
