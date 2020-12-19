@@ -9,9 +9,8 @@
   </mat-card-title>
   <div mat-card-content>
     <mat-form-field appearance="fill">
-      <mat-label>Project</mat-label>
-      <mat-select (selectionChange)="selectProject($event)" [value]="'all'">
-        <mat-option value="all">all</mat-option>
+      <mat-label>Filter by Project</mat-label>
+      <mat-select (selectionChange)="selectProject($event)" multiple>
         <mat-option *ngFor="let p of getProjects()|async" [value]="p">
           {{p}}
         </mat-option>

@@ -18,7 +18,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   public paginator: MatPaginator;
   public sort: MatSort;
 
-  private _filter_project: string = "";
+  private _filter_project: string[] = [];
   private _all_weekly_tasks: WeeklyTaskItem[] = [];
   private _filtered_weekly_tasks: WeeklyTaskItem[] = [];
   private _filtered_weekly_tasks_subject: BehaviorSubject<WeeklyTaskItem[]> =
@@ -76,7 +76,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
     this._all_tasks_subscription?.unsubscribe();
   }
 
-  public filterData(project: string): void {
+  public filterData(project: string[]): void {
     this._filter_project = project;
     this._updateFilterItems();
   }
@@ -84,10 +84,18 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   private _updateFilterItems(): void {
     const tasks: WeeklyTaskItem[] = [];
     this._all_weekly_tasks.forEach( (entry: WeeklyTaskItem) => {
-      if (this._filter_project === "" || this._filter_project === "all") {
+      if (this._filter_project.length === 0) {
         tasks.push(entry);
-      } else if (entry.task.project.includes(this._filter_project)) {
-        tasks.push(entry);
+      } else {
+        let included: boolean = false;
+        this._filter_project.forEach( (project: string) => {
+          if (included) {
+            return;
+          } else if (entry.task.project.includes(project)) {
+            included = true;
+            tasks.push(entry);
+          }
+        });
       }
     });
     console.log("filtered: ", tasks);
