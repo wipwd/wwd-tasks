@@ -5,6 +5,9 @@ import { MatTable } from '@angular/material/table';
 import { getTimeDiffStr, TaskNoteItem, TaskService } from 'src/app/services/task-service.service';
 import { getCurrentWeek, WeeklyReportDataSource, WeeklyTaskItem } from './weekly-report-datasource';
 import * as moment from 'moment';
+import { ProjectsService } from 'src/app/services/projects-service.service';
+import { BehaviorSubject } from 'rxjs';
+import { MatSelectChange } from '@angular/material/select';
 
 class ReportEntry {
 
@@ -126,7 +129,8 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
   public displayedColumns = ["status", "prio", "title", "spent"];
 
   public constructor(
-    private _tasks_svc: TaskService
+    private _tasks_svc: TaskService,
+    private _projects_svc: ProjectsService,
   ) {
 
   }
@@ -190,6 +194,15 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
     const monday: string = this._getYMDStr(week.monday);
     const sunday: string = this._getYMDStr(week.sunday);
     return `(${monday} to ${sunday})`;
+  }
+
+  public getProjects(): BehaviorSubject<string[]> {
+    return this._projects_svc.getProjects();
+  }
+
+  public selectProject(selection: MatSelectChange): void {
+    console.log("selected project: ", selection.value);
+    this.data_source.filterData(selection.value);
   }
 
   public downloadAsRAG(): void {

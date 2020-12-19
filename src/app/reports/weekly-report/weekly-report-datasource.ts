@@ -18,11 +18,14 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   public paginator: MatPaginator;
   public sort: MatSort;
 
-  private _weekly_tasks: WeeklyTaskItem[] = [];
-  private _weekly_tasks_subject: BehaviorSubject<WeeklyTaskItem[]> =
+  private _filter_project: string = "";
+  private _all_weekly_tasks: WeeklyTaskItem[] = [];
+  private _filtered_weekly_tasks: WeeklyTaskItem[] = [];
+  private _filtered_weekly_tasks_subject: BehaviorSubject<WeeklyTaskItem[]> =
     new BehaviorSubject<WeeklyTaskItem[]>([]);
   private _all_tasks_subscription: Subscription;
   private _total_time_spent: number = 0;
+  private _table_observable: Observable<WeeklyTaskItem[]>;
 
   constructor(
     private _tasks_svc: TaskService
@@ -37,27 +40,58 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
    */
   public connect(): Observable<WeeklyTaskItem[]> {
 
+    console.log("datasource > connect");
     this._all_tasks_subscription = this._tasks_svc.getAllTasks().subscribe({
       next: (all_tasks: TaskItemMap) => {
         this._processTasks(all_tasks);
       }
     });
 
+    this._filtered_weekly_tasks_subject.subscribe({
+      next: (tasks: WeeklyTaskItem[]) => {
+        this._filtered_weekly_tasks = [...tasks];
+      }
+    });
+
     // Combine everything that affects the rendered data into one update
     // stream for the data-table to consume.
     const dataMutations = [
-      this._weekly_tasks_subject,
+      this._filtered_weekly_tasks_subject,
       this.paginator.page,
       this.sort.sortChange
     ];
 
-    return merge(...dataMutations).pipe(map(() => {
-      return this.getPagedData(this.getSortedData([...this._weekly_tasks]));
+    this._table_observable = merge(...dataMutations).pipe(map(() => {
+      return this.getPagedData(this.getSortedData(
+        [...this._filtered_weekly_tasks]
+      ));
     }));
+    this._table_observable.subscribe({
+      next: (items: WeeklyTaskItem[]) => { console.log("items: ", items); }
+    });
+    return this._table_observable;
   }
 
   public disconnect(): void {
     this._all_tasks_subscription?.unsubscribe();
+  }
+
+  public filterData(project: string): void {
+    this._filter_project = project;
+    this._updateFilterItems();
+  }
+
+  private _updateFilterItems(): void {
+    const tasks: WeeklyTaskItem[] = [];
+    this._all_weekly_tasks.forEach( (entry: WeeklyTaskItem) => {
+      if (this._filter_project === "" || this._filter_project === "all") {
+        tasks.push(entry);
+      } else if (entry.task.project.includes(this._filter_project)) {
+        tasks.push(entry);
+      }
+    });
+    console.log("filtered: ", tasks);
+    this._filtered_weekly_tasks_subject.next(tasks);
   }
 
   /**
@@ -124,8 +158,8 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
       total_time_spent += _spent;
     });
 
-    this._weekly_tasks = [...tasks];
-    this._weekly_tasks_subject.next(tasks);
+    this._all_weekly_tasks = [...tasks];
+    this._updateFilterItems();
     this._total_time_spent = total_time_spent;
   }
 
@@ -167,7 +201,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   }
 
   public getSize(): number {
-    return this._weekly_tasks.length;
+    return this._filtered_weekly_tasks.length;
   }
 
   public getTotalSpentTime(): number {
@@ -175,7 +209,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   }
 
   public getTasks(): WeeklyTaskItem[] {
-    return this._weekly_tasks;
+    return this._filtered_weekly_tasks;
   }
 }
 

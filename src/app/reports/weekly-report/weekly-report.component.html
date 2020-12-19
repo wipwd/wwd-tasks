@@ -5,8 +5,18 @@
     <button mat-icon-button type="button" (click)="downloadAsRAG()">
       <mat-icon>save_alt</mat-icon>
     </button>
+    <span style="width: 20px"></span>
   </mat-card-title>
   <div mat-card-content>
+    <mat-form-field appearance="fill">
+      <mat-label>Project</mat-label>
+      <mat-select (selectionChange)="selectProject($event)" [value]="'all'">
+        <mat-option value="all">all</mat-option>
+        <mat-option *ngFor="let p of getProjects()|async" [value]="p">
+          {{p}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
     <table mat-table class="full-width-table" matSort aria-label="Tasks">
 
       <!-- Status Column -->
