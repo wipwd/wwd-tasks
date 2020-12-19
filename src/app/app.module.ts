@@ -35,7 +35,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { SettingsDashboardComponent } from './settings/settings-dashboard/settings-dashboard.component';
 import { MatChipsModule } from '@angular/material/chips';
 import { HelpDialogComponent } from './help-dialog/help-dialog.component';
-import { TaskEditComponent } from './tasks/task-edit/task-edit.component';
 import { ReportsComponent } from './reports/reports.component';
 import { ArchivesListComponent } from './archives/archives-list/archives-list.component';
 import { TaskInfoComponent } from './tasks/task-info/task-info.component';
@@ -79,7 +78,6 @@ import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/materia
     FirstTimeDialogComponent,
     SettingsDashboardComponent,
     HelpDialogComponent,
-    TaskEditComponent,
     ReportsComponent,
     ArchivesListComponent,
     TaskInfoComponent,

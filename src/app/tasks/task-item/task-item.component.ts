@@ -5,7 +5,6 @@ import {
   TaskLedgerEntry, TaskService, getTimeDiffStr
 } from '../../services/task-service.service';
 import { TaskDeleteComponent } from '../task-delete/task-delete.component';
-import { TaskEditComponent } from '../task-edit/task-edit.component';
 import { TaskInfoComponent } from '../task-info/task-info.component';
 import { TaskNotesComponent } from '../task-notes/task-notes.component';
 
@@ -96,14 +95,6 @@ export class TaskItemComponent implements OnInit {
 
   public isMarkedDone(): boolean {
     return this._tasks_svc.isDone(this.task);
-  }
-
-  public editTask(): void {
-    this._edit_task_dialog.open(TaskEditComponent, {
-      data: {
-        task: this.task
-      }
-    });
   }
 
   public openTaskInfo(): void {
