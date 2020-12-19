@@ -171,6 +171,8 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
     ) || (
       item.task.priority === "medium" &&
       !this.isInProgress(item) && !this.isDone(item)
+    ) || (
+      item.task.priority === "low" && !this.isDone(item)
     );
   }
 
