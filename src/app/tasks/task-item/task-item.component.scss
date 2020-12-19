@@ -4,9 +4,22 @@
 }
 
 .item-title {
-  min-width: 30em;
+  width: 50em;
+  word-wrap: break-word;
 }
 
 .item-date {
   min-width: 20em;
+}
+
+.item-spacer {
+  width: 40px;
+}
+
+.item-progress {
+  min-width: 15em;
+}
+
+.item-progress-time {
+  width: 7em;
 }
