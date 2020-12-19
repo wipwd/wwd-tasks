@@ -83,9 +83,11 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
 
   private _updateFilterItems(): void {
     const tasks: WeeklyTaskItem[] = [];
+    let time_spent: number = 0;
     this._all_weekly_tasks.forEach( (entry: WeeklyTaskItem) => {
       if (this._filter_project.length === 0) {
         tasks.push(entry);
+        time_spent += entry.spent_seconds;
       } else {
         let included: boolean = false;
         this._filter_project.forEach( (project: string) => {
@@ -94,12 +96,14 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
           } else if (entry.task.project.includes(project)) {
             included = true;
             tasks.push(entry);
+            time_spent += entry.spent_seconds;
           }
         });
       }
     });
     console.log("filtered: ", tasks);
     this._filtered_weekly_tasks_subject.next(tasks);
+    this._total_time_spent = time_spent;
   }
 
   /**
@@ -139,7 +143,6 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
     const sunday: Date = week.sunday;
 
     const tasks: WeeklyTaskItem[] = [];
-    let total_time_spent: number = 0;
 
     Object.values(taskmap).forEach( (taskitem: TaskItem) => {
 
@@ -163,12 +166,10 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
         workedon: (_spent > 0)
       };
       tasks.push(task);
-      total_time_spent += _spent;
     });
 
     this._all_weekly_tasks = [...tasks];
     this._updateFilterItems();
-    this._total_time_spent = total_time_spent;
   }
 
   private _wasCreatedBetween(item: TaskItem, start: Date, end: Date): boolean {
