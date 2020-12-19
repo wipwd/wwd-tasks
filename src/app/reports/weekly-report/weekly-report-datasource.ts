@@ -4,6 +4,7 @@ import { MatSort } from '@angular/material/sort';
 import { map } from 'rxjs/operators';
 import { Observable, merge, BehaviorSubject, Subscription } from 'rxjs';
 import { TaskItem, TaskItemMap, TaskService, TaskTimerItem } from '../../services/task-service.service';
+import * as moment from 'moment';
 
 export interface WeeklyTaskItem {
   task: TaskItem;
@@ -13,10 +14,17 @@ export interface WeeklyTaskItem {
   workedon: boolean;
 }
 
+export interface DateRange {
+  start?: moment.Moment;
+  end?: moment.Moment;
+}
+
 
 export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   public paginator: MatPaginator;
   public sort: MatSort;
+
+  private _all_tasks: TaskItemMap;
 
   private _filter_project: string[] = [];
   private _all_weekly_tasks: WeeklyTaskItem[] = [];
@@ -26,6 +34,8 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
   private _all_tasks_subscription: Subscription;
   private _total_time_spent: number = 0;
   private _table_observable: Observable<WeeklyTaskItem[]>;
+
+  private _date_range: DateRange = {};
 
   constructor(
     private _tasks_svc: TaskService
@@ -43,7 +53,8 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
     console.log("datasource > connect");
     this._all_tasks_subscription = this._tasks_svc.getAllTasks().subscribe({
       next: (all_tasks: TaskItemMap) => {
-        this._processTasks(all_tasks);
+        this._all_tasks = all_tasks;
+        this._processTasks();
       }
     });
 
@@ -136,22 +147,35 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
     });
   }
 
-  private _processTasks(taskmap: TaskItemMap): void {
+  public setDateRange(dr: DateRange): void {
+    this._date_range = dr;
+    this._processTasks();
+  }
 
-    const week: {monday: Date, sunday: Date} = getCurrentWeek();
-    const monday: Date = week.monday;
-    const sunday: Date = week.sunday;
+  private _processTasks(): void {
+
+    if (!this._all_tasks) {
+      return;
+    }
+
+    const start: moment.Moment = this._date_range.start;
+    const end: moment.Moment = this._date_range.end;
+
+    if (!start || !end) {
+      console.warn("reports/weekly: no date range supplied to data source");
+      return;
+    }
 
     const tasks: WeeklyTaskItem[] = [];
 
-    Object.values(taskmap).forEach( (taskitem: TaskItem) => {
+    Object.values(this._all_tasks).forEach( (taskitem: TaskItem) => {
 
       const _spent: number =
-        this._calcTimeSpent(taskitem, monday, sunday);
+        this._calcTimeSpent(taskitem, start, end);
       const _created: boolean =
-        this._wasCreatedBetween(taskitem, monday, sunday);
+        this._wasCreatedBetween(taskitem, start, end);
       const _finished: boolean =
-        this._wasFinishedBetween(taskitem, monday, sunday);
+        this._wasFinishedBetween(taskitem, start, end);
 
       if (!_created && !_finished && _spent <= 0) {
         // we don't want this task.
@@ -172,27 +196,43 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
     this._updateFilterItems();
   }
 
-  private _wasCreatedBetween(item: TaskItem, start: Date, end: Date): boolean {
-    return (!!item.date && item.date >= start && item.date <= end);
+  private _wasCreatedBetween(
+    item: TaskItem,
+    start: moment.Moment,
+    end: moment.Moment
+  ): boolean {
+    const d: moment.Moment = moment(item.date);
+    return (!!item.date && d >= start && d <= end);
   }
 
-  private _wasFinishedBetween(item: TaskItem, start: Date, end: Date): boolean {
-    return (!!item.done && item.done >= start && item.done <= end);
+  private _wasFinishedBetween(
+    item: TaskItem,
+    start: moment.Moment,
+    end: moment.Moment
+  ): boolean {
+    const d: moment.Moment = moment(item.date);
+    return (!!item.done && d >= start && d <= end);
   }
 
-  private _calcTimeSpent(item: TaskItem, start: Date, end: Date): number {
+  private _calcTimeSpent(
+    item: TaskItem,
+    start: moment.Moment,
+    end: moment.Moment
+  ): number {
     if (!item.timer) {
       return 0;
     }
-    const now: Date = new Date();
-    const nowish: Date = (end > now ? now : end);
+    const now: moment.Moment = moment();
+    const nowish: moment.Moment = (end > now ? now : end);
     let spent: number = 0;
     item.timer.intervals.forEach( (interval: TaskTimerItem) => {
       if (!interval.start) {
         return;
       }
 
-      if (!!interval.end && (interval.end < start || interval.end > end)) {
+      if (!!interval.end &&
+          (moment(interval.end) < start || moment(interval.end) > end)
+      ) {
         return;
       }
 
@@ -201,9 +241,11 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
         console.error("task: ", item);
       }
 
-      const interval_end: Date = (!!interval.end ? interval.end : nowish);
+      const interval_end: moment.Moment =
+        (!!interval.end ? moment(interval.end) : nowish);
+
       if (!!interval.start) {
-        spent += interval_end.getTime() - interval.start.getTime();
+        spent += (interval_end.diff(interval.start));
       }
     });
     return Math.floor(spent / 1000);

@@ -3,11 +3,12 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { getTimeDiffStr, TaskNoteItem, TaskService } from 'src/app/services/task-service.service';
-import { getCurrentWeek, WeeklyReportDataSource, WeeklyTaskItem } from './weekly-report-datasource';
+import { DateRange, getCurrentWeek, WeeklyReportDataSource, WeeklyTaskItem } from './weekly-report-datasource';
 import * as moment from 'moment';
 import { ProjectsService } from 'src/app/services/projects-service.service';
 import { BehaviorSubject } from 'rxjs';
 import { MatSelectChange } from '@angular/material/select';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
 class ReportEntry {
 
@@ -128,6 +129,8 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
   public data_source: WeeklyReportDataSource;
   public displayedColumns = ["status", "prio", "title", "spent"];
 
+  private _date_range: DateRange = { };
+
   public constructor(
     private _tasks_svc: TaskService,
     private _projects_svc: ProjectsService,
@@ -137,6 +140,8 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
 
   public ngOnInit(): void {
     this.data_source = new WeeklyReportDataSource(this._tasks_svc);
+    this._date_range = this._getCurrentWeek();
+    this.data_source.setDateRange(this._date_range);
   }
 
   public ngAfterViewInit(): void {
@@ -184,18 +189,45 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
     return getTimeDiffStr(this.data_source.getTotalSpentTime());
   }
 
-  private _getYMDStr(date: Date): string {
-    const year: number = date.getUTCFullYear();
-    const month: number = date.getUTCMonth();
-    const day: number = date.getUTCDate();
-    return `${year}-${month}-${day}`;
+  private _getCurrentWeek(): DateRange {
+    const now: moment.Moment = moment.utc();
+    let monday: moment.Moment = undefined;
+    if (now.day() === 0) {
+      monday = moment.utc().day(-6); // previous monday
+    } else {
+      monday = moment.utc().day(1);
+      console.log("last monday: ", monday);
+    }
+    const sunday: moment.Moment = moment.utc().day(7); // next sunday
+
+    const dr: DateRange = {
+      start: moment.utc([monday.year(), monday.month(), monday.date()]),
+      end: moment.utc([sunday.year(), sunday.month(), sunday.date()])
+    };
+
+    console.log("current week: ", dr);
+    return dr;
   }
 
-  public getWeekString(): string {
-    const week: {monday: Date, sunday: Date} = getCurrentWeek();
-    const monday: string = this._getYMDStr(week.monday);
-    const sunday: string = this._getYMDStr(week.sunday);
-    return `(${monday} to ${sunday})`;
+  private _getDateString(date: moment.Moment): string {
+    if (!date) {
+      return "";
+    }
+    return `${date.year()}-${date.month()}-${date.date()}`;
+  }
+
+  public getDateRangeString(): string {
+    const start: string = this._getDateString(this._date_range.start);
+    const end: string = this._getDateString(this._date_range.end);
+    return `(${start} to ${end})`;
+  }
+
+  public getDateRangeStart(): moment.Moment {
+    return this._date_range.start;
+  }
+
+  public getDateRangeEnd(): moment.Moment {
+    return this._date_range.end;
   }
 
   public getProjects(): BehaviorSubject<string[]> {
@@ -205,6 +237,40 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
   public selectProject(selection: MatSelectChange): void {
     console.log("selected project: ", selection.value);
     this.data_source.filterData(selection.value);
+  }
+
+  public dateRangePickerFilter(d: Date | null): boolean {
+    if (!d) {
+      return false;
+    }
+    return (d <= (new Date()));
+  }
+
+  private _updateDateRange(): void {
+    console.log("report from ", this._date_range.start, " to ", this._date_range.end);
+    this.data_source.setDateRange(this._date_range);
+  }
+
+  public dateRangeChanged(
+    event: MatDatepickerInputEvent<moment.Moment>,
+    is_start: boolean
+  ): void {
+    if (is_start) {
+      console.log("start: ", event.value);
+      if (!!event.value) {
+        this._date_range.start = event.value;
+        this._date_range.end = undefined;
+      }
+    } else {
+      if (!!event.value) {
+        this._date_range.end = event.value;
+      }
+      console.log("end: ", event);
+    }
+
+    if (!!this._date_range.start && !!this._date_range.end) {
+      this._updateDateRange();
+    }
   }
 
   public downloadAsRAG(): void {

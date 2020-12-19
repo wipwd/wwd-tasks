@@ -1,6 +1,6 @@
 <mat-card class="mat-elevation-z8">
   <mat-card-title fxLayout="row" fxLayoutAlign="start center">
-    <span>Weekly Report {{getWeekString()}}</span>
+    <span>Weekly Report {{getDateRangeString()}}</span>
     <span style="width: 20px"></span>
     <button mat-icon-button type="button" (click)="downloadAsRAG()">
       <mat-icon>save_alt</mat-icon>
@@ -8,14 +8,37 @@
     <span style="width: 20px"></span>
   </mat-card-title>
   <div mat-card-content>
-    <mat-form-field appearance="fill">
-      <mat-label>Filter by Project</mat-label>
-      <mat-select (selectionChange)="selectProject($event)" multiple>
-        <mat-option *ngFor="let p of getProjects()|async" [value]="p">
-          {{p}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div fxLayout="row" fxLayoutAlign="start center">
+      <!-- project filter -->
+      <mat-form-field appearance="fill">
+        <mat-label>Filter by Project</mat-label>
+        <mat-select (selectionChange)="selectProject($event)" multiple>
+          <mat-option *ngFor="let p of getProjects()|async" [value]="p">
+            {{p}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <!-- spacer -->
+      <span style="width: 40px"></span>
+      <!-- date picker -->
+      <mat-form-field appearance="fill">
+        <mat-label>Date Range</mat-label>
+        <mat-date-range-input
+            [rangePicker]="rangePicker"
+            [dateFilter]="dateRangePickerFilter">
+          <input matStartDate placeholder="from"
+            (dateChange)="dateRangeChanged($event, true)"
+            [value]="getDateRangeStart()"/>
+          <input matEndDate placeholder="until"
+            (dateChange)="dateRangeChanged($event, false)"
+            [value]="getDateRangeEnd()"/>
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="rangePicker">          
+        </mat-datepicker-toggle>
+        <mat-date-range-picker #rangePicker></mat-date-range-picker>
+      </mat-form-field>
+    </div>
+    
     <table mat-table class="full-width-table" matSort aria-label="Tasks">
 
       <!-- Status Column -->
