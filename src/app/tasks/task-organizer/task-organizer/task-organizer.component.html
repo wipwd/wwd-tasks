@@ -7,6 +7,7 @@
     </ng-template>
     <ng-template matTabContent>
 
+      <!-- options expansion panel -->
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
@@ -15,7 +16,7 @@
               <!-- filter button -->
               <div fxLayout="row" fxLayoutAlign="start center">
                 <mat-icon>filter_list</mat-icon>
-                <span style="padding-left: 10px;">Filters</span>
+                <span style="padding-left: 10px;">Options</span>
               </div>
 
               <div fxLayout="row"> <!-- filters list -->
@@ -34,28 +35,70 @@
         
         <!-- panel contents -->
         <div fxLayout="row" fxLayoutAlign="start center"
-            [formGroup]="filter_form_group">
-          <!-- filter by project -->
-          <mat-form-field>
-            <mat-label>Project</mat-label>
-            <mat-select multiple formControlName="project"
-                (selectionChange)="projectFilterChanged($event)">
-              <mat-option
-                  *ngFor="let project of getProjects()|async"
-                  [value]="project">
-                {{project}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <span style="width: 40px"></span>
-          <mat-form-field style="width: 30em">
-            <mat-label>Title</mat-label>
-            <input matInput formControlName="title"
-                (keyup)="titleFilterChanged($event)"/>
-          </mat-form-field>
+            style="margin-top: 10px">
 
-        </div>
+          <!-- filters -->
+          <div fxLayout="column" fxLayoutAlign="center start">
 
+            <span><strong>Filters</strong></span>
+            <div fxLayout="row" fxLayoutAlign="start center"
+                [formGroup]="filter_form_group">
+              <!-- filter by project -->
+              <mat-form-field>
+                <mat-label>Project</mat-label>
+                <mat-select multiple formControlName="project"
+                    (selectionChange)="projectFilterChanged($event)">
+                  <mat-option
+                      *ngFor="let project of getProjects()|async"
+                      [value]="project">
+                    {{project}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <span style="width: 40px"></span>
+              <!-- filter by title -->
+              <mat-form-field style="width: 30em">
+                <mat-label>Title</mat-label>
+                <input matInput formControlName="title"
+                    (keyup)="titleFilterChanged($event)"/>
+              </mat-form-field>
+            </div>
+          </div> <!-- /filters -->
+
+          <span style="width: 40px"></span> <!-- spacer -->
+          <div>
+            <mat-divider [vertical]="true" style="height: 86px"></mat-divider>
+          </div>
+          <span style="width: 40px"></span> <!-- spacer -->
+
+          <!-- sort -->
+          <div fxLayout="column" fxLayoutAlign="center start">
+
+            <span><strong>Sort By</strong></span>
+            <div fxLayout="row" fxLayoutAlign="start center">
+              <!-- sort by field -->
+              <mat-form-field>
+                <mat-label>Field</mat-label>
+                <mat-select>
+                  <mat-option value="title">Title</mat-option>
+                  <mat-option value="creation">Creation</mat-option>
+                  <mat-option value="duration">Duration</mat-option>
+                  <mat-option value="project">Project</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <span style="width: 40px"></span> <!-- spacer -->
+              <!-- ascending / descending -->
+              <mat-form-field>
+                <mat-label>Direction</mat-label>
+                <mat-select>
+                  <mat-option value="asc">Ascending</mat-option>
+                  <mat-option value="desc">Descending</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+      
+        </div> <!-- /panel contents-->
 
       </mat-expansion-panel>
       
