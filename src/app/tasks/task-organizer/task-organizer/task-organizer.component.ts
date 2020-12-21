@@ -4,6 +4,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
 import { ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskService } from '../../../services/task-service.service';
+import { TaskFilterItem } from '../task-filter';
 
 declare type LedgerEntry = {
   name: string;
@@ -22,7 +23,13 @@ export class TaskOrganizerComponent implements OnInit {
 
   private _has_project_filter: boolean = false;
   private _has_expression_filter: boolean = false;
-  private _filter_projects: string[] = [];
+
+  private _filters: TaskFilterItem = {
+    projects: [],
+    title: ""
+  };
+  public filters$: BehaviorSubject<TaskFilterItem> =
+    new BehaviorSubject<TaskFilterItem>({ projects: [], title: ""});
 
   public filter_form_group: FormGroup;
 
@@ -88,20 +95,18 @@ export class TaskOrganizerComponent implements OnInit {
     const filterstrs: {[id: string]: string} = {};
 
     if (this.hasProjectFilter()) {
-      filterstrs.project = this._filter_projects.join(", ");
+      filterstrs.project = this._filters.projects.join(", ");
     }
 
     return filterstrs;
   }
 
   public projectFilterChanged(event: MatSelectChange): void {
-    if (!event.value || (event.value as string[]).length === 0) {
-      this._has_project_filter = false;
-      return;
-    }
     console.log("project filter changed: ", event);
-    this._filter_projects = (event.value as string[]);
-    this._has_project_filter = true;
+    this._filters.projects = (event.value as string[]);
+    this._has_project_filter =
+      (!!event.value && this._filters.projects.length !== 0);
+    this.filters$.next(this._filters);
   }
 
 }

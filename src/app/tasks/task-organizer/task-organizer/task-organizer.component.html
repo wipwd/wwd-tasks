@@ -53,7 +53,8 @@
 
       </mat-expansion-panel>
       
-      <app-task-ledger [ledger]="ledger.name"></app-task-ledger>
+      <app-task-ledger [ledger]="ledger.name" [filters]="filters$">        
+      </app-task-ledger>
     </ng-template>
   </mat-tab>
 

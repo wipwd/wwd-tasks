@@ -2,9 +2,11 @@ import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/cor
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
+import { BehaviorSubject } from 'rxjs';
 import {
   TaskLedgerEntry, TaskService
 } from 'src/app/services/task-service.service';
+import { TaskFilterItem } from '../../task-organizer/task-filter';
 import { TaskLedgerListDataSource } from './task-ledger-list-datasource';
 
 @Component({
@@ -14,15 +16,16 @@ import { TaskLedgerListDataSource } from './task-ledger-list-datasource';
 })
 export class TaskLedgerListComponent implements AfterViewInit, OnInit {
 
-  @Input() ledger: string = "backlog";
-  @Input() prio: string = "medium";
+  @Input() public ledger: string = "backlog";
+  @Input() public prio: string = "medium";
+  @Input() public filters: BehaviorSubject<TaskFilterItem>;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild(MatTable) table: MatTable<TaskLedgerEntry>;
-  data_source: TaskLedgerListDataSource;
+  @ViewChild(MatPaginator) public paginator: MatPaginator;
+  @ViewChild(MatSort) public sort: MatSort;
+  @ViewChild(MatTable) public table: MatTable<TaskLedgerEntry>;
+  public data_source: TaskLedgerListDataSource;
 
-  displayedColumns = ['id', 'name'];
+  public displayedColumns = ['id', 'name'];
 
   public constructor(
     private _tasks_svc: TaskService
@@ -30,7 +33,9 @@ export class TaskLedgerListComponent implements AfterViewInit, OnInit {
 
   public ngOnInit(): void {
     this.data_source =
-      new TaskLedgerListDataSource(this._tasks_svc, this.ledger, this.prio);
+      new TaskLedgerListDataSource(
+        this._tasks_svc, this.ledger, this.prio, this.filters
+      );
   }
 
   public ngAfterViewInit(): void {
