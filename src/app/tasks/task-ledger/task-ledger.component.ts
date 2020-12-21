@@ -3,7 +3,7 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import {
   Ledger, TaskLedgerEntry, TaskLedgerMap, TaskService
 } from '../../services/task-service.service';
-import { TaskFilterItem } from '../task-organizer/task-filter';
+import { TaskFilterItem } from '../task-organizer/task-list-options';
 
 
 declare interface Priority {

@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs';
 import {
   TaskLedgerEntry, TaskService
 } from 'src/app/services/task-service.service';
-import { TaskFilterItem } from '../../task-organizer/task-filter';
+import { TaskFilterItem } from '../../task-organizer/task-list-options';
 import { TaskLedgerListDataSource } from './task-ledger-list-datasource';
 
 @Component({

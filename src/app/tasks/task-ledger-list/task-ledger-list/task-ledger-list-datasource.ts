@@ -6,7 +6,7 @@ import {
   Observable, merge, BehaviorSubject, Subscription
 } from 'rxjs';
 import { Ledger, TaskItem, TaskLedgerEntry, TaskService } from '../../../services/task-service.service';
-import { TaskFilterItem } from '../../task-organizer/task-filter';
+import { TaskFilterItem } from '../../task-organizer/task-list-options';
 
 /**
  * Data source for the TaskLedgerList view. This class should

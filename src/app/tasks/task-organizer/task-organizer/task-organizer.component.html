@@ -75,11 +75,13 @@
           <div fxLayout="column" fxLayoutAlign="center start">
 
             <span><strong>Sort By</strong></span>
-            <div fxLayout="row" fxLayoutAlign="start center">
+            <div fxLayout="row" fxLayoutAlign="start center"
+                [formGroup]="sorting_form_group">
               <!-- sort by field -->
               <mat-form-field>
                 <mat-label>Field</mat-label>
-                <mat-select>
+                <mat-select formControlName="field"
+                    (selectionChange)="sortingFieldChanged($event)">
                   <mat-option value="title">Title</mat-option>
                   <mat-option value="creation">Creation</mat-option>
                   <mat-option value="duration">Duration</mat-option>
@@ -90,7 +92,8 @@
               <!-- ascending / descending -->
               <mat-form-field>
                 <mat-label>Direction</mat-label>
-                <mat-select>
+                <mat-select formControlName="direction"
+                    (selectionChange)="sortingDirectionChanged($event)">
                   <mat-option value="asc">Ascending</mat-option>
                   <mat-option value="desc">Descending</mat-option>
                 </mat-select>

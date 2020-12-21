@@ -4,7 +4,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
 import { ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskService } from '../../../services/task-service.service';
-import { TaskFilterItem } from '../task-filter';
+import { TaskFilterItem, TaskSortItem } from '../task-list-options';
 
 declare type LedgerEntry = {
   name: string;
@@ -28,10 +28,18 @@ export class TaskOrganizerComponent implements OnInit {
     projects: [],
     title: ""
   };
+  private _sorting: TaskSortItem = {
+    sortby: "creation",
+    ascending: false
+  };
+
   public filters$: BehaviorSubject<TaskFilterItem> =
     new BehaviorSubject<TaskFilterItem>({ projects: [], title: ""});
+  public sorting$: BehaviorSubject<TaskSortItem> =
+    new BehaviorSubject<TaskSortItem>(this._sorting);
 
   public filter_form_group: FormGroup;
+  public sorting_form_group: FormGroup;
 
 
   public constructor(
@@ -42,6 +50,10 @@ export class TaskOrganizerComponent implements OnInit {
     this.filter_form_group = this._fb.group({
       project: new FormControl([]),
       title: new FormControl("")
+    });
+    this.sorting_form_group = this._fb.group({
+      field: new FormControl("creation"),
+      direction: new FormControl("desc")
     });
   }
 
@@ -117,4 +129,17 @@ export class TaskOrganizerComponent implements OnInit {
     this.filters$.next(this._filters);
   }
 
+  private _sortingChanged(): void {
+    console.log("sort changed: ", this._sorting);
+  }
+
+  public sortingFieldChanged(event: MatSelectChange): void {
+    this._sorting.sortby = event.value;
+    this._sortingChanged();
+  }
+
+  public sortingDirectionChanged(event: MatSelectChange): void {
+    this._sorting.ascending = (event.value === "asc");
+    this._sortingChanged();
+  }
 }
