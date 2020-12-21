@@ -137,20 +137,24 @@ export class TaskInfoComponent implements OnInit {
       return;
     }
 
-    const date_from: Date = this.date_picker_form_group.get("from").value;
-    const date_to: Date = this.date_picker_form_group.get("to").value;
+    const date_from: moment.Moment =
+      this.date_picker_form_group.get("from").value;
+    const date_to: moment.Moment =
+      this.date_picker_form_group.get("to").value;
     const from_hour: number = this.time_from_form_group.get("hour").value;
     const from_min: number = this.time_from_form_group.get("minutes").value;
     const until_hour: number = this.time_until_form_group.get("hour").value;
     const until_min: number = this.time_until_form_group.get("minutes").value;
 
-    date_from.setHours(from_hour);
-    date_from.setMinutes(from_min);
-    date_to.setHours(until_hour);
-    date_to.setMinutes(until_min);
+    date_from.hour(from_hour);
+    date_from.minute(from_min);
+    date_to.hour(until_hour);
+    date_to.minute(until_min);
 
     console.log(`add new entry > from ${date_from} to ${date_to}`);
-    this._tasks_svc.addTimerEntry(this.task, date_from, date_to);
+    this._tasks_svc.addTimerEntry(this.task,
+      date_from.toDate(), date_to.toDate()
+    );
     this.toggleAddNewEntry();
   }
 
