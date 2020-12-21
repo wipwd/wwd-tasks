@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, timer } from 'rxjs';
-import {
-  set as idbset,
-  get as idbget
-} from 'idb-keyval';
+import { BehaviorSubject } from 'rxjs';
 
 
 export interface TaskTimerItem {
@@ -261,18 +257,6 @@ export class TaskService {
     if (typeof task === "string") {
       throw new Error("task can't be of type string!");
     }
-    /*
-    if (typeof task === "string") {
-      if (!(task in this._ledger_by_taskid)) {
-        return;  // assume task does not exist.
-      }
-      const ledger: Ledger = this._ledger_by_taskid[task];
-      console.assert(task in ledger.tasks);
-      this._remove(ledger.tasks[task]);
-    } else {
-      this._remove(task);
-    }
-    */
     this._remove(task);
     // we are actively removing a task through this path, so remove it from all
     // tasks too.
