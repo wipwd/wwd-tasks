@@ -165,14 +165,14 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
             done = true;
           }
         });
-        if (done) {
-          return;
-        }
-        if (has_title_filter) {
-          if (task.item.title.includes(this._filters.title)) {
-            filtered_tasks.push(task);
-            done = true;
-          }
+      }
+      if (done) {
+        return;
+      }
+      if (has_title_filter) {
+        if (task.item.title.includes(this._filters.title)) {
+          filtered_tasks.push(task);
+          done = true;
         }
       }
     });

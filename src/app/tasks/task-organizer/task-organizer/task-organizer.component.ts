@@ -22,7 +22,7 @@ export class TaskOrganizerComponent implements OnInit {
   private _ledger_sizes: {[id: string]: BehaviorSubject<string>} = {};
 
   private _has_project_filter: boolean = false;
-  private _has_expression_filter: boolean = false;
+  private _has_title_filter: boolean = false;
 
   private _filters: TaskFilterItem = {
     projects: [],
@@ -41,7 +41,7 @@ export class TaskOrganizerComponent implements OnInit {
   ) {
     this.filter_form_group = this._fb.group({
       project: new FormControl([]),
-      expression: new FormControl("")
+      title: new FormControl("")
     });
   }
 
@@ -83,12 +83,12 @@ export class TaskOrganizerComponent implements OnInit {
     return this._has_project_filter;
   }
 
-  public hasExpressionFilter(): boolean {
-    return this._has_expression_filter;
+  public hasTitleFilter(): boolean {
+    return this._has_title_filter;
   }
 
   public hasFilter(): boolean {
-    return this.hasProjectFilter() || this.hasExpressionFilter();
+    return this.hasProjectFilter() || this.hasTitleFilter();
   }
 
   public getFilters(): {[id: string]: string} {
@@ -106,6 +106,14 @@ export class TaskOrganizerComponent implements OnInit {
     this._filters.projects = (event.value as string[]);
     this._has_project_filter =
       (!!event.value && this._filters.projects.length !== 0);
+    this.filters$.next(this._filters);
+  }
+
+  public titleFilterChanged(event): void {
+    const titlestr: string = this.filter_form_group.get("title").value;
+    console.log("title filter changed: ", event, ", value: ", titlestr);
+    this._filters.title = titlestr;
+    this._has_title_filter = (titlestr !== "");
     this.filters$.next(this._filters);
   }
 
