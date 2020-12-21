@@ -131,6 +131,7 @@ export class TaskOrganizerComponent implements OnInit {
 
   private _sortingChanged(): void {
     console.log("sort changed: ", this._sorting);
+    this.sorting$.next(this._sorting);
   }
 
   public sortingFieldChanged(event: MatSelectChange): void {

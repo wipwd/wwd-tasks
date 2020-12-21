@@ -6,7 +6,7 @@ import {
   Observable, merge, BehaviorSubject, Subscription
 } from 'rxjs';
 import { Ledger, TaskItem, TaskLedgerEntry, TaskService } from '../../../services/task-service.service';
-import { TaskFilterItem } from '../../task-organizer/task-list-options';
+import { TaskFilterItem, TaskSortItem } from '../../task-organizer/task-list-options';
 
 /**
  * Data source for the TaskLedgerList view. This class should
@@ -32,12 +32,16 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
     new BehaviorSubject<number>(0);
 
   private _filters: TaskFilterItem = { projects: [], title: "" };
+  private _sorting: TaskSortItem = {
+    sortby: "creation", ascending: false
+  };
 
   constructor(
     private _tasks_svc: TaskService,
     private _ledgername: string,
     private _ledgerprio: string,
-    private _filters_subject: BehaviorSubject<TaskFilterItem>
+    private _filters_subject: BehaviorSubject<TaskFilterItem>,
+    private _sorting_subject: BehaviorSubject<TaskSortItem>
   ) {
     super();
 
@@ -47,7 +51,14 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
         this._filters = filters;
         this._filterTasks(this._tasks);
       }
-    })
+    });
+
+    this._sorting_subject.subscribe({
+      next: (sort: TaskSortItem) => {
+        console.log("updated sort: ", sort);
+        this._sorting = sort;
+      }
+    });
   }
 
   /**
@@ -87,7 +98,7 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
     const dataMutations = [
       this._filtered_tasks_subject,
       this.paginator.page,
-      this.sort.sortChange
+      this._sorting_subject
     ];
 
     return merge(...dataMutations).pipe(map(() => {
@@ -117,7 +128,7 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
    * Sort the data (client-side). If you're using server-side sorting,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private _getSortedData(data: TaskLedgerEntry[]): TaskLedgerEntry[] {
+  private _getSortedData2(data: TaskLedgerEntry[]): TaskLedgerEntry[] {
     if (!this.sort.active || this.sort.direction === '') {
       return data;
     }
@@ -128,6 +139,20 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
         case 'title': return compare(a.item.title, b.item.title, isAsc);
         default: return 0;
       }
+    });
+  }
+
+  private _getSortedData(data: TaskLedgerEntry[]): TaskLedgerEntry[] {
+    console.log("sort data");
+    return data.sort((a, b) => {
+      const isAsc = this._sorting.ascending;
+      switch (this._sorting.sortby) {
+        case "title": return compare(a.item.title, b.item.title, !isAsc);
+        case "creation": return compare(a.item.date, b.item.date, !isAsc);
+        case "duration": return this._compareDurations(a, b, isAsc);
+        case "project": return this._compareProject(a.item, b.item, isAsc);
+      }
+      
     });
   }
 
@@ -182,11 +207,27 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
   public getLength(): BehaviorSubject<number> {
     return this._tasks_size_subject;
   }
+
+  private _compareDurations(
+    a: TaskLedgerEntry,
+    b: TaskLedgerEntry,
+    isAsc: boolean
+  ): number {
+    const duration_a = (!!a.item.timer ? this._tasks_svc.getTimerTotal(a) : 0);
+    const duration_b = (!!b.item.timer ? this._tasks_svc.getTimerTotal(b) : 0);
+    return compare(duration_a, duration_b, isAsc);
+  }
+
+  private _compareProject(a: TaskItem, b: TaskItem, isAsc: boolean): number {
+    const proj_a: string = (a.project.length > 0 ? a.project[0] : "");
+    const proj_b: string = (b.project.length > 0 ? b.project[0] : "");
+    return compare(proj_a, proj_b, isAsc);
+  }
 }
 
 function compare(
-  a: string | number,
-  b: string | number,
+  a: string | number | Date,
+  b: string | number | Date,
   isAsc: boolean
 ): number {
   return (a < b ? -1 : 1) * (isAsc ? 1 : -1);

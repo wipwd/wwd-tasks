@@ -3,7 +3,7 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import {
   Ledger, TaskLedgerEntry, TaskLedgerMap, TaskService
 } from '../../services/task-service.service';
-import { TaskFilterItem } from '../task-organizer/task-list-options';
+import { TaskFilterItem, TaskSortItem } from '../task-organizer/task-list-options';
 
 
 declare interface Priority {
@@ -22,8 +22,9 @@ declare interface Priority {
 })
 export class TaskLedgerComponent implements OnInit {
 
-  @Input() ledger: string = "backlog";
-  @Input() filters: BehaviorSubject<TaskFilterItem>;
+  @Input() public ledger: string = "backlog";
+  @Input() public filters: BehaviorSubject<TaskFilterItem>;
+  @Input() public sorting: BehaviorSubject<TaskSortItem>;
 
   public priorities: {[id: string]: Priority} = {
     high: {

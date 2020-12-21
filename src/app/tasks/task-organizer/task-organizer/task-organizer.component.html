@@ -115,7 +115,8 @@
 
       </mat-expansion-panel>
       
-      <app-task-ledger [ledger]="ledger.name" [filters]="filters$">        
+      <app-task-ledger [ledger]="ledger.name"
+          [filters]="filters$" [sorting]="sorting$">
       </app-task-ledger>
     </ng-template>
   </mat-tab>

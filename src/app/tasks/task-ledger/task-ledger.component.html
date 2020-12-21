@@ -10,7 +10,8 @@
       <mat-panel-title>{{prio.label}} {{prio.size|async}}</mat-panel-title>
     </mat-expansion-panel-header>
     <app-task-ledger-list
-        [ledger]="ledger" [prio]="prio.name" [filters]="filters">
+        [ledger]="ledger" [prio]="prio.name"
+        [filters]="filters" [sorting]="sorting">
     </app-task-ledger-list>
   </mat-expansion-panel>
 </mat-accordion>
