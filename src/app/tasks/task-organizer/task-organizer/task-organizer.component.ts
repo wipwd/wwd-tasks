@@ -142,4 +142,8 @@ export class TaskOrganizerComponent implements OnInit {
     this._sorting.ascending = (event.value === "asc");
     this._sortingChanged();
   }
+
+  public getSorting(): TaskSortItem {
+    return this._sorting;
+  }
 }

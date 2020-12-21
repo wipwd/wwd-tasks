@@ -25,6 +25,16 @@
                   <strong>{{filter.key}}: </strong>
                   {{filter.value}}
                 </span>
+                <div *ngIf="hasFilter()"
+                    style="padding-left: 10px; padding-right: 10px;">
+                  <mat-divider [vertical]="true" style="height: 24px">
+                  </mat-divider>
+                </div>
+                <span>
+                  <strong>sort by: </strong> {{getSorting().sortby}}
+                  <strong *ngIf="getSorting().ascending">ascending</strong>
+                  <strong *ngIf="!getSorting().ascending">descending</strong>
+                </span>
               </div>
 
               <span></span>
