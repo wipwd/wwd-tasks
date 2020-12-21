@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MatSelectChange } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
+import { ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskService } from '../../../services/task-service.service';
 
 declare type LedgerEntry = {
@@ -17,9 +20,23 @@ export class TaskOrganizerComponent implements OnInit {
   private _ledgers: LedgerEntry[] = [];
   private _ledger_sizes: {[id: string]: BehaviorSubject<string>} = {};
 
+  private _has_project_filter: boolean = false;
+  private _has_expression_filter: boolean = false;
+  private _filter_projects: string[] = [];
+
+  public filter_form_group: FormGroup;
+
+
   public constructor(
-    private _tasks_svc: TaskService
-  ) { }
+    private _tasks_svc: TaskService,
+    private _fb: FormBuilder,
+    private _projects_svc: ProjectsService
+  ) {
+    this.filter_form_group = this._fb.group({
+      project: new FormControl([]),
+      expression: new FormControl("")
+    });
+  }
 
   public ngOnInit(): void {
     this._tasks_svc.getLedgersNames().forEach( (ledgername: string) => {
@@ -49,6 +66,42 @@ export class TaskOrganizerComponent implements OnInit {
 
   public getLedgers(): LedgerEntry[] {
     return this._ledgers;
+  }
+
+  public getProjects(): BehaviorSubject<string[]> {
+    return this._projects_svc.getProjects();
+  }
+
+  public hasProjectFilter(): boolean {
+    return this._has_project_filter;
+  }
+
+  public hasExpressionFilter(): boolean {
+    return this._has_expression_filter;
+  }
+
+  public hasFilter(): boolean {
+    return this.hasProjectFilter() || this.hasExpressionFilter();
+  }
+
+  public getFilters(): {[id: string]: string} {
+    const filterstrs: {[id: string]: string} = {};
+
+    if (this.hasProjectFilter()) {
+      filterstrs.project = this._filter_projects.join(", ");
+    }
+
+    return filterstrs;
+  }
+
+  public projectFilterChanged(event: MatSelectChange): void {
+    if (!event.value || (event.value as string[]).length === 0) {
+      this._has_project_filter = false;
+      return;
+    }
+    console.log("project filter changed: ", event);
+    this._filter_projects = (event.value as string[]);
+    this._has_project_filter = true;
   }
 
 }

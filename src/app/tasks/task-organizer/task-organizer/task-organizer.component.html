@@ -1,10 +1,58 @@
 <mat-tab-group>
 
   <mat-tab *ngFor="let ledger of getLedgers()">
+
     <ng-template mat-tab-label>
       {{ledger.label}} {{getLedgerSize(ledger.name)|async}}
     </ng-template>
     <ng-template matTabContent>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div fxLayout="row" fxLayoutAlign="space-between center"
+                style="width: 100%">
+              <!-- filter button -->
+              <div fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon>filter_list</mat-icon>
+                <span style="padding-left: 10px;">Filters</span>
+              </div>
+
+              <div fxLayout="row"> <!-- filters list -->
+                <span *ngFor="let filter of getFilters()|keyvalue"
+                    style="padding-left: 10px;">
+                  <strong>{{filter.key}}: </strong>
+                  {{filter.value}}
+                </span>
+              </div>
+
+              <span></span>
+
+            </div>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <!-- panel contents -->
+        <div fxLayout="row" fxLayoutAlign="start center"
+            [formGroup]="filter_form_group">
+          <!-- filter by project -->
+          <mat-form-field>
+            <mat-label>Project</mat-label>
+            <mat-select multiple formControlName="project"
+                (selectionChange)="projectFilterChanged($event)">
+              <mat-option
+                  *ngFor="let project of getProjects()|async"
+                  [value]="project">
+                {{project}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </div>
+
+
+      </mat-expansion-panel>
+      
       <app-task-ledger [ledger]="ledger.name"></app-task-ledger>
     </ng-template>
   </mat-tab>
