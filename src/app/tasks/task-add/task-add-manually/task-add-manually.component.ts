@@ -52,20 +52,18 @@ export class TaskAddManuallyComponent implements OnInit {
       // ignore form submission: invalid.
       return;
     }
-    const project_lst: string[] = [];
+    let project: string = "";
     if (!!this.form_ctrl_project && !!this.form_ctrl_project.value) {
-      const tmp: string[] = this.form_ctrl_project.value as string[];
-      tmp.forEach( (project: string) => {
-        if (!!project) {
-          project_lst.push(project);
-        }
-      });
+      const tmp: string = this.form_ctrl_project.value as string;
+      if (!!tmp) {
+        project = tmp;
+      }
     }
     const now: Date = new Date();
     const task: TaskItem = {
       title: this.form_ctrl_title.value,
       priority: this.form_ctrl_priority.value,
-      project: project_lst,
+      project: project,
       url: this.form_ctrl_url.value,
       date: now
     };

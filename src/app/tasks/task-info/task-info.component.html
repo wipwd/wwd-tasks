@@ -48,7 +48,7 @@
         <!-- edit -->
         <div *ngIf="isEditMode()" [formGroup]="edit_form_group">
           <mat-form-field>
-            <mat-select multiple formControlName="projects">
+            <mat-select formControlName="projects">
               <mat-option
                   *ngFor="let project of getProjects()|async"
                   [value]="project">

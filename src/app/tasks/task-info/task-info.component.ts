@@ -171,19 +171,19 @@ export class TaskInfoComponent implements OnInit {
 
     const title: string = this.edit_form_group.get("title").value;
     const priority: string = this.edit_form_group.get("priority").value;
-    const projects: string[] = this.edit_form_group.get("projects").value;
+    const project: string = this.edit_form_group.get("projects").value;
 
-    if (!title || title === "" || !priority || priority === "" || !projects) {
+    if (!title || title === "" || !priority || priority === "" || !project) {
       return;
     }
 
-    if (!Array.isArray(projects)) {
-      throw new Error("projects field expected to be an array");
+    if (typeof project !== "string") {
+      throw new Error("project field expected to be a string");
     }
 
     this.task.item.title = title;
     this.task.item.priority = priority;
-    this.task.item.project = projects;
+    this.task.item.project = project;
     this._tasks_svc.updateTask(this.task, this.task.item);
   }
 

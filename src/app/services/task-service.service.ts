@@ -20,7 +20,7 @@ export interface TaskNoteItem {
 export interface TaskItem {
   title: string;
   priority: string;
-  project: string[];
+  project: string[] | string;
   url: string;
   date?: Date;
   timer?: TaskTimerState;
@@ -161,6 +161,7 @@ export class TaskService {
         return;
       }
       this._convertStrToDate(task.item);
+      this._convertProjectFormat(task.item);
       this._ledger_by_name[task.ledger].tasks[task.id] = {
         id: task.id,
         item: task.item,
@@ -557,6 +558,18 @@ export class TaskService {
         }
       });
     }
+  }
+
+  private _convertProjectFormat(task: TaskItem): void {
+    if (typeof task.project === "string") {
+      return; // nothing to do.
+    } else if (!Array.isArray(task.project)) {
+      throw new Error("task projects is not an array nor a string");
+    }
+    const project: string = (
+      (task.project as string[]).length === 0 ? "" : task.project[0]
+    );
+    task.project = project;
   }
 
 }

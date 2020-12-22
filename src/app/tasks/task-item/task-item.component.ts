@@ -42,7 +42,11 @@ export class TaskItemComponent implements OnInit {
   }
 
   public getProjects(): string {
-    const str: string = this.task.item.project.join(', ');
+    const str: string = (
+      typeof this.task.item.project === "string" ?
+        this.task.item.project :
+        this.task.item.project.join(', ')
+    );
     if (str !== "") {
       return `on ${str}`;
     }

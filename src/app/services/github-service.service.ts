@@ -61,7 +61,7 @@ export class GithubService {
     const task: TaskItem = {
       title: task_title,
       url: pr.html_url,
-      project: [task_project],
+      project: task_project,
       date: new Date(),
       priority: task_priority
     };

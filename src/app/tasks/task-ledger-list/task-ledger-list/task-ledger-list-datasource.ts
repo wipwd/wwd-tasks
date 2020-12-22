@@ -181,15 +181,25 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
     tasks.forEach( (task: TaskLedgerEntry) => {
       let done: boolean = false;
       if (has_project_filter) {
-        task.item.project.forEach( (project: string) => {
-          if (done) {
-            return;
-          }
-          if (this._filters.projects.includes(project)) {
+        if (typeof task.item.project === "string") { // new version (v3)
+          if (this._filters.projects.includes(task.item.project)) {
             filtered_tasks.push(task);
             done = true;
           }
-        });
+        } else { // old version (v2)
+          if (!Array.isArray(task.item.project)) {
+            throw new Error("format error on task item projects");
+          }
+          task.item.project.forEach( (project: string) => {
+            if (done) {
+              return;
+            }
+            if (this._filters.projects.includes(project)) {
+              filtered_tasks.push(task);
+              done = true;
+            }
+          });
+        }
       }
       if (done) {
         return;
