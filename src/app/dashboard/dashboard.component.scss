@@ -38,9 +38,12 @@
   margin: 20px;
 }
 
+.selected-route.mat-list-option:not(.mat-list-single-selected-option):not(mat-list-item-disabled):hover,
+.mat-nav-list .selected-route.mat-list-item:not(.mat-list-item-disabled):hover,
+.mat-action-list .selected-route.mat-list-item:not(.mat-list-item-disabled):hover,
 .selected-route,
 .selected-route:hover,
 .selected-route:focus {
-  color: white;
-  background-color: #3f51b5;
+    background-color: #3f51b5;
+    color: white;
 }
