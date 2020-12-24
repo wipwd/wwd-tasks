@@ -5,8 +5,8 @@ import { ENTER, COMMA } from '@angular/cdk/keycodes';
 import { FormControl } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { WWDTASKS_BUILD_COMMIT, WWDTASKS_BUILD_DATE } from '../../build-info';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import { InOutAnimation } from '../../animations';
+
 
 interface SettingsEntryItem {
   id: string;
@@ -19,29 +19,7 @@ interface SettingsEntryItem {
   templateUrl: './settings-dashboard.component.html',
   styleUrls: ['./settings-dashboard.component.scss'],
   animations: [
-    trigger("InOutAnimation", [
-      state("in", style({transform: "translateX(0%)"})),
-      state("out", style({transform: "translateX(100%)"})),
-      transition("in <=> out", animate("200ms ease-in")),
-      transition(":enter", [
-        style({transform: "translateX(100%)"}),
-        animate("200ms ease-in", style({transform: "translateX(0%)"}))
-      ]),
-      transition(":leave", [
-        style({transform: "translateX(0%)"}),
-        animate("200ms ease-in", style({transform: "translateX(100%)"}))
-      ])
-    ]),
-    trigger("ExpandAnimation", [
-      state("expanded", style({width: "100%"})),
-      state("contracted", style({width: "250px"})),
-      transition("expanded => contracted", [
-        animate("200ms ease-in")
-      ]),
-      transition("contracted => expanded", [
-        animate("200ms ease-in")
-      ])
-    ])
+    InOutAnimation
   ]
 })
 export class SettingsDashboardComponent implements OnInit {
