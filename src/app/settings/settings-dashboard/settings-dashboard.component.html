@@ -3,13 +3,22 @@
   <mat-sidenav role="navigation" mode="side" [opened]="true"
       class="sidenav-menu">
     <mat-nav-list>
-      <div *ngFor="let entry of settings_items">
-        <a mat-list-item (click)="selectedEntry(entry)">
-          <div fxLayout="row" fxLayoutAlign="start center">
-            <mat-icon>{{entry.icon}}</mat-icon>
-            <span>{{entry.label}}</span>
+      <div *ngFor="let entry of settings_items" fxLayout="column">
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+          <a mat-list-item (click)="selectedEntry(entry)">
+            <div fxLayout="row" fxLayoutAlign="start center">
+              <mat-icon>{{entry.icon}}</mat-icon>
+              <span style="width: 10px"></span> <!-- spacer -->
+              <span>{{entry.label}}</span>
+            </div>
+          </a>
+          <span></span>
+          <div>
+            <mat-icon *ngIf="selected_item === entry.id">
+              play_arrow
+            </mat-icon>
           </div>
-        </a>
+        </div>
         <mat-divider></mat-divider>
       </div>
     </mat-nav-list>
