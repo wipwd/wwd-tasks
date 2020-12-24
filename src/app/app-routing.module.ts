@@ -3,8 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { ArchivesListComponent } from './archives/archives-list/archives-list.component';
 import { ReportsComponent } from './reports/reports.component';
 import { SettingsDashboardComponent } from './settings/settings-dashboard/settings-dashboard.component';
-import { TaskLedgerComponent } from './tasks/task-ledger/task-ledger.component';
-import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer/task-organizer.component';
+import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer.component';
 
 const routes: Routes = [
   { path: 'task-organizer', component: TaskOrganizerComponent },

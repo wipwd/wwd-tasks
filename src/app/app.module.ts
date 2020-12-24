@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer/task-organizer.component';
+import { TaskOrganizerComponent } from './tasks/task-organizer/task-organizer.component';
 import { TaskLedgerComponent } from './tasks/task-ledger/task-ledger.component';
 import { TaskItemComponent } from './tasks/task-item/task-item.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -60,7 +60,6 @@ import { WeeklyReportComponent } from './reports/weekly-report/weekly-report.com
 import { TaskAddManuallyComponent } from './tasks/task-add/task-add-manually/task-add-manually.component';
 import { TaskAddFromGithubComponent } from './tasks/task-add/task-add-from-github/task-add-from-github.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-// import { MatNativeDateModule } from '@angular/material/core';
 import { MatMomentDateModule, MAT_MOMENT_DATE_ADAPTER_OPTIONS, MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 

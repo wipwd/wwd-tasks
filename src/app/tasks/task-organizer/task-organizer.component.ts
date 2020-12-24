@@ -3,8 +3,8 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
 import { ProjectsService } from 'src/app/services/projects-service.service';
-import { TaskService } from '../../../services/task-service.service';
-import { TaskFilterItem, TaskSortItem } from '../task-list-options';
+import { TaskService } from '../../services/task-service.service';
+import { TaskFilterItem, TaskSortItem } from './task-list-options';
 
 declare type LedgerEntry = {
   name: string;
