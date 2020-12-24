@@ -101,10 +101,11 @@
       <span></span>
     </mat-card>
     <div *ngFor="let ledger of ledgers">
-      <app-task-ledger [ledger]="ledger.name"
-          [filters]="filters$" [sorting]="sorting$"
-          *ngIf="ledger.name === selected_ledger">
-      </app-task-ledger>
+      <div *ngIf="ledger.name === selected_ledger" @InOutAnimation>
+        <app-task-ledger [ledger]="ledger.name"
+            [filters]="filters$" [sorting]="sorting$">
+        </app-task-ledger>
+      </div>
     </div>
 
   </mat-sidenav-content>

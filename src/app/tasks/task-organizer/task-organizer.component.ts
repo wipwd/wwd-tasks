@@ -5,6 +5,8 @@ import { BehaviorSubject } from 'rxjs';
 import { ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskService } from '../../services/task-service.service';
 import { TaskFilterItem, TaskSortItem } from './task-list-options';
+import { InOutAnimation } from '../../animations';
+
 
 declare type LedgerEntry = {
   name: string;
@@ -15,7 +17,10 @@ declare type LedgerEntry = {
 @Component({
   selector: 'app-task-organizer',
   templateUrl: './task-organizer.component.html',
-  styleUrls: ['./task-organizer.component.scss']
+  styleUrls: ['./task-organizer.component.scss'],
+  animations: [
+    InOutAnimation
+  ]
 })
 export class TaskOrganizerComponent implements OnInit {
 
