@@ -1,61 +1,91 @@
-<mat-accordion>
+<mat-sidenav-container class="sidenav-container" autosize>
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Projects</mat-panel-title>
-    </mat-expansion-panel-header>
+  <mat-sidenav role="navigation" mode="side" [opened]="true"
+      class="sidenav-menu">
+    <mat-nav-list>
+      <div *ngFor="let entry of settings_items">
+        <a mat-list-item (click)="selectedEntry(entry)">
+          <div fxLayout="row" fxLayoutAlign="start center">
+            <mat-icon>{{entry.icon}}</mat-icon>
+            <span>{{entry.label}}</span>
+          </div>
+        </a>
+        <mat-divider></mat-divider>
+      </div>
+    </mat-nav-list>
+  </mat-sidenav>
 
-    <mat-form-field style="width: 100%">
-      <mat-chip-list #projectList aria-label="Projects List">
-        <mat-chip *ngFor="let project of getProjects()|async"
-            [selectable]="false" [removable]="true"
-            (removed)="removeProject(project)">
-          {{project}}
-          <mat-icon matChipRemove>cancel</mat-icon>
-        </mat-chip>
-        <input placeholder="Add new project"
-            [formControl]="project_form_ctrl"
-            [matChipInputFor]="projectList"
-            [matChipInputSeparatorKeyCodes]="chip_separator_codes"
-            (matChipInputTokenEnd)="addProject($event)">
-      </mat-chip-list>
-    </mat-form-field>
+  <mat-sidenav-content>
+    <div class="sidenav-content" fxLayout="row">
+      <div *ngIf="selected_item === 'projects'" @InOutAnimation
+          class="settings-item">
 
-  </mat-expansion-panel>
+        <mat-card class="settings-item-card">
+          <mat-card-header>
+            <mat-card-title>Projects</mat-card-title>
+          </mat-card-header>
+          
+          <mat-form-field style="width: 100%">
+            <mat-chip-list #projectList aria-label="Projects List">
+              <mat-chip *ngFor="let project of getProjects()|async"
+                  [selectable]="false" [removable]="true"
+                  (removed)="removeProject(project)">
+                {{project}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+              <input placeholder="Add new project"
+                  [formControl]="project_form_ctrl"
+                  [matChipInputFor]="projectList"
+                  [matChipInputSeparatorKeyCodes]="chip_separator_codes"
+                  (matChipInputTokenEnd)="addProject($event)">
+            </mat-chip-list>
+          </mat-form-field>
+          </mat-card>
+      </div>
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Workflow</mat-panel-title>
-    </mat-expansion-panel-header>
+      <div *ngIf="selected_item === 'importexport'" @InOutAnimation
+          class="settings-item">
+        <mat-card class="settings-item-card">
+          <mat-card-header>
+            <mat-card-title>Import/Export Data</mat-card-title>
+          </mat-card-header>
+          <app-import-export-data></app-import-export-data>
+        </mat-card>
+      </div>
 
-    Ledgers ...
-  </mat-expansion-panel>
+      <div *ngIf="selected_item === 'sync'" @InOutAnimation
+          class="settings-item">
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Import/Export Data</mat-panel-title>
-    </mat-expansion-panel-header>
+        <mat-card class="settings-item-card">
+          <mat-card-header>
+            <mat-card-title>
+              Device Synchronization
+            </mat-card-title>
+          </mat-card-header>
+          <app-settings-device-sync></app-settings-device-sync>
+        </mat-card>
 
-    <app-import-export-data></app-import-export-data>
-  </mat-expansion-panel>
+      </div>
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Device Sync</mat-panel-title>
-    </mat-expansion-panel-header>
-    <app-settings-device-sync></app-settings-device-sync>
-  </mat-expansion-panel>
+      <div *ngIf="selected_item === 'appinfo'" @InOutAnimation
+          class="settings-item">
+        <mat-card class="settings-item-card">
+          <mat-card-header>
+            <mat-card-title>
+              Application Information
+            </mat-card-title>
+          </mat-card-header>
 
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Application Information</mat-panel-title>
-    </mat-expansion-panel-header>
+          <div fxLayout="column">
+            <span>Build: {{getBuildCommit()}}</span>
+            <span>Date: {{getBuildDate()}}</span>
+          </div>
 
-    <div fxLayout="column">
-      <span>Build: {{getBuildCommit()}}</span>
-      <span>Date: {{getBuildDate()}}</span>
+        </mat-card>
+
+      </div>
+
+
     </div>
-
-  </mat-expansion-panel>
-
-</mat-accordion>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,21 @@
+.sidenav-container {
+    height: calc(100vh - 64px - 20px - 20px);
+    width: 100%;
+}
+
+.sidenav-menu {
+    width: 250px;
+}
+
+.sidenav-content {
+    height: calc(100vh - 64px - 20px);
+    width: calc(100% - 250px);
+}
+
+.settings-item {
+    width: 100%;
+}
+
+.settings-item-card {
+    height: 100%;
+}
