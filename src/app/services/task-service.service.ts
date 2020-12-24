@@ -44,6 +44,7 @@ export interface Ledger {
   next?: Ledger;
   name: string;
   label: string;
+  icon?: string;
   tasks: TaskLedgerMap;
 }
 
@@ -70,10 +71,18 @@ export declare type TaskItemMap = {[id: string]: TaskItem};
 export class TaskService {
 
   private _ledger_by_name: {[id: string]: Ledger} = {
-    backlog: { name: "backlog", label: "Backlog", tasks: {} },
-    next: { name: "next", label: "Next", tasks: {} },
-    inprogress: { name: "inprogress", label: "In Progress", tasks: {} },
-    done: { name: "done", label: "Done", tasks: {} }
+    backlog: {
+      name: "backlog", label: "Backlog", icon: "assignment", tasks: {}
+    },
+    next: {
+      name: "next", label: "Next", icon: "label_important", tasks: {}
+    },
+    inprogress: {
+      name: "inprogress", label: "In Progress", icon: "sync", tasks: {}
+    },
+    done: {
+      name: "done", label: "Done", icon: "done_all", tasks: {}
+    }
   };
   private _ledger_by_taskid: {[id: string]: Ledger} = {};
   private _archived_tasks: {[id: string]: TaskArchiveEntry} = {};
@@ -349,6 +358,13 @@ export class TaskService {
       return "";
     }
     return this._ledger_by_name[ledgername].label;
+  }
+
+  public getLedgerIcon(ledgername: string): string {
+    if (!(ledgername in this._ledger_by_name)) {
+      return "";
+    }
+    return this._ledger_by_name[ledgername].icon;
   }
 
   public getArchive(): BehaviorSubject<TaskArchiveEntry[]> {

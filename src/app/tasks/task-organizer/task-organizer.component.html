@@ -1,124 +1,112 @@
-<mat-tab-group>
+<mat-sidenav-container class="sidenav-container">
 
-  <mat-tab *ngFor="let ledger of getLedgers()">
-
-    <ng-template mat-tab-label>
-      {{ledger.label}} {{getLedgerSize(ledger.name)|async}}
-    </ng-template>
-    <ng-template matTabContent>
-
-      <!-- options expansion panel -->
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <div fxLayout="row" fxLayoutAlign="space-between center"
-                style="width: 100%">
-              <!-- filter button -->
+  <mat-sidenav role="navigation" mode="side" [opened]="true"
+      class="sidenav-menu">
+    
+      <mat-nav-list>
+        <div *ngFor="let ledger of ledgers" fxLayout="column">
+          <div fxLayout="row" fxLayoutAlign="space-between center">
+            <a mat-list-item (click)="selectLedger(ledger)">
               <div fxLayout="row" fxLayoutAlign="start center">
-                <mat-icon>filter_list</mat-icon>
-                <span style="padding-left: 10px;">Options</span>
-              </div>
-
-              <div fxLayout="row"> <!-- filters list -->
-                <span *ngFor="let filter of getFilters()|keyvalue"
-                    style="padding-left: 10px;">
-                  <strong>{{filter.key}}: </strong>
-                  {{filter.value}}
-                </span>
-                <div *ngIf="hasFilter()"
-                    style="padding-left: 10px; padding-right: 10px;">
-                  <mat-divider [vertical]="true" style="height: 24px">
-                  </mat-divider>
-                </div>
-                <span>
-                  <strong>sort by: </strong> {{getSorting().sortby}}
-                  <strong *ngIf="getSorting().ascending">ascending</strong>
-                  <strong *ngIf="!getSorting().ascending">descending</strong>
+                <mat-icon>{{ledger.icon}}</mat-icon>
+                <span class="menu-entry">
+                  {{ledger.label}} {{getLedgerSize(ledger.name)|async}}
                 </span>
               </div>
-
-              <span></span>
-
+            </a>          
+            <span></span>
+            <div>
+              <mat-icon *ngIf="selected_ledger === ledger.name">
+                play_arrow
+              </mat-icon>
             </div>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        
-        <!-- panel contents -->
-        <div fxLayout="row" fxLayoutAlign="start center"
-            style="margin-top: 10px">
-
-          <!-- filters -->
-          <div fxLayout="column" fxLayoutAlign="center start">
-
+          </div>
+          <mat-divider></mat-divider>
+        </div>
+        <a mat-list-item (click)="toggleOptionsMenu()">
+          <div fxLayout="row" fxLayoutAlign="start center">
+            <mat-icon>filter_list</mat-icon>
+            <span class="menu-entry">Options</span>
+          </div>
+        </a>
+        <div *ngIf="show_options_menu" fxLayout="column">
+          <div
+              fxLayout="column" class="filter-menu"
+              [formGroup]="filter_form_group">
             <span><strong>Filters</strong></span>
-            <div fxLayout="row" fxLayoutAlign="start center"
-                [formGroup]="filter_form_group">
-              <!-- filter by project -->
-              <mat-form-field>
-                <mat-label>Project</mat-label>
-                <mat-select multiple formControlName="project"
-                    (selectionChange)="projectFilterChanged($event)">
-                  <mat-option
-                      *ngFor="let project of getProjects()|async"
-                      [value]="project">
-                    {{project}}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-              <span style="width: 40px"></span>
-              <!-- filter by title -->
-              <mat-form-field style="width: 30em">
-                <mat-label>Title</mat-label>
-                <input matInput formControlName="title"
-                    (keyup)="titleFilterChanged($event)"/>
-              </mat-form-field>
-            </div>
-          </div> <!-- /filters -->
-
-          <span style="width: 40px"></span> <!-- spacer -->
-          <div>
-            <mat-divider [vertical]="true" style="height: 86px"></mat-divider>
+            <mat-form-field style="width: 200px">
+              <mat-label>Project</mat-label>
+              <mat-select multiple formControlName="project"
+                  (selectionChange)="projectFilterChanged($event)">
+                <mat-option
+                    *ngFor="let project of getProjects()|async"
+                    [value]="project">
+                  {{project}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 200px">
+              <mat-label>Title</mat-label>
+              <input matInput formControlName="title"
+                  (keyup)="titleFilterChanged($event)"/>
+            </mat-form-field>
           </div>
-          <span style="width: 40px"></span> <!-- spacer -->
 
-          <!-- sort -->
-          <div fxLayout="column" fxLayoutAlign="center start">
+          <mat-divider class="filter-menu-divider"></mat-divider>
 
+          <div fxLayout="column" class="filter-menu"
+              [formGroup]="sorting_form_group">
             <span><strong>Sort By</strong></span>
-            <div fxLayout="row" fxLayoutAlign="start center"
-                [formGroup]="sorting_form_group">
-              <!-- sort by field -->
-              <mat-form-field>
-                <mat-label>Field</mat-label>
-                <mat-select formControlName="field"
-                    (selectionChange)="sortingFieldChanged($event)">
-                  <mat-option value="title">Title</mat-option>
-                  <mat-option value="creation">Creation</mat-option>
-                  <mat-option value="duration">Duration</mat-option>
-                  <mat-option value="project">Project</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <span style="width: 40px"></span> <!-- spacer -->
-              <!-- ascending / descending -->
-              <mat-form-field>
-                <mat-label>Direction</mat-label>
-                <mat-select formControlName="direction"
-                    (selectionChange)="sortingDirectionChanged($event)">
-                  <mat-option value="asc">Ascending</mat-option>
-                  <mat-option value="desc">Descending</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
+            <mat-form-field style="width: 200px">
+              <mat-label>Field</mat-label>
+              <mat-select formControlName="field"
+                  (selectionChange)="sortingFieldChanged($event)">
+                <mat-option value="title">Title</mat-option>
+                <mat-option value="creation">Creation</mat-option>
+                <mat-option value="duration">Duration</mat-option>
+                <mat-option value="project">Project</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 200px">
+              <mat-label>Direction</mat-label>
+              <mat-select formControlName="direction"
+                  (selectionChange)="sortingDirectionChanged($event)">
+                <mat-option value="asc">Ascending</mat-option>
+                <mat-option value="desc">Descending</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
-      
-        </div> <!-- /panel contents-->
 
-      </mat-expansion-panel>
-      
+        </div>
+        <mat-divider></mat-divider>
+      </mat-nav-list>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-card class="filters-card">
+      <div fxLayout="row" fxLayoutAlign="center center">
+        <span *ngFor="let filter of getFilters()|keyvalue" class="filter-entry">
+          <strong>{{filter.key}}:</strong> {{filter.value}}
+        </span>
+        <div *ngIf="hasFilter()" class="filter-divider-container">
+          <mat-divider [vertical]="true" class="filter-divider"></mat-divider>
+        </div>
+        <span>
+          <strong>sort by: </strong> {{getSorting().sortby}}
+          <strong *ngIf="getSorting().ascending">ascending</strong>
+          <strong *ngIf="!getSorting().ascending">descending</strong>
+        </span>
+      </div>
+      <span></span>
+    </mat-card>
+    <div *ngFor="let ledger of ledgers">
       <app-task-ledger [ledger]="ledger.name"
-          [filters]="filters$" [sorting]="sorting$">
+          [filters]="filters$" [sorting]="sorting$"
+          *ngIf="ledger.name === selected_ledger">
       </app-task-ledger>
-    </ng-template>
-  </mat-tab>
+    </div>
 
-</mat-tab-group>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

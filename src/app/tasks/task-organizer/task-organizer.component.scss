@@ -1,3 +1,55 @@
 .mat-expansion-panel-header {
     height: 30px;
 }
+
+.sidenav-container {
+    height: calc(100vh - 64px - 20px - 20px);
+    width: 100%;
+}
+
+.sidenav-menu {
+    width: 270px;
+}
+
+.menu-entry {
+    padding-left: 10px;
+}
+
+.sidenav-content {
+    height: calc(100vh - 64px - 20px);
+    width: calc(100% - 270px);
+}
+
+.ledger {
+    width: 100%;
+}
+
+.ledger-entry {
+    height: 100%;
+}
+
+.filters-card.mat-card {
+    padding: 10px;
+}
+
+.filter-entry {
+    padding-left: 10px;
+}
+
+.filter-divider-container {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.filter-divider {
+    height: 24px;
+}
+
+.filter-menu {
+    padding-left: 20px;
+}
+
+.filter-menu-divider {
+    margin: 20px;
+    margin-top: 10px;
+}

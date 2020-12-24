@@ -9,6 +9,7 @@ import { TaskFilterItem, TaskSortItem } from './task-list-options';
 declare type LedgerEntry = {
   name: string;
   label: string;
+  icon: string;
 };
 
 @Component({
@@ -18,7 +19,11 @@ declare type LedgerEntry = {
 })
 export class TaskOrganizerComponent implements OnInit {
 
-  private _ledgers: LedgerEntry[] = [];
+  public ledgers: LedgerEntry[] = [];
+  public selected_ledger: string;
+
+  public show_options_menu: boolean = false;
+
   private _ledger_sizes: {[id: string]: BehaviorSubject<string>} = {};
 
   private _has_project_filter: boolean = false;
@@ -60,7 +65,12 @@ export class TaskOrganizerComponent implements OnInit {
   public ngOnInit(): void {
     this._tasks_svc.getLedgersNames().forEach( (ledgername: string) => {
       const ledgerlabel: string = this._tasks_svc.getLedgerLabel(ledgername);
-      this._ledgers.push({name: ledgername, label: ledgerlabel});
+      const ledgericon: string = this._tasks_svc.getLedgerIcon(ledgername);
+      this.ledgers.push({
+        name: ledgername, label: ledgerlabel, icon: ledgericon
+      });
+      this.selected_ledger =
+        (this.ledgers.length > 0 ? this.ledgers[0].name : "");
       this._ledger_sizes[ledgername] = new BehaviorSubject<string>("");
       this._subscribeSize(ledgername);
     });
@@ -78,13 +88,21 @@ export class TaskOrganizerComponent implements OnInit {
     });
   }
 
+  public toggleOptionsMenu(): void {
+    this.show_options_menu = !this.show_options_menu;
+  }
+
+  public selectLedger(ledger: LedgerEntry): void {
+    this.selected_ledger = ledger.name;
+  }
+
   public getLedgerSize(ledgername: string): BehaviorSubject<string> {
     console.assert(ledgername in this._ledger_sizes);
     return this._ledger_sizes[ledgername];
   }
 
   public getLedgers(): LedgerEntry[] {
-    return this._ledgers;
+    return this.ledgers;
   }
 
   public getProjects(): BehaviorSubject<string[]> {
