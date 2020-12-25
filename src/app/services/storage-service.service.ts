@@ -9,12 +9,13 @@ import {
 import * as triplesec from 'triplesec/browser/triplesec';
 import { Mutex } from 'async-mutex';
 import { set as idbset, get as idbget, del as idbdel } from 'idb-keyval';
-import { rejects } from 'assert';
+import { LabelsService, LabelsStorageDataItem } from './labels-service.service';
 
 
 export interface StorageDataItem {
   tasks?: TasksStorageDataItem;
   projects?: ProjectsStorageDataItem;
+  labels?: LabelsStorageDataItem;
 }
 
 export interface StorageItem {
@@ -46,7 +47,8 @@ export class StorageService {
 
   public constructor(
     private _tasks_svc: TaskService,
-    private _projects_svc: ProjectsService
+    private _projects_svc: ProjectsService,
+    private _labels_svc: LabelsService
   ) {
     this._initState();
 
@@ -67,6 +69,15 @@ export class StorageService {
         this._handleProjectData(item);
       }
     });
+
+    this._labels_svc.getStorageObserver().subscribe({
+      next: (item: LabelsStorageDataItem) => {
+        if (!item) {
+          return;
+        }
+        this._handleLabelsData(item);
+      }
+    })
   }
 
   private async _initStorage(): Promise<void> {
@@ -120,6 +131,10 @@ export class StorageService {
 
         this._tasks_svc.stateLoad(this._current_state.data.tasks);
         this._projects_svc.stateLoad(this._current_state.data.projects);
+        if (!("labels" in this._current_state.data)) {
+          this._current_state.data.labels = this._labels_svc.getInitState();
+        }
+        this._labels_svc.stateLoad(this._current_state.data.labels);
         resolve();
       })
       .catch( (err: string) => {
@@ -275,6 +290,13 @@ export class StorageService {
     item: ProjectsStorageDataItem
   ): Promise<void> {
     this._current_state.data.projects = item;
+    this._commitState();
+  }
+
+  private async _handleLabelsData(
+    item: LabelsStorageDataItem
+  ): Promise<void> {
+    this._current_state.data.labels = item;
     this._commitState();
   }
 
