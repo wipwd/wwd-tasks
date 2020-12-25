@@ -64,7 +64,7 @@ export class LabelsService {
     return this._storage_subject;
   }
 
-  public getInitSTate(): LabelsStorageDataItem {
+  public getInitState(): LabelsStorageDataItem {
     return this._getCurrentState();
   }
 
