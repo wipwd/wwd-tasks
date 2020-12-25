@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { set as idbset, get as idbget } from 'idb-keyval';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ProjectsStorageDataItem {
