@@ -10,7 +10,18 @@
 
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>Name</th>
-      <td mat-cell *matCellDef="let label">{{label.name}}</td>
+      <td mat-cell *matCellDef="let label" style="min-width: 300px;">
+        <div *ngIf="edit_label_id !== label.id">
+          <span>{{label.name}}</span>
+        </div>
+        <div *ngIf="edit_label_id === label.id">
+          <mat-form-field style="width: 300px">
+            <mat-label>Label Name</mat-label>
+            <input matInput (keyup.enter)="submitLabelRename(label)"
+                [formControl]="label_rename_form_ctrl"/>
+          </mat-form-field>
+        </div>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="numtasks">
@@ -22,8 +33,11 @@
       <th mat-header-cell *matHeaderCellDef></th>
       <td mat-cell *matCellDef="let label">
         <div fxLayout="row" fxLayoutAlign="start center">
-          <button mat-icon-button type="button" (click)="renameLabel(label)">
-            <mat-icon>edit</mat-icon>
+          <button mat-icon-button type="button"
+              (click)="toggleRenameLabel(label)"
+              [disabled]="edit_label_id > 0 && edit_label_id !== label.id">
+            <mat-icon *ngIf="edit_label_id !== label.id">edit</mat-icon>
+            <mat-icon *ngIf="edit_label_id === label.id">cancel</mat-icon>
           </button>
           <span style="width: 20px"></span>
           <button mat-icon-button type="button" (click)="removeLabel(label)">
