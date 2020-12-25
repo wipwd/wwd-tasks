@@ -111,6 +111,8 @@ export class LabelsService {
 
     const label: Label = this._labels[_old];
     label.name = _new;
+    this._labels[_new] = label;
+    delete this._labels[_old];
     this._stateSave();
     this._updateSubjects();
   }
