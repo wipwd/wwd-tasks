@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, interval, Subscription } from 'rxjs';
+import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskLedgerEntry, TaskService, getTimeDiffStr
 } from '../../services/task-service.service';
@@ -21,8 +22,11 @@ export class TaskItemComponent implements OnInit {
     new BehaviorSubject<string>("");
   private _running_check_interval_subscription: Subscription;
 
+  private _projects: ProjectsMap = {};
+
   public constructor(
     private _tasks_svc: TaskService,
+    private _projects_svc: ProjectsService,
     private _edit_task_dialog: MatDialog,
     private _task_info_dialog: MatDialog,
     private _task_delete_dialog: MatDialog,
@@ -35,18 +39,27 @@ export class TaskItemComponent implements OnInit {
     } else {
       this._updateTimer();
     }
+
+    this._projects_svc.getProjects().subscribe({
+      next: (projects: ProjectsMap) => {
+        this._projects = projects;
+      }
+    });
   }
 
-  public hasProjects(): boolean {
-    return this.task.item.project.length > 0;
+  public hasProject(): boolean {
+    return this.task.item.project > 0;
   }
 
-  public getProjects(): string {
-    const str: string = (
-      typeof this.task.item.project === "string" ?
-        this.task.item.project :
-        this.task.item.project.join(', ')
-    );
+  public getProject(): string {
+    let str: string = "";
+    if (typeof this.task.item.project === "string") {
+      str = this.task.item.project;
+    } else if (typeof this.task.item.project === "number") {
+      str = this._projects[this.task.item.project].name;
+    } else {
+      str = this.task.item.project.join(", ");
+    }
     if (str !== "") {
       return `on ${str}`;
     }

@@ -104,7 +104,7 @@ export class WeeklyReportDataSource extends DataSource<WeeklyTaskItem> {
         this._filter_project.forEach( (project: string) => {
           if (included) {
             return;
-          } else if (entry.task.project.includes(project)) {
+          } else if (entry.task.project === project) {
             included = true;
             tasks.push(entry);
             time_spent += entry.spent_seconds;

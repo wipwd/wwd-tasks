@@ -73,6 +73,13 @@ export class ProjectsService {
     return this._projects_subject;
   }
 
+  public getProjectByName(name: string): ProjectItem|undefined {
+    if (!(name in this._projects_by_name)) {
+      return undefined;
+    }
+    return this._projects_by_name[name];
+  }
+
   public add(_name: string): void {
     if (!_name || _name === "") {
       return;

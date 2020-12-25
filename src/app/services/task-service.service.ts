@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { ProjectItem, ProjectsService } from './projects-service.service';
 
 
 export interface TaskTimerItem {
@@ -20,7 +21,7 @@ export interface TaskNoteItem {
 export interface TaskItem {
   title: string;
   priority: string;
-  project: string[] | string;
+  project: string[] | string | number;
   url: string;
   date?: Date;
   timer?: TaskTimerState;
@@ -577,7 +578,7 @@ export class TaskService {
   }
 
   private _convertProjectFormat(task: TaskItem): void {
-    if (typeof task.project === "string") {
+    if (typeof task.project === "string" || typeof task.project === "number") {
       return; // nothing to do.
     } else if (!Array.isArray(task.project)) {
       throw new Error("task projects is not an array nor a string");
@@ -586,6 +587,41 @@ export class TaskService {
       (task.project as string[]).length === 0 ? "" : task.project[0]
     );
     task.project = project;
+  }
+
+  private _convertTaskProjectToID(
+    taskitem: TaskItem,
+    projects_svc: ProjectsService
+  ): void {
+
+    if (typeof taskitem.project === "number") {
+      return;
+    } else if (typeof taskitem.project !== "string") {
+      throw new Error("task project is not a number nor a string");
+    }
+    const pname: string = taskitem.project;
+    if (!pname || pname === "") {
+      taskitem.project = 0;
+      return;
+    }
+    const project: ProjectItem = projects_svc.getProjectByName(pname);
+    let pid: number = 0;
+    if (!project) {
+      console.error(`projects-svc > can't find project ${pname}'s id`);
+    } else {
+      pid = project.id;
+    }
+    taskitem.project = pid;
+  }
+
+  public convertProjectsToIDs(projects_svc: ProjectsService): void {
+    
+    const data: TasksStorageDataItem = this._getCurrentState();
+    data.tasks.forEach( (taskitem: IDBTaskItem) => {
+      this._convertTaskProjectToID(taskitem.item, projects_svc);
+    });
+
+    this._stateSave();
   }
 
 }

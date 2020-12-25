@@ -229,8 +229,14 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
   }
 
   private _compareProject(a: TaskItem, b: TaskItem, isAsc: boolean): number {
-    const proj_a: string = (a.project.length > 0 ? a.project[0] : "");
-    const proj_b: string = (b.project.length > 0 ? b.project[0] : "");
+    const proj_a: string|number = (
+      (typeof a.project === "string" || typeof a.project === "number") ?
+        a.project : a.project[0]
+    );
+    const proj_b: string|number = (
+      (typeof b.project === "string" || typeof b.project === "number") ?
+        b.project : b.project[0]
+    );
     return compare(proj_a, proj_b, isAsc);
   }
 }

@@ -135,6 +135,7 @@ export class StorageService {
           this._current_state.data.labels = this._labels_svc.getInitState();
         }
         this._labels_svc.stateLoad(this._current_state.data.labels);
+
         resolve();
       })
       .catch( (err: string) => {
@@ -156,7 +157,12 @@ export class StorageService {
     .finally( () => {
       console.log("mutex > release > _initState");
       this._state_mutex.release();
+      this._initServices();
     });
+  }
+
+  private _initServices(): void {
+    this._tasks_svc.convertProjectsToIDs(this._projects_svc);
   }
 
   private async _upgradeStore(version: number): Promise<void> {
@@ -261,12 +267,13 @@ export class StorageService {
 
   private async _commitState(): Promise<void> {
     return new Promise<void>( (resolve, reject) => {
-      console.log("committing state...");
+      console.log(`committing state (locked ${this._state_mutex.isLocked()})`);
       this._state_mutex.acquire()
       .then( async () => {
         console.log("mutex > acquire > _commitState");
         if (!this._is_init) {
           console.log("storage not init");
+          reject();
           return;
         }
         const old_hash: string = this._current_state.hash;
