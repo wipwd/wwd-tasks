@@ -10,7 +10,7 @@
 
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>Name</th>
-      <td mat-cell *matCellDef="let label">{{label}}</td>
+      <td mat-cell *matCellDef="let label">{{label.name}}</td>
     </ng-container>
 
     <ng-container matColumnDef="numtasks">
@@ -20,7 +20,17 @@
 
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef></th>
-      <td mat-cell *matCellDef="let label">remove/rename</td>
+      <td mat-cell *matCellDef="let label">
+        <div fxLayout="row" fxLayoutAlign="start center">
+          <button mat-icon-button type="button" (click)="renameLabel(label)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <span style="width: 20px"></span>
+          <button mat-icon-button type="button" (click)="removeLabel(label)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="['name', 'numtasks', 'actions']"></tr>
