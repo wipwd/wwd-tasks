@@ -31,24 +31,11 @@
 
         <mat-card class="settings-item-card">
           <mat-card-header>
-            <mat-card-title>Projects</mat-card-title>
+            <mat-card-title>Projects & Labels</mat-card-title>
           </mat-card-header>
           
-          <mat-form-field style="width: 100%">
-            <mat-chip-list #projectList aria-label="Projects List">
-              <mat-chip *ngFor="let project of getProjects()|async"
-                  [selectable]="false" [removable]="true"
-                  (removed)="removeProject(project)">
-                {{project}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-              <input placeholder="Add new project"
-                  [formControl]="project_form_ctrl"
-                  [matChipInputFor]="projectList"
-                  [matChipInputSeparatorKeyCodes]="chip_separator_codes"
-                  (matChipInputTokenEnd)="addProject($event)">
-            </mat-chip-list>
-          </mat-form-field>
+          <app-settings-projects-labels></app-settings-projects-labels>
+          
           </mat-card>
       </div>
 

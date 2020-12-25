@@ -62,6 +62,9 @@ import { TaskAddFromGithubComponent } from './tasks/task-add/task-add-from-githu
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatMomentDateModule, MAT_MOMENT_DATE_ADAPTER_OPTIONS, MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import { SettingsProjectsLabelsComponent } from './settings/settings-projects-labels/settings-projects-labels.component';
+import { SettingsLabelsComponent } from './settings/settings-projects-labels/settings-labels/settings-labels.component';
+import { SettingsProjectsComponent } from './settings/settings-projects-labels/settings-projects/settings-projects.component';
 
 
 
@@ -91,6 +94,9 @@ import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/materia
     WeeklyReportComponent,
     TaskAddManuallyComponent,
     TaskAddFromGithubComponent,
+    SettingsProjectsLabelsComponent,
+    SettingsLabelsComponent,
+    SettingsProjectsComponent,
   ],
   imports: [
     BrowserModule,

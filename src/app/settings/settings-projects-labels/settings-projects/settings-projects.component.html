@@ -1,0 +1,51 @@
+<div fxLayout="column" fxLayoutAlign="start start"
+    style="width: 100%;">
+  <!-- <mat-form-field style="width: 100%">
+    <mat-chip-list #projectList aria-label="Projects List">
+      <mat-chip *ngFor="let project of getProjects()|async"
+          [selectable]="false" [removable]="true"
+          (removed)="removeProject(project)">
+        {{project}}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+      <input placeholder="Add new project"
+          [formControl]="project_form_ctrl"
+          [matChipInputFor]="projectList"
+          [matChipInputSeparatorKeyCodes]="chip_separator_codes"
+          (matChipInputTokenEnd)="addProject($event)">
+    </mat-chip-list>
+  </mat-form-field> -->
+
+  <mat-form-field style="width: 300px">
+    <mat-label>New Project Name</mat-label>
+    <input matInput (keyup.enter)="addProject()"
+        [formControl]="project_add_form_ctrl"/>
+  </mat-form-field>
+
+  <table mat-table [dataSource]="projects" style="width: 100%">
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let project">{{project}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="numtasks">
+      <th mat-header-cell *matHeaderCellDef># Tasks</th>
+      <td mat-cell *matCellDef="let project">N/A</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let project">remove/rename</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="['name', 'numtasks', 'actions']"></tr>
+    <tr mat-row
+        *matRowDef="let project_row; columns: ['name', 'numtasks', 'actions']">
+    </tr>
+
+  </table>
+
+
+
+</div>
