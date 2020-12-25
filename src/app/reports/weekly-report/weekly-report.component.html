@@ -13,7 +13,7 @@
       <mat-form-field appearance="fill">
         <mat-label>Filter by Project</mat-label>
         <mat-select (selectionChange)="selectProject($event)" multiple>
-          <mat-option *ngFor="let p of getProjects()|async" [value]="p">
+          <mat-option *ngFor="let p of projects" [value]="p">
             {{p}}
           </mat-option>
         </mat-select>

@@ -39,7 +39,7 @@
               <mat-select multiple formControlName="project"
                   (selectionChange)="projectFilterChanged($event)">
                 <mat-option
-                    *ngFor="let project of getProjects()|async"
+                    *ngFor="let project of projects"
                     [value]="project">
                   {{project}}
                 </mat-option>

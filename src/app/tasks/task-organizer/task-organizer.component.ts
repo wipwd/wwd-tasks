@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
-import { ProjectsService } from 'src/app/services/projects-service.service';
+import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskService } from '../../services/task-service.service';
 import { TaskFilterItem, TaskSortItem } from './task-list-options';
 import { InOutAnimation } from '../../animations';
@@ -51,6 +51,8 @@ export class TaskOrganizerComponent implements OnInit {
   public filter_form_group: FormGroup;
   public sorting_form_group: FormGroup;
 
+  public projects: string[] = [];
+
 
   public constructor(
     private _tasks_svc: TaskService,
@@ -78,6 +80,16 @@ export class TaskOrganizerComponent implements OnInit {
         (this.ledgers.length > 0 ? this.ledgers[0].name : "");
       this._ledger_sizes[ledgername] = new BehaviorSubject<string>("");
       this._subscribeSize(ledgername);
+    });
+
+    this._projects_svc.getProjects().subscribe({
+      next: (projects: ProjectsMap) => {
+        const project_names: string[] = [];
+        Object.values(projects).forEach( (item: ProjectItem) => {
+          project_names.push(item.name);
+        });
+        this.projects = [...project_names];
+      }
     });
   }
 
@@ -108,10 +120,6 @@ export class TaskOrganizerComponent implements OnInit {
 
   public getLedgers(): LedgerEntry[] {
     return this.ledgers;
-  }
-
-  public getProjects(): BehaviorSubject<string[]> {
-    return this._projects_svc.getProjects();
   }
 
   public hasProjectFilter(): boolean {

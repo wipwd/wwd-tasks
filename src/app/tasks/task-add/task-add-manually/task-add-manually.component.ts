@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
-import { ProjectsService } from 'src/app/services/projects-service.service';
+import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskItem, TaskService } from 'src/app/services/task-service.service';
 
 @Component({
@@ -25,6 +25,8 @@ export class TaskAddManuallyComponent implements OnInit {
   public show_form_url: boolean = false;
   public show_form_notes: boolean = false;
 
+  public projects: string[] = [];
+
 
   public constructor(
     private _fb: FormBuilder,
@@ -45,7 +47,19 @@ export class TaskAddManuallyComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void { }
+  public ngOnInit(): void {
+
+    this._projects_svc.getProjects().subscribe({
+      next: (projects: ProjectsMap) => {
+        const project_names: string[] = [];
+        Object.values(projects).forEach( (item: ProjectItem) => {
+          project_names.push(item.name);
+        });
+        this.projects = [...project_names];
+      }
+    });
+
+  }
 
   public addNewTask(): void {
     if (!this.add_task_form_group.valid) {
@@ -73,10 +87,6 @@ export class TaskAddManuallyComponent implements OnInit {
     this._tasks_svc.add(task);
     console.log("add new task > ", task);
     this.finished.next(true);
-  }
-
-  public getProjects(): BehaviorSubject<string[]> {
-    return this._projects_svc.getProjects();
   }
 
 }

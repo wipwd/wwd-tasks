@@ -23,7 +23,7 @@
         <mat-label>Project</mat-label>
         <mat-select [formControl]="form_ctrl_project">
           <mat-option
-              *ngFor="let project of getProjects()|async"
+              *ngFor="let project of projects"
               value="{{project}}">
             {{project}}
           </mat-option>

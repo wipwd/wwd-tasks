@@ -5,7 +5,7 @@ import { MatTable } from '@angular/material/table';
 import { getTimeDiffStr, TaskNoteItem, TaskService } from 'src/app/services/task-service.service';
 import { DateRange, getCurrentWeek, WeeklyReportDataSource, WeeklyTaskItem } from './weekly-report-datasource';
 import * as moment from 'moment';
-import { ProjectsService } from 'src/app/services/projects-service.service';
+import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import { BehaviorSubject } from 'rxjs';
 import { MatSelectChange } from '@angular/material/select';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
@@ -129,6 +129,8 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
   public data_source: WeeklyReportDataSource;
   public displayedColumns = ["status", "prio", "title", "spent"];
 
+  public projects: string[] = [];
+
   private _date_range: DateRange = { };
 
   public constructor(
@@ -142,6 +144,16 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
     this.data_source = new WeeklyReportDataSource(this._tasks_svc);
     this._date_range = this._getCurrentWeek();
     this.data_source.setDateRange(this._date_range);
+
+    this._projects_svc.getProjects().subscribe({
+      next: (projects: ProjectsMap) => {
+        const project_names: string[] = [];
+        Object.values(projects).forEach( (item: ProjectItem) => {
+          project_names.push(item.name);
+        });
+        this.projects = [...project_names];
+      }
+    });
   }
 
   public ngAfterViewInit(): void {
@@ -231,10 +243,6 @@ export class WeeklyReportComponent implements AfterViewInit, OnInit {
 
   public getDateRangeEnd(): moment.Moment {
     return this._date_range.end;
-  }
-
-  public getProjects(): BehaviorSubject<string[]> {
-    return this._projects_svc.getProjects();
   }
 
   public selectProject(selection: MatSelectChange): void {

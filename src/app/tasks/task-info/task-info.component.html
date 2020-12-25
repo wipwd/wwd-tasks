@@ -50,7 +50,7 @@
           <mat-form-field>
             <mat-select formControlName="projects">
               <mat-option
-                  *ngFor="let project of getProjects()|async"
+                  *ngFor="let project of projects"
                   [value]="project">
                 {{project}}
               </mat-option>            

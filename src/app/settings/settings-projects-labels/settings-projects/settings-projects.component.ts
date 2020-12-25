@@ -2,7 +2,7 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
-import { ProjectsService } from 'src/app/services/projects-service.service';
+import { ProjectsService, ProjectsMap, ProjectItem } from '../../../services/projects-service.service';
 
 @Component({
   selector: 'app-settings-projects',
@@ -13,6 +13,7 @@ export class SettingsProjectsComponent implements OnInit {
 
   public project_add_form_ctrl: FormControl = new FormControl();
   public projects: string[] = [];
+  private _projects_by_name: {[id: string]: ProjectItem} = {};
 
   public constructor(
     private _projects_svc: ProjectsService
@@ -20,15 +21,15 @@ export class SettingsProjectsComponent implements OnInit {
 
   public ngOnInit(): void {
     this._projects_svc.getProjects().subscribe({
-      next: (projects: string[]) => {
-        this.projects = [...projects];
+      next: (projects: ProjectsMap) => {
+        const project_names: string[] = [];
+        Object.values(projects).forEach( (item: ProjectItem) => {
+          project_names.push(item.name);
+          this._projects_by_name[item.name] = item;
+        });
+        this.projects = [...project_names];
       }
     });
-  }
-
-
-  public getProjects(): BehaviorSubject<string[]> {
-    return this._projects_svc.getProjects();
   }
 
   public removeProject(name: string): void {

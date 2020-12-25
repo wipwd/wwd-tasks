@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BehaviorSubject } from 'rxjs';
-import { ProjectsService } from 'src/app/services/projects-service.service';
+import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskItem, TaskLedgerEntry, TaskTimerItem, getTimeDiffStr, TaskService
 } from '../../services/task-service.service';
@@ -24,6 +24,7 @@ export class TaskInfoComponent implements OnInit {
 
   // edit mode
   public edit_form_group: FormGroup;
+  public projects: string[];
 
   // timesheet add entry
   public add_entry_form_group: FormGroup;
@@ -82,7 +83,17 @@ export class TaskInfoComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void { }
+  public ngOnInit(): void {
+    this._projects_svc.getProjects().subscribe({
+      next: (projects: ProjectsMap) => {
+        const project_names: string[] = [];
+        Object.values(projects).forEach( (item: ProjectItem) => {
+          project_names.push(item.name);
+        });
+        this.projects = [...project_names];
+      }
+    })
+  }
 
   public _timeSpent(interval: TaskTimerItem): number {
     const start = interval.start;
@@ -191,7 +202,4 @@ export class TaskInfoComponent implements OnInit {
     return this._is_edit_mode;
   }
 
-  public getProjects(): BehaviorSubject<string[]> {
-    return this._projects_svc.getProjects();
-  }
 }

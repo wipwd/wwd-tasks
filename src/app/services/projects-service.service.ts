@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface ProjectsStorageDataItem {
-  projects: string[];
+export interface ProjectItem {
+  id: number;
+  name: string;
 }
 
-declare type ProjectsMap = {[id: string]: string};
+export interface ProjectsStorageDataItem {
+  projects?: string[];
+  projects_map?: {[id: number]: ProjectItem};
+  latest_id?: number;
+}
+
+export declare type ProjectsMap = {[id: number]: ProjectItem};
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +20,11 @@ declare type ProjectsMap = {[id: string]: string};
 export class ProjectsService {
 
   private _projects: ProjectsMap = {};
-  private _projects_subject: BehaviorSubject<string[]> =
-    new BehaviorSubject<string[]>([]);
+  private _projects_by_name: {[id: string]: ProjectItem} = {};
+  private _latest_used_id: number = 0;
+
+  private _projects_subject: BehaviorSubject<ProjectsMap> =
+    new BehaviorSubject<ProjectsMap>({});
   private _storage_subject: BehaviorSubject<ProjectsStorageDataItem|undefined> =
     new BehaviorSubject<ProjectsStorageDataItem|undefined>(undefined);
 
@@ -30,19 +40,23 @@ export class ProjectsService {
   }
 
   public stateLoad(data: ProjectsStorageDataItem): void {
-    this._stateLoad(data.projects);
+    this._convertToProjectsMap(data);
+    this._stateLoad(data.projects_map, data.latest_id);
   }
 
-  private _stateLoad(projects: string[]): void {
-    projects.forEach( (name: string) => {
-      this._projects[name] = name;
+  private _stateLoad(projects: ProjectsMap, latest_id: number ): void {
+    this._projects = projects;
+    Object.values(this._projects).forEach( (item: ProjectItem) => {
+      this._projects_by_name[item.name] = item;
     });
+    this._latest_used_id = latest_id;
     this._updateSubjects();
   }
 
   private _getCurrentState(): ProjectsStorageDataItem {
     return {
-      projects: Object.values(this._projects)
+      projects_map: this._projects,
+      latest_id: this._latest_used_id
     };
   }
 
@@ -52,31 +66,69 @@ export class ProjectsService {
   }
 
   private _updateSubjects(): void {
-    this._projects_subject.next(Object.values(this._projects));
+    this._projects_subject.next(this._projects);
   }
 
-  public getProjects(): BehaviorSubject<string[]> {
+  public getProjects(): BehaviorSubject<ProjectsMap> {
     return this._projects_subject;
   }
 
-  public add(name: string): void {
-    if (!name || name === "") {
+  public add(_name: string): void {
+    if (!_name || _name === "") {
       return;
     }
-    if (name in this._projects) {
+    if (_name in this._projects_by_name) {
       return;
     }
-    this._projects[name] = name;
+    const new_id = this._latest_used_id + 1;
+    this._latest_used_id = new_id;
+    const item: ProjectItem = { id: new_id, name: _name};
+    this._projects[new_id] = item;
+    this._projects_by_name[_name] = item;
     this._stateSave();
     this._updateSubjects();
   }
 
   public remove(name: string): void {
-    if (!name || name === "" || !(name in this._projects)) {
+    if (!name || name === "" || !(name in this._projects_by_name)) {
       return;
     }
-    delete this._projects[name];
+    const item: ProjectItem = this._projects_by_name[name];
+    delete this._projects[item.id];
+    delete this._projects_by_name[name];
     this._stateSave();
     this._updateSubjects();
+  }
+
+  private _convertToProjectsMap(data: ProjectsStorageDataItem): void {
+    if (!("projects_map" in data)) {
+      data.projects_map = {};
+    }
+    if (!("latest_id" in data)) {
+      data.latest_id = 0;
+    }
+    if (!("projects" in data) || !data.projects) {
+      return;
+    }
+    data.projects.forEach( (pname: string) => {
+      let exists: boolean = false;
+      Object.values(data.projects_map).forEach( (item: ProjectItem) => {
+        if (exists) {
+          return;
+        }
+        if (pname === item.name) {
+          exists = true;
+          return;
+        }
+      });
+      if (exists) {
+        return;
+      }
+
+      const new_id: number = data.latest_id + 1;
+      data.latest_id = new_id;
+      data.projects_map[new_id] = { id: new_id, name: pname };
+    });
+    data.projects = undefined;
   }
 }
