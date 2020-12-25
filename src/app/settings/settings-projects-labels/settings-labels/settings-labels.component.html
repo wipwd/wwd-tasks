@@ -1,1 +1,31 @@
-<p>settings-labels works!</p>
+<div fxLayout="column" fxLayoutAlign="start start" style="width: 100%">
+
+  <mat-form-field style="width: 300px">
+    <mat-label>New Label Name</mat-label>
+    <input matInput (keyup.enter)="addLabel()"
+        [formControl]="label_add_form_ctrl"/>
+  </mat-form-field>
+
+  <table mat-table [dataSource]="labels" style="width: 100%">
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let label">{{label}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="numtasks">
+      <th mat-header-cell *matHeaderCellDef># Tasks</th>
+      <td mat-cell *matCellDef="let label">N/A</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let label">remove/rename</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="['name', 'numtasks', 'actions']"></tr>
+    <tr mat-row
+        *matRowDef="let label; columns: ['name', 'numtasks', 'actions']"></tr>
+
+  </table>
+</div>

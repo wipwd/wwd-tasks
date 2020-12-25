@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-settings-labels',
@@ -7,9 +8,21 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SettingsLabelsComponent implements OnInit {
 
-  constructor() { }
+  public label_add_form_ctrl: FormControl = new FormControl("");
+  public labels: string[] = [];
 
-  ngOnInit(): void {
+  public constructor() { }
+
+  public ngOnInit(): void { }
+
+  public addLabel(): void {
+    const value: string = this.label_add_form_ctrl.value?.trim();
+    if (!value || value === "") {
+      return;
+    }
+    this.labels = [...this.labels, value];
+
+    this.label_add_form_ctrl.setValue("");
   }
 
 }
