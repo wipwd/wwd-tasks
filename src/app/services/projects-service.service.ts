@@ -80,6 +80,13 @@ export class ProjectsService {
     return this._projects_by_name[name];
   }
 
+  public getProjectByID(projid: number): ProjectItem|undefined {
+    if (!(projid in this._projects)) {
+      return undefined;
+    }
+    return this._projects[projid];
+  }
+
   public add(_name: string): void {
     if (!_name || _name === "") {
       return;

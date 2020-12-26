@@ -399,6 +399,32 @@ export class TaskService {
     this._updateLedgerSubjects(ledger);
   }
 
+  public updateTaskInBulk(tasklst: TaskItem[]): void {
+    if (tasklst.length === 0) {
+      return;
+    }
+
+    const updated_ledgers: Ledger[] = [];
+    tasklst.forEach( (task: TaskItem) => {
+      if (!("id" in task) || !task.id || task.id === "") {
+        return;
+      }
+
+      const ledger: Ledger = this._ledger_by_taskid[task.id];
+      const actual_task: TaskLedgerEntry = ledger.tasks[task.id];
+      actual_task.item = task;
+
+      if (!updated_ledgers.includes(ledger)) {
+        updated_ledgers.push(ledger);
+      }
+    });
+
+    this._stateSave();
+    updated_ledgers.forEach( (ledger: Ledger) => {
+      this._updateLedgerSubjects(ledger);
+    });
+  }
+
 
   public addTimerEntry(task: TaskLedgerEntry, from: Date, until: Date): void {
     console.log("task-svc > add timer entry on ", task);

@@ -27,7 +27,9 @@
 
     <ng-container matColumnDef="numtasks">
       <th mat-header-cell *matHeaderCellDef># Tasks</th>
-      <td mat-cell *matCellDef="let project">N/A</td>
+      <td mat-cell *matCellDef="let project">
+        {{num_tasks_by_project[project.id]}}
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="actions">
