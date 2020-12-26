@@ -19,6 +19,7 @@ export interface TaskNoteItem {
 }
 
 export interface TaskItem {
+  id?: string;
   title: string;
   priority: string;
   project: string[] | string | number;
@@ -172,6 +173,7 @@ export class TaskService {
       }
       this._convertStrToDate(task.item);
       this._convertProjectFormat(task.item);
+      this._convertToTaskWithID(task);
       this._ledger_by_name[task.ledger].tasks[task.id] = {
         id: task.id,
         item: task.item,
@@ -250,6 +252,7 @@ export class TaskService {
     // can't easily add multiple tasks at the same point in time. And we thus
     // avoid adding a new dependency on a uuid library.
     const taskid: string = new Date().getTime().toString();
+    task.id = taskid;
     this._ledger_by_name.backlog.tasks[taskid] = {
       id: taskid,
       item: task,
@@ -614,8 +617,15 @@ export class TaskService {
     taskitem.project = pid;
   }
 
+  private _convertToTaskWithID(task: IDBTaskItem): void {
+    if (task.item.id !== undefined && task.item.id !== "") {
+      return;
+    }
+    task.item.id = task.id;
+  }
+
   public convertProjectsToIDs(projects_svc: ProjectsService): void {
-    
+
     const data: TasksStorageDataItem = this._getCurrentState();
     data.tasks.forEach( (taskitem: IDBTaskItem) => {
       this._convertTaskProjectToID(taskitem.item, projects_svc);
