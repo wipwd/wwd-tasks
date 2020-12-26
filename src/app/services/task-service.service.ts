@@ -22,6 +22,7 @@ export interface TaskItem {
   id?: string;
   title: string;
   priority: string;
+  ledger?: string;
   project: string[] | string | number;
   url: string;
   date?: Date;
@@ -174,6 +175,7 @@ export class TaskService {
       this._convertStrToDate(task.item);
       this._convertProjectFormat(task.item);
       this._convertToTaskWithID(task.id, task.item);
+      this._convertToTaskWithLedger(task.ledger, task.item);
       this._ledger_by_name[task.ledger].tasks[task.id] = {
         id: task.id,
         item: task.item,
@@ -255,6 +257,7 @@ export class TaskService {
     // avoid adding a new dependency on a uuid library.
     const taskid: string = new Date().getTime().toString();
     task.id = taskid;
+    task.ledger = this._ledger_by_name.backlog.name;
     this._ledger_by_name.backlog.tasks[taskid] = {
       id: taskid,
       item: task,
@@ -284,6 +287,7 @@ export class TaskService {
     if (task.id in this._archived_tasks) {
       return;
     }
+    task.item.ledger = undefined;
     this._archived_tasks[task.id] = {
       id: task.id,
       item: task.item
@@ -302,6 +306,7 @@ export class TaskService {
     dest.tasks[task.id] = task;
     delete cur_ledger.tasks[task.id];
     task.ledger = dest;
+    task.item.ledger = dest.name;
     this._stateSave();
     this._updateLedgerSubjects(cur_ledger);
     this._updateLedgerSubjects(dest);
@@ -650,6 +655,14 @@ export class TaskService {
       return;
     }
     task.id = taskid;
+  }
+
+  private _convertToTaskWithLedger(ledgername: string, task: TaskItem): void {
+    if ((!!task.ledger && task.ledger !== "") ||
+        (!ledgername || ledgername === "")) {
+      return;
+    }
+    task.ledger = ledgername;
   }
 
   public convertProjectsToIDs(projects_svc: ProjectsService): void {
