@@ -107,6 +107,16 @@ export class ProjectsService {
     this._updateSubjects();
   }
 
+  public rename(old_name: string, new_name: string): void {
+    const item: ProjectItem = this.getProjectByName(old_name);
+    if (!item) {
+      return;
+    }
+    item.name = new_name;
+    this._stateSave();
+    this._updateSubjects();
+  }
+
   private _convertToProjectsMap(data: ProjectsStorageDataItem): void {
     if (!("projects_map" in data)) {
       data.projects_map = {};

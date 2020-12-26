@@ -12,7 +12,10 @@ import { ProjectsService, ProjectsMap, ProjectItem } from '../../../services/pro
 export class SettingsProjectsComponent implements OnInit {
 
   public project_add_form_ctrl: FormControl = new FormControl();
-  public projects: string[] = [];
+  public project_rename_form_ctrl: FormControl = new FormControl();
+  public projects: ProjectItem[] = [];
+  public edit_project_id: number = 0;
+
   private _projects_by_name: {[id: string]: ProjectItem} = {};
 
   public constructor(
@@ -22,18 +25,15 @@ export class SettingsProjectsComponent implements OnInit {
   public ngOnInit(): void {
     this._projects_svc.getProjects().subscribe({
       next: (projects: ProjectsMap) => {
-        const project_names: string[] = [];
-        Object.values(projects).forEach( (item: ProjectItem) => {
-          project_names.push(item.name);
-          this._projects_by_name[item.name] = item;
-        });
-        this.projects = [...project_names];
+        this.projects = [...Object.values(projects)];
       }
     });
   }
 
-  public removeProject(name: string): void {
-    this._projects_svc.remove(name);
+  public removeProject(project: ProjectItem): void {
+    this._projects_svc.remove(project.name);
+    this.project_rename_form_ctrl.setValue("");
+    this.edit_project_id = 0;
   }
 
   public addProject(): void {
@@ -43,6 +43,27 @@ export class SettingsProjectsComponent implements OnInit {
     }
     this._projects_svc.add(value);
     this.project_add_form_ctrl.setValue("");
+  }
+
+  public toggleRenameProject(project: ProjectItem): void {
+    this.edit_project_id = (this.edit_project_id > 0 ? 0 : project.id);
+    if (this.edit_project_id >= 0) {
+      this.project_rename_form_ctrl.setValue(project.name);
+    } else {
+      this.project_rename_form_ctrl.setValue("");
+    }
+  }
+
+  public submitProjectRename(project: ProjectItem): void {
+    const value: string = this.project_rename_form_ctrl.value?.trim();
+    if (!value || value === "") {
+      return;
+    }
+    const old_name: string = project.name;
+    const new_name: string = value;
+    this.edit_project_id = 0;
+    this.project_rename_form_ctrl.setValue("");
+    this._projects_svc.rename(old_name, new_name);
   }
 
 }
