@@ -173,7 +173,7 @@ export class TaskService {
       }
       this._convertStrToDate(task.item);
       this._convertProjectFormat(task.item);
-      this._convertToTaskWithID(task);
+      this._convertToTaskWithID(task.id, task.item);
       this._ledger_by_name[task.ledger].tasks[task.id] = {
         id: task.id,
         item: task.item,
@@ -193,6 +193,8 @@ export class TaskService {
     Object.keys(archive).forEach( (key: string) => {
       const entry: TaskArchiveEntry = archive[key];
       this._convertStrToDate(entry.item);
+      this._convertProjectFormat(entry.item);
+      this._convertToTaskWithID(entry.id, entry.item);
       this._archived_tasks[key] = entry;
     });
     this._updateArchiveSubject();
@@ -617,11 +619,11 @@ export class TaskService {
     taskitem.project = pid;
   }
 
-  private _convertToTaskWithID(task: IDBTaskItem): void {
-    if (task.item.id !== undefined && task.item.id !== "") {
+  private _convertToTaskWithID(taskid: string, task: TaskItem): void {
+    if (taskid !== undefined && taskid !== "") {
       return;
     }
-    task.item.id = task.id;
+    task.id = taskid;
   }
 
   public convertProjectsToIDs(projects_svc: ProjectsService): void {
@@ -629,6 +631,10 @@ export class TaskService {
     const data: TasksStorageDataItem = this._getCurrentState();
     data.tasks.forEach( (taskitem: IDBTaskItem) => {
       this._convertTaskProjectToID(taskitem.item, projects_svc);
+    });
+
+    Object.values(data.archives).forEach( (entry: TaskArchiveEntry) => {
+      this._convertTaskProjectToID(entry.item, projects_svc);
     });
 
     this._stateSave();
