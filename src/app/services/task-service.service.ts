@@ -646,7 +646,7 @@ export class TaskService {
   }
 
   private _convertToTaskWithID(taskid: string, task: TaskItem): void {
-    if (taskid !== undefined && taskid !== "") {
+    if (task.id !== undefined && task.id !== "") {
       return;
     }
     task.id = taskid;
