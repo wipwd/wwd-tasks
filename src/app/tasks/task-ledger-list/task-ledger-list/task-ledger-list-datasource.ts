@@ -134,24 +134,6 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
     return data.splice(startIndex, this.paginator.pageSize);
   }
 
-  /**
-   * Sort the data (client-side). If you're using server-side sorting,
-   * this would be replaced by requesting the appropriate data from the server.
-   */
-  private _getSortedData2(data: TaskLedgerEntry[]): TaskLedgerEntry[] {
-    if (!this.sort.active || this.sort.direction === '') {
-      return data;
-    }
-
-    return data.sort((a, b) => {
-      const isAsc = this.sort.direction === 'asc';
-      switch (this.sort.active) {
-        case 'title': return compare(a.item.title, b.item.title, isAsc);
-        default: return 0;
-      }
-    });
-  }
-
   private _getSortedData(data: TaskLedgerEntry[]): TaskLedgerEntry[] {
     console.log("sort data");
     return data.sort((a, b) => {
