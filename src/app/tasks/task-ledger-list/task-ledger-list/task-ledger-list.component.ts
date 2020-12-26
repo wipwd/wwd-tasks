@@ -3,6 +3,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { BehaviorSubject } from 'rxjs';
+import { ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskLedgerEntry, TaskService
 } from 'src/app/services/task-service.service';
@@ -28,14 +29,16 @@ export class TaskLedgerListComponent implements AfterViewInit, OnInit {
   public displayedColumns = ['id', 'name'];
 
   public constructor(
-    private _tasks_svc: TaskService
+    private _tasks_svc: TaskService,
+    private _projects_svc: ProjectsService,
   ) { }
 
   public ngOnInit(): void {
     this.data_source =
       new TaskLedgerListDataSource(
-        this._tasks_svc, this.ledger, this.prio, this.filters,
-        this.sorting
+        this._tasks_svc, this._projects_svc,
+        this.ledger, this.prio,
+        this.filters, this.sorting
       );
   }
 

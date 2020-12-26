@@ -7,6 +7,7 @@ import {
 } from 'rxjs';
 import { Ledger, TaskItem, TaskLedgerEntry, TaskService } from '../../../services/task-service.service';
 import { TaskFilterItem, TaskSortItem } from '../../task-organizer/task-list-options';
+import { ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 
 /**
  * Data source for the TaskLedgerList view. This class should
@@ -26,7 +27,7 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
 
   private _filtered_tasks_subject: BehaviorSubject<TaskLedgerEntry[]> =
     new BehaviorSubject<TaskLedgerEntry[]>([]);
-    
+
   private _ledger_subscription: Subscription;
   private _tasks_size_subject: BehaviorSubject<number> =
     new BehaviorSubject<number>(0);
@@ -36,8 +37,11 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
     sortby: "creation", ascending: false
   };
 
+  private _projects: ProjectsMap = {};
+
   constructor(
     private _tasks_svc: TaskService,
+    private _projects_svc: ProjectsService,
     private _ledgername: string,
     private _ledgerprio: string,
     private _filters_subject: BehaviorSubject<TaskFilterItem>,
@@ -57,6 +61,12 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
       next: (sort: TaskSortItem) => {
         console.log("updated sort: ", sort);
         this._sorting = sort;
+      }
+    });
+
+    this._projects_svc.getProjects().subscribe({
+      next: (projects: ProjectsMap) => {
+        this._projects = projects;
       }
     });
   }
@@ -152,7 +162,6 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
         case "duration": return this._compareDurations(a, b, isAsc);
         case "project": return this._compareProject(a.item, b.item, isAsc);
       }
-      
     });
   }
 
@@ -181,24 +190,14 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
     tasks.forEach( (task: TaskLedgerEntry) => {
       let done: boolean = false;
       if (has_project_filter) {
-        if (typeof task.item.project === "string") { // new version (v3)
-          if (this._filters.projects.includes(task.item.project)) {
-            filtered_tasks.push(task);
-            done = true;
-          }
-        } else { // old version (v2)
-          if (!Array.isArray(task.item.project)) {
-            throw new Error("format error on task item projects");
-          }
-          task.item.project.forEach( (project: string) => {
-            if (done) {
-              return;
-            }
-            if (this._filters.projects.includes(project)) {
-              filtered_tasks.push(task);
-              done = true;
-            }
-          });
+        if (typeof task.item.project !== "number") {
+          throw new Error("project type is not a number");
+        }
+        const projid: number = task.item.project;
+        const projname: string = this._projects[projid].name;
+        if (this._filters.projects.includes(projname)) {
+          filtered_tasks.push(task);
+          done = true;
         }
       }
       if (done) {
