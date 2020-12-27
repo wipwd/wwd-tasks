@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { BaseStorageService } from './base-storage-service';
 import { LedgerService } from './ledger-service.service';
 import { ProjectItem, ProjectsService } from './projects-service.service';
 
@@ -72,7 +73,8 @@ export declare type TaskItemMap = {[id: string]: TaskItem};
 @Injectable({
   providedIn: 'root'
 })
-export class TaskService {
+export class TaskService
+  extends BaseStorageService<TasksStorageDataItem>{
 
   private _archived_tasks: {[id: string]: TaskArchiveEntry} = {};
   private _tasks: TaskLedgerMap = {};
@@ -93,7 +95,9 @@ export class TaskService {
 
   public constructor(
     private _ledger_svc: LedgerService
-  ) { }
+  ) {
+    super();
+  }
 
   public getStorageObserver(): BehaviorSubject<TasksStorageDataItem|undefined> {
     return this._storage_subject;

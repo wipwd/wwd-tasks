@@ -77,7 +77,7 @@ export class StorageService {
         }
         this._handleLabelsData(item);
       }
-    })
+    });
   }
 
   private async _initStorage(): Promise<void> {

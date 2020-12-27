@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { BaseStorageService } from './base-storage-service';
 
 export interface ProjectItem {
   id: number;
@@ -17,7 +18,8 @@ export declare type ProjectsMap = {[id: number]: ProjectItem};
 @Injectable({
   providedIn: 'root'
 })
-export class ProjectsService {
+export class ProjectsService
+  extends BaseStorageService<ProjectsStorageDataItem> {
 
   private _projects: ProjectsMap = {};
   private _projects_by_name: {[id: string]: ProjectItem} = {};
@@ -28,7 +30,9 @@ export class ProjectsService {
   private _storage_subject: BehaviorSubject<ProjectsStorageDataItem|undefined> =
     new BehaviorSubject<ProjectsStorageDataItem|undefined>(undefined);
 
-  public constructor() { }
+  public constructor() {
+    super();
+  }
 
   public getStorageObserver(
   ): BehaviorSubject<ProjectsStorageDataItem|undefined> {

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { BaseStorageService } from './base-storage-service';
 
 
 export interface Label {
@@ -18,7 +19,8 @@ export interface LabelsStorageDataItem {
 @Injectable({
   providedIn: 'root'
 })
-export class LabelsService {
+export class LabelsService
+  extends BaseStorageService<LabelsStorageDataItem> {
 
   private _latest_label_id: number = 0;
   private _labels: LabelsMap = {};
@@ -30,7 +32,9 @@ export class LabelsService {
     new BehaviorSubject<LabelsStorageDataItem|undefined>(undefined);
 
 
-  public constructor() { }
+  public constructor() {
+    super();
+  }
 
   private _getCurrentState(): LabelsStorageDataItem {
     return { labels: this._labels, latest_id: this._latest_label_id };
