@@ -94,12 +94,12 @@ export class TaskOrganizerComponent implements OnInit {
   }
 
   private _subscribeSize(ledgername: string): void {
-    this._ledger_svc.getLedger(ledgername).subscribe({
-      next: (ledger: Ledger) => {
-        const size: number = Object.keys(ledger.tasks).length;
+
+    this._filtered_tasks_svc.getLedgerLength(ledgername).subscribe({
+      next: (numtasks: number) => {
         let str: string = "";
-        if (size > 0) {
-          str = `(${size})`;
+        if (numtasks > 0) {
+          str = `(${numtasks})`;
         }
         this._ledger_sizes[ledgername].next(str);
       }
