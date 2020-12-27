@@ -4,7 +4,6 @@ import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { BehaviorSubject } from 'rxjs';
 import { FilteredTasksService } from 'src/app/services/filtered-tasks-service.service';
-import { ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskLedgerEntry, TaskService
 } from 'src/app/services/task-service.service';
@@ -30,7 +29,6 @@ export class TaskLedgerListComponent implements AfterViewInit, OnInit {
 
   public constructor(
     private _tasks_svc: TaskService,
-    private _projects_svc: ProjectsService,
     private _filtered_tasks_svc: FilteredTasksService
   ) { }
 
@@ -39,7 +37,6 @@ export class TaskLedgerListComponent implements AfterViewInit, OnInit {
       new TaskLedgerListDataSource(
         this._filtered_tasks_svc,
         this._tasks_svc,
-        this._projects_svc,
         this.ledger, this.prio,
         this.sorting
       );

@@ -7,7 +7,6 @@ import {
 } from 'rxjs';
 import { TaskItem, TaskLedgerEntry, TaskService } from '../../../services/task-service.service';
 import { TaskSortItem } from '../../task-organizer/task-list-options';
-import { ProjectsService } from '../../../services/projects-service.service';
 import { FilteredTasksService } from '../../../services/filtered-tasks-service.service';
 
 /**
@@ -32,7 +31,6 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
   constructor(
     private _filtered_tasks_svc: FilteredTasksService,
     private _tasks_svc: TaskService,
-    private _projects_svc: ProjectsService,
     private _ledgername: string,
     private _ledgerprio: string,
     private _sorting_subject: BehaviorSubject<TaskSortItem>
