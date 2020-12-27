@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, interval, Subscription } from 'rxjs';
-import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
+import { ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskLedgerEntry, TaskService, getTimeDiffStr
 } from '../../services/task-service.service';
@@ -27,7 +27,6 @@ export class TaskItemComponent implements OnInit {
   public constructor(
     private _tasks_svc: TaskService,
     private _projects_svc: ProjectsService,
-    private _edit_task_dialog: MatDialog,
     private _task_info_dialog: MatDialog,
     private _task_delete_dialog: MatDialog,
     private _task_notes_dialog: MatDialog
