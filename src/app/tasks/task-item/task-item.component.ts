@@ -56,9 +56,11 @@ export class TaskItemComponent implements OnInit {
     if (typeof this.task.item.project === "string") {
       str = this.task.item.project;
     } else if (typeof this.task.item.project === "number") {
-      str = this._projects[this.task.item.project].name;
+      if (this.task.item.project > 0) {
+        str = this._projects[this.task.item.project].name;
+      }
     } else {
-      str = this.task.item.project.join(", ");
+      throw new Error(`unknown project type for task ${this.task.item.id}`);
     }
     if (str !== "") {
       return `on ${str}`;
