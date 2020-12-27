@@ -1,9 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import {
-  Ledger, TaskLedgerEntry, TaskLedgerMap, TaskService
-} from '../../services/task-service.service';
+import { TaskLedgerEntry } from '../../services/task-service.service';
 import { TaskFilterItem, TaskSortItem } from '../task-organizer/task-list-options';
+import { FilteredTasksService } from '../../services/filtered-tasks-service.service';
 
 
 declare interface Priority {
@@ -51,16 +50,17 @@ export class TaskLedgerComponent implements OnInit {
   };
 
   public constructor(
-    private _tasks_svc: TaskService
+    private _filtered_tasks_svc: FilteredTasksService
   ) { }
 
   public ngOnInit(): void {
-    this._tasks_svc.getLedger(this.ledger).subscribe({
-      next: (task_ledger: Ledger) => {
-        if (!task_ledger || Object.keys(task_ledger).length === 0) {
+    this._filtered_tasks_svc.getLedger(this.ledger).subscribe({
+      next: (tasks: TaskLedgerEntry[]) => {
+        console.log("task-ledger > tasks: ", tasks);
+        if (tasks.length === 0) {
           return;
         }
-        this._updateSizes(task_ledger.tasks);
+        this._updateSizes(tasks);
         this._maybeOpenPriorities();
       }
     });
@@ -99,12 +99,12 @@ export class TaskLedgerComponent implements OnInit {
     }
   }
 
-  private _updateSizes(tasks: TaskLedgerMap): void {
+  private _updateSizes(tasks: TaskLedgerEntry[]): void {
     let total_high: number = 0;
     let total_medium: number = 0;
     let total_low: number = 0;
 
-    Object.values(tasks).forEach( (entry: TaskLedgerEntry) => {
+    tasks.forEach( (entry: TaskLedgerEntry) => {
       switch (entry.item.priority) {
         case "high": total_high++; break;
         case "medium": total_medium++; break;
