@@ -102,8 +102,7 @@
     </mat-card>
     <div *ngFor="let ledger of ledgers">
       <div *ngIf="ledger.name === selected_ledger" @InOutAnimation>
-        <app-task-ledger [ledger]="ledger.name"
-            [filters]="filters$" [sorting]="sorting$">
+        <app-task-ledger [ledger]="ledger.name" [sorting]="sorting$">
         </app-task-ledger>
       </div>
     </div>

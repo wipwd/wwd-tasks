@@ -4,9 +4,10 @@ import { MatSelectChange } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
 import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import { Ledger, TaskService } from '../../services/task-service.service';
-import { TaskFilterItem, TaskSortItem } from './task-list-options';
+import { TaskSortItem } from './task-list-options';
 import { InOutAnimation } from '../../animations';
 import { LedgerService } from 'src/app/services/ledger-service.service';
+import { FilteredTasksService, TaskFilterOptions } from '../../services/filtered-tasks-service.service';
 
 
 declare type LedgerEntry = {
@@ -35,17 +36,12 @@ export class TaskOrganizerComponent implements OnInit {
   private _has_project_filter: boolean = false;
   private _has_title_filter: boolean = false;
 
-  private _filters: TaskFilterItem = {
-    projects: [],
-    title: ""
-  };
+  private _filters: TaskFilterOptions = {};
   private _sorting: TaskSortItem = {
     sortby: "creation",
     ascending: false
   };
 
-  public filters$: BehaviorSubject<TaskFilterItem> =
-    new BehaviorSubject<TaskFilterItem>({ projects: [], title: ""});
   public sorting$: BehaviorSubject<TaskSortItem> =
     new BehaviorSubject<TaskSortItem>(this._sorting);
 
@@ -59,7 +55,8 @@ export class TaskOrganizerComponent implements OnInit {
     private _tasks_svc: TaskService,
     private _fb: FormBuilder,
     private _projects_svc: ProjectsService,
-    private _ledger_svc: LedgerService
+    private _ledger_svc: LedgerService,
+    private _filtered_tasks_svc: FilteredTasksService
   ) {
     this.filter_form_group = this._fb.group({
       project: new FormControl([]),
@@ -73,7 +70,7 @@ export class TaskOrganizerComponent implements OnInit {
 
   public ngOnInit(): void {
 
-    this._tasks_svc.getLedgersNames().forEach( (ledgername: string) => {
+    this._ledger_svc.getLedgersNames().forEach( (ledgername: string) => {
       const ledgerlabel: string = this._tasks_svc.getLedgerLabel(ledgername);
       const ledgericon: string = this._tasks_svc.getLedgerIcon(ledgername);
       this.ledgers.push({
@@ -153,7 +150,7 @@ export class TaskOrganizerComponent implements OnInit {
     this._filters.projects = (event.value as string[]);
     this._has_project_filter =
       (!!event.value && this._filters.projects.length !== 0);
-    this.filters$.next(this._filters);
+    this._filtered_tasks_svc.setFilter(this._filters);
   }
 
   public titleFilterChanged(event): void {
@@ -161,7 +158,7 @@ export class TaskOrganizerComponent implements OnInit {
     console.log("title filter changed: ", event, ", value: ", titlestr);
     this._filters.title = titlestr;
     this._has_title_filter = (titlestr !== "");
-    this.filters$.next(this._filters);
+    this._filtered_tasks_svc.setFilter(this._filters);
   }
 
   private _sortingChanged(): void {

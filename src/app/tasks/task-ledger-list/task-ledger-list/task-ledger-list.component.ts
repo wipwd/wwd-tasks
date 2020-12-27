@@ -3,6 +3,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { BehaviorSubject } from 'rxjs';
+import { FilteredTasksService } from 'src/app/services/filtered-tasks-service.service';
 import { ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskLedgerEntry, TaskService
@@ -19,7 +20,6 @@ export class TaskLedgerListComponent implements AfterViewInit, OnInit {
 
   @Input() public ledger: string = "backlog";
   @Input() public prio: string = "medium";
-  @Input() public filters: BehaviorSubject<TaskFilterItem>;
   @Input() public sorting: BehaviorSubject<TaskSortItem>;
 
   @ViewChild(MatPaginator) public paginator: MatPaginator;
@@ -31,14 +31,17 @@ export class TaskLedgerListComponent implements AfterViewInit, OnInit {
   public constructor(
     private _tasks_svc: TaskService,
     private _projects_svc: ProjectsService,
+    private _filtered_tasks_svc: FilteredTasksService
   ) { }
 
   public ngOnInit(): void {
     this.data_source =
       new TaskLedgerListDataSource(
-        this._tasks_svc, this._projects_svc,
+        this._filtered_tasks_svc,
+        this._tasks_svc,
+        this._projects_svc,
         this.ledger, this.prio,
-        this.filters, this.sorting
+        this.sorting
       );
   }
 

@@ -22,7 +22,6 @@ declare interface Priority {
 export class TaskLedgerComponent implements OnInit {
 
   @Input() public ledger: string = "backlog";
-  @Input() public filters: BehaviorSubject<TaskFilterItem>;
   @Input() public sorting: BehaviorSubject<TaskSortItem>;
 
   public priorities: {[id: string]: Priority} = {

@@ -5,9 +5,10 @@ import { map } from 'rxjs/operators';
 import {
   Observable, merge, BehaviorSubject, Subscription
 } from 'rxjs';
-import { Ledger, TaskItem, TaskLedgerEntry, TaskService } from '../../../services/task-service.service';
-import { TaskFilterItem, TaskSortItem } from '../../task-organizer/task-list-options';
-import { ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
+import { TaskItem, TaskLedgerEntry, TaskService } from '../../../services/task-service.service';
+import { TaskSortItem } from '../../task-organizer/task-list-options';
+import { ProjectsMap, ProjectsService } from '../../../services/projects-service.service';
+import { FilteredTasksService } from '../../../services/filtered-tasks-service.service';
 
 /**
  * Data source for the TaskLedgerList view. This class should
@@ -19,54 +20,29 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
   public paginator: MatPaginator;
   public sort: MatSort;
 
-  private _tasks: TaskLedgerEntry[] = [];
-  private _filtered_tasks: TaskLedgerEntry[] = [];
+  public tasks: TaskLedgerEntry[] = [];
 
   private _tasks_subject: BehaviorSubject<TaskLedgerEntry[]> =
     new BehaviorSubject<TaskLedgerEntry[]>([]);
 
-  private _filtered_tasks_subject: BehaviorSubject<TaskLedgerEntry[]> =
-    new BehaviorSubject<TaskLedgerEntry[]>([]);
-
-  private _ledger_subscription: Subscription;
-  private _tasks_size_subject: BehaviorSubject<number> =
-    new BehaviorSubject<number>(0);
-
-  private _filters: TaskFilterItem = { projects: [], title: "" };
   private _sorting: TaskSortItem = {
     sortby: "creation", ascending: false
   };
 
-  private _projects: ProjectsMap = {};
-
   constructor(
+    private _filtered_tasks_svc: FilteredTasksService,
     private _tasks_svc: TaskService,
     private _projects_svc: ProjectsService,
     private _ledgername: string,
     private _ledgerprio: string,
-    private _filters_subject: BehaviorSubject<TaskFilterItem>,
     private _sorting_subject: BehaviorSubject<TaskSortItem>
   ) {
     super();
-
-    this._filters_subject.subscribe({
-      next: (filters: TaskFilterItem) => {
-        console.log("updated filters: ", filters);
-        this._filters = filters;
-        this._filterTasks(this._tasks);
-      }
-    });
 
     this._sorting_subject.subscribe({
       next: (sort: TaskSortItem) => {
         console.log("updated sort: ", sort);
         this._sorting = sort;
-      }
-    });
-
-    this._projects_svc.getProjects().subscribe({
-      next: (projects: ProjectsMap) => {
-        this._projects = projects;
       }
     });
   }
@@ -78,41 +54,34 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
    */
   public connect(): Observable<TaskLedgerEntry[]> {
 
-    this._ledger_subscription =
-      this._tasks_svc.getLedger(this._ledgername).subscribe({
-        next: (ledger: Ledger) => {
-          if (!ledger || Object.keys(ledger).length === 0) {
-            return;
+    this._filtered_tasks_svc.getLedger(this._ledgername).subscribe({
+      next: (filtered_tasks: TaskLedgerEntry[]) => {
+        const wanted_tasks: TaskLedgerEntry[] = [];
+        filtered_tasks.forEach( (task: TaskLedgerEntry) => {
+          if (task.item.priority === this._ledgerprio) {
+            wanted_tasks.push(task);
           }
-          this._updateLedger(ledger);
-        }
-      }
-    );
-
-    this._tasks_subject.subscribe({
-      next: (tasks: TaskLedgerEntry[]) => {
-        this._tasks = [...tasks];
-        this._filterTasks(this._tasks);
+        });
+        this._tasks_subject.next(wanted_tasks);
       }
     });
 
-    this._filtered_tasks_subject.subscribe({
+    this._tasks_subject.subscribe({
       next: (filtered_tasks: TaskLedgerEntry[]) => {
-        this._filtered_tasks = [...filtered_tasks];
-        console.log("filtered tasks: ", this._filtered_tasks);
+        this.tasks = [...filtered_tasks];
       }
     });
 
     // Combine everything that affects the rendered data into one update
     // stream for the data-table to consume.
     const dataMutations = [
-      this._filtered_tasks_subject,
+      this._tasks_subject,
       this.paginator.page,
       this._sorting_subject
     ];
 
     return merge(...dataMutations).pipe(map(() => {
-      return this._getPagedData(this._getSortedData([...this._filtered_tasks]));
+      return this._getPagedData(this._getSortedData([...this.tasks]));
     }));
   }
 
@@ -121,9 +90,7 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
    * any open connections or free any held resources that were set up during
    * connect.
    */
-  public disconnect(): void {
-    this._ledger_subscription.unsubscribe();
-  }
+  public disconnect(): void { }
 
   /**
    * Paginate the data (client-side). If you're using server-side pagination,
@@ -145,58 +112,6 @@ export class TaskLedgerListDataSource extends DataSource<TaskLedgerEntry> {
         case "project": return this._compareProject(a.item, b.item, isAsc);
       }
     });
-  }
-
-  private _updateLedger(ledger: Ledger): void {
-    const new_entries: TaskLedgerEntry[] = [];
-    Object.values(ledger.tasks).forEach( (entry: TaskLedgerEntry) => {
-      if (entry.item.priority === this._ledgerprio) {
-        new_entries.push(entry);
-      }
-    });
-    this._tasks = [...new_entries];
-    this._tasks_subject.next(this._tasks);
-    this._tasks_size_subject.next(this._tasks.length);
-  }
-
-  private _filterTasks(tasks: TaskLedgerEntry[]): void {
-    const has_project_filter: boolean = (this._filters.projects.length !== 0);
-    const has_title_filter: boolean = (this._filters.title !== "");
-
-    if (!has_project_filter && !has_title_filter) {
-      this._filtered_tasks_subject.next(tasks);
-      return;
-    }
-
-    const filtered_tasks: TaskLedgerEntry[] = [];
-    tasks.forEach( (task: TaskLedgerEntry) => {
-      let done: boolean = false;
-      if (has_project_filter) {
-        if (typeof task.item.project !== "number") {
-          throw new Error("project type is not a number");
-        }
-        const projid: number = task.item.project;
-        const projname: string = this._projects[projid].name;
-        if (this._filters.projects.includes(projname)) {
-          filtered_tasks.push(task);
-          done = true;
-        }
-      }
-      if (done) {
-        return;
-      }
-      if (has_title_filter) {
-        if (task.item.title.includes(this._filters.title)) {
-          filtered_tasks.push(task);
-          done = true;
-        }
-      }
-    });
-    this._filtered_tasks_subject.next(filtered_tasks);
-  }
-
-  public getLength(): BehaviorSubject<number> {
-    return this._tasks_size_subject;
   }
 
   private _compareDurations(
