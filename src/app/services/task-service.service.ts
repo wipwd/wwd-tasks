@@ -123,7 +123,6 @@ export class TaskService {
 
   private _stateSave(): void {
     const new_state: TasksStorageDataItem = this._getCurrentState();
-    console.log("tasks-svc > notify new state: ", new_state);
     this._storage_subject.next(new_state);
   }
 
@@ -138,7 +137,6 @@ export class TaskService {
     const ledgertasks: TaskLedgerMap = {};
 
     tasks.forEach( (task: IDBTaskItem) => {
-      console.log("task > ", task);
       this._convertStrToDate(task.item);
       this._convertProjectFormat(task.item);
       this._convertToTaskWithID(task.id, task.item);
@@ -342,9 +340,6 @@ export class TaskService {
 
 
   public addTimerEntry(task: TaskLedgerEntry, from: Date, until: Date): void {
-    console.log("task-svc > add timer entry on ", task);
-    console.log("task-svc > from: ", from, " until: ", until);
-
     if (!task.item.timer) {
       task.item.timer = { state: "stopped", intervals: [] };
     }
@@ -355,7 +350,6 @@ export class TaskService {
   }
 
   public timerStart(task: TaskLedgerEntry): void {
-    console.log("task-svc > timer start on ", task);
     if (!task.item.timer) {
       task.item.timer = { state: "stopped", intervals: [] };
     }
@@ -382,7 +376,6 @@ export class TaskService {
   }
 
   private _timerPause(task: TaskLedgerEntry): void {
-    console.log("task-svc > timer pause on ", task);
     if (!task.item.timer || !this.isTimerRunning(task)) {
       console.error("task-svc > can't pause task that has not been started");
       // can't pause a task that has not been started.
@@ -402,7 +395,6 @@ export class TaskService {
   }
 
   public timerStop(task: TaskLedgerEntry): void {
-    console.log("task-svc > timer stop on ", task);
     if (!task.item.timer || this.isTimerStopped(task)) {
       console.error("task-svc > can't stop task that has not been started");
       return;

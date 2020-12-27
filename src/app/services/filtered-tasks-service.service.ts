@@ -45,7 +45,6 @@ export class FilteredTasksService {
   }
 
   private _handleLedger(ledger: Ledger): void {
-    console.log("filtered-tasks-svc > ledger: ", ledger);
     const ledgername: string = ledger.name;
     const tasks: TaskLedgerEntry[] = Object.values(ledger.tasks);
     this._raw_tasks[ledgername] = tasks;
@@ -57,7 +56,6 @@ export class FilteredTasksService {
     const tasks: TaskLedgerEntry[] = this._raw_tasks[ledgername];
     const filtered: TaskLedgerEntry[] = this._filter(tasks);
 
-    console.log(`filtered-tasks-svc > raw: ${tasks.length}, filtered: ${filtered.length}`);
     this._filtered_tasks_by_ledger[ledgername] = filtered;
     this._num_tasks_by_ledger[ledgername] = filtered.length;
     this._updateObservers(ledgername);
@@ -120,7 +118,6 @@ export class FilteredTasksService {
   private _filter(tasks: TaskLedgerEntry[]): TaskLedgerEntry[] {
 
     if (!this._hasProjectFilter() && !this._hasTitleFilter()) {
-      console.log("filtered-tasks-svc > no filters set");
       return tasks;
     }
 
@@ -152,7 +149,6 @@ export class FilteredTasksService {
   }
 
   public setFilter(filter: TaskFilterOptions): void {
-    console.log("filtered-tasks-svc > set filter: ", filter);
     this._filters = filter;
     this._updateFilteredTasks();
   }

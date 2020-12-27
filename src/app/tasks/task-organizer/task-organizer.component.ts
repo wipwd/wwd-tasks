@@ -146,7 +146,6 @@ export class TaskOrganizerComponent implements OnInit {
   }
 
   public projectFilterChanged(event: MatSelectChange): void {
-    console.log("project filter changed: ", event);
     this._filters.projects = (event.value as string[]);
     this._has_project_filter =
       (!!event.value && this._filters.projects.length !== 0);
@@ -155,14 +154,12 @@ export class TaskOrganizerComponent implements OnInit {
 
   public titleFilterChanged(event): void {
     const titlestr: string = this.filter_form_group.get("title").value;
-    console.log("title filter changed: ", event, ", value: ", titlestr);
     this._filters.title = titlestr;
     this._has_title_filter = (titlestr !== "");
     this._filtered_tasks_svc.setFilter(this._filters);
   }
 
   private _sortingChanged(): void {
-    console.log("sort changed: ", this._sorting);
     this.sorting$.next(this._sorting);
   }
 

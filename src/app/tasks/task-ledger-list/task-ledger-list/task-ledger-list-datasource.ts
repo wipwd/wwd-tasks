@@ -7,7 +7,7 @@ import {
 } from 'rxjs';
 import { TaskItem, TaskLedgerEntry, TaskService } from '../../../services/task-service.service';
 import { TaskSortItem } from '../../task-organizer/task-list-options';
-import { ProjectsMap, ProjectsService } from '../../../services/projects-service.service';
+import { ProjectsService } from '../../../services/projects-service.service';
 import { FilteredTasksService } from '../../../services/filtered-tasks-service.service';
 
 /**

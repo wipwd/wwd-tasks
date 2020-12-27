@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { TaskLedgerEntry } from '../../services/task-service.service';
-import { TaskFilterItem, TaskSortItem } from '../task-organizer/task-list-options';
+import { TaskSortItem } from '../task-organizer/task-list-options';
 import { FilteredTasksService } from '../../services/filtered-tasks-service.service';
 
 
