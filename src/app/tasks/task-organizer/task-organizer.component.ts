@@ -3,9 +3,10 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
 import { BehaviorSubject } from 'rxjs';
 import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
-import { TaskService } from '../../services/task-service.service';
+import { Ledger, TaskService } from '../../services/task-service.service';
 import { TaskFilterItem, TaskSortItem } from './task-list-options';
 import { InOutAnimation } from '../../animations';
+import { LedgerService } from 'src/app/services/ledger-service.service';
 
 
 declare type LedgerEntry = {
@@ -57,7 +58,8 @@ export class TaskOrganizerComponent implements OnInit {
   public constructor(
     private _tasks_svc: TaskService,
     private _fb: FormBuilder,
-    private _projects_svc: ProjectsService
+    private _projects_svc: ProjectsService,
+    private _ledger_svc: LedgerService
   ) {
     this.filter_form_group = this._fb.group({
       project: new FormControl([]),
@@ -70,6 +72,7 @@ export class TaskOrganizerComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+
     this._tasks_svc.getLedgersNames().forEach( (ledgername: string) => {
       const ledgerlabel: string = this._tasks_svc.getLedgerLabel(ledgername);
       const ledgericon: string = this._tasks_svc.getLedgerIcon(ledgername);
@@ -94,8 +97,9 @@ export class TaskOrganizerComponent implements OnInit {
   }
 
   private _subscribeSize(ledgername: string): void {
-    this._tasks_svc.getLedgerSize(ledgername).subscribe({
-      next: (size: number) => {
+    this._ledger_svc.getLedger(ledgername).subscribe({
+      next: (ledger: Ledger) => {
+        const size: number = Object.keys(ledger.tasks).length;
         let str: string = "";
         if (size > 0) {
           str = `(${size})`;

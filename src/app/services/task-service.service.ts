@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { LedgerService } from './ledger-service.service';
 import { ProjectItem, ProjectsService } from './projects-service.service';
 
 
@@ -73,38 +74,9 @@ export declare type TaskItemMap = {[id: string]: TaskItem};
 })
 export class TaskService {
 
-  private _ledger_by_name: {[id: string]: Ledger} = {
-    backlog: {
-      name: "backlog", label: "Backlog", icon: "assignment", tasks: {}
-    },
-    next: {
-      name: "next", label: "Next", icon: "label_important", tasks: {}
-    },
-    inprogress: {
-      name: "inprogress", label: "In Progress", icon: "sync", tasks: {}
-    },
-    done: {
-      name: "done", label: "Done", icon: "done_all", tasks: {}
-    }
-  };
-  private _ledger_by_taskid: {[id: string]: Ledger} = {};
   private _archived_tasks: {[id: string]: TaskArchiveEntry} = {};
-
+  private _tasks: TaskLedgerMap = {};
   private _all_tasks: TaskItemMap = {};
-
-  private _ledger_subjects: {[id: string]: BehaviorSubject<Ledger>} = {
-    backlog: new BehaviorSubject<Ledger>({} as Ledger),
-    next: new BehaviorSubject<Ledger>({} as Ledger),
-    inprogress: new BehaviorSubject<Ledger>({} as Ledger),
-    done: new BehaviorSubject<Ledger>({} as Ledger)
-  };
-
-  private _ledger_size_subjects: {[id: string]: BehaviorSubject<number>} = {
-    backlog: new BehaviorSubject<number>(0),
-    next: new BehaviorSubject<number>(0),
-    inprogress: new BehaviorSubject<number>(0),
-    done: new BehaviorSubject<number>(0)
-  };
 
   private _archive_subject: BehaviorSubject<TaskArchiveEntry[]> =
     new BehaviorSubject<TaskArchiveEntry[]>([]);
@@ -115,14 +87,13 @@ export class TaskService {
   private _all_tasks_subject: BehaviorSubject<TaskItemMap> =
     new BehaviorSubject<TaskItemMap>({});
 
-  public constructor() {
-    this._ledger_by_name.backlog.next = this._ledger_by_name.next;
-    this._ledger_by_name.next.next = this._ledger_by_name.inprogress;
-    this._ledger_by_name.next.previous = this._ledger_by_name.backlog;
-    this._ledger_by_name.inprogress.next = this._ledger_by_name.done;
-    this._ledger_by_name.inprogress.previous = this._ledger_by_name.backlog;
-    // 'done' tasks are not movable.
-  }
+  private _tasks_subject: BehaviorSubject<TaskLedgerEntry[]> =
+    new BehaviorSubject<TaskLedgerEntry[]>([]);
+
+
+  public constructor(
+    private _ledger_svc: LedgerService
+  ) { }
 
   public getStorageObserver(): BehaviorSubject<TasksStorageDataItem|undefined> {
     return this._storage_subject;
@@ -134,16 +105,15 @@ export class TaskService {
 
   private _getCurrentState(): TasksStorageDataItem {
     const _tasks: IDBTaskItem[] = [];
-    Object.values(this._ledger_by_name).forEach( (ledger: Ledger) => {
-      const ledgername: string = ledger.name;
-      Object.values(ledger.tasks).forEach( (entry: TaskLedgerEntry) => {
-        _tasks.push({
-          id: entry.id,
-          item: entry.item,
-          ledger: ledgername
-        });
+
+    Object.values(this._tasks).forEach( (task: TaskLedgerEntry) => {
+      _tasks.push({
+        id: task.id,
+        item: task.item,
+        ledger: task.ledger.name
       });
     });
+
     const new_state: TasksStorageDataItem = {
       archives: this._archived_tasks,
       tasks: _tasks
@@ -165,29 +135,21 @@ export class TaskService {
   }
 
   private _loadTasks(tasks: IDBTaskItem[]): void {
-    const updated_ledgers: {[id: string]: boolean} = {};
+    const ledgertasks: TaskLedgerMap = {};
+
     tasks.forEach( (task: IDBTaskItem) => {
       console.log("task > ", task);
-      console.assert(task.ledger in this._ledger_by_name);
-      if (!(task.ledger in this._ledger_by_name)) {
-        return;
-      }
       this._convertStrToDate(task.item);
       this._convertProjectFormat(task.item);
       this._convertToTaskWithID(task.id, task.item);
       this._convertToTaskWithLedger(task.ledger, task.item);
-      this._ledger_by_name[task.ledger].tasks[task.id] = {
-        id: task.id,
-        item: task.item,
-        ledger: this._ledger_by_name[task.ledger]
-      };
-      this._ledger_by_taskid[task.id] = this._ledger_by_name[task.ledger];
-      updated_ledgers[task.ledger] = true;
+
+      const entry = this._ledger_svc.addTask(task.item);
+      ledgertasks[entry.id] = entry;
     });
 
-    Object.keys(updated_ledgers).forEach( (ledgername: string) => {
-      this._updateLedgerSubjects(this._ledger_by_name[ledgername]);
-    });
+    this._tasks = ledgertasks;
+    this._updateTasksSubject();
   }
 
   private _loadArchive(archive: IDBTaskArchiveType): void {
@@ -220,13 +182,6 @@ export class TaskService {
     this._updateAllTasksSubject();
   }
 
-  private _updateLedgerSubjects(ledger: Ledger): void {
-    this._ledger_subjects[ledger.name].next(ledger);
-    this._ledger_size_subjects[ledger.name].next(
-      Object.keys(ledger.tasks).length
-    );
-  }
-
   private _updateArchiveSubject(): void {
     this._archive_subject.next(
       Object.values(this._archived_tasks).reverse()
@@ -237,17 +192,14 @@ export class TaskService {
     this._all_tasks_subject.next(this._all_tasks);
   }
 
-  private _removeFromLedgers(task: TaskLedgerEntry): void {
-    const ledger: Ledger = task.ledger;
-    delete ledger.tasks[task.id];
-    delete this._ledger_by_taskid[task.id];
+  private _updateTasksSubject(): void {
+    this._tasks_subject.next(Object.values(this._tasks));
   }
 
   private _remove(task: TaskLedgerEntry): void {
     const ledger: Ledger = task.ledger;
-    this._removeFromLedgers(task);
+    this._ledger_svc.removeTask(task);
     this._stateSave();
-    this._updateLedgerSubjects(ledger);
   }
 
   // tasks are always added to the backlog.
@@ -257,15 +209,9 @@ export class TaskService {
     // avoid adding a new dependency on a uuid library.
     const taskid: string = new Date().getTime().toString();
     task.id = taskid;
-    task.ledger = this._ledger_by_name.backlog.name;
-    this._ledger_by_name.backlog.tasks[taskid] = {
-      id: taskid,
-      item: task,
-      ledger: this._ledger_by_name.backlog
-    };
-    this._ledger_by_taskid[taskid] = this._ledger_by_name.backlog;
+    const entry = this._ledger_svc.addToBacklog(task);
+    this._tasks[taskid] = entry;
     this._stateSave();
-    this._updateLedgerSubjects(this._ledger_by_name.backlog);
 
     // adding a new task, add to all tasks as well.
     this._all_tasks[taskid] = task;
@@ -292,32 +238,19 @@ export class TaskService {
       id: task.id,
       item: task.item
     };
-    this._removeFromLedgers(task);
+    this._ledger_svc.removeTask(task);
     this._stateSave();
-    this._updateLedgerSubjects(task.ledger);
     this._updateArchiveSubject();
   }
 
-  private _moveTo(task: TaskLedgerEntry, dest: Ledger|undefined): void {
-    if (!dest) {
-      return;
-    }
-    const cur_ledger: Ledger = task.ledger;
-    dest.tasks[task.id] = task;
-    delete cur_ledger.tasks[task.id];
-    task.ledger = dest;
-    task.item.ledger = dest.name;
-    this._stateSave();
-    this._updateLedgerSubjects(cur_ledger);
-    this._updateLedgerSubjects(dest);
-  }
-
   public moveNext(task: TaskLedgerEntry): void {
-    this._moveTo(task, task.ledger.next);
+    this._ledger_svc.moveNext(task);
+    this._stateSave();
   }
 
   public movePrevious(task: TaskLedgerEntry): void {
-    this._moveTo(task, task.ledger.previous);
+    this._ledger_svc.movePrev(task);
+    this._stateSave();
   }
 
   public canMarkDone(task: TaskLedgerEntry): boolean {
@@ -337,45 +270,34 @@ export class TaskService {
     if (this.isTimerRunning(task)) {
       this.timerStop(task);
     }
-    this._moveTo(task, this._ledger_by_name.done);
+    this._ledger_svc.moveToDone(task);
+    this._stateSave();
   }
 
   public getLedger(name: string): BehaviorSubject<Ledger> {
-    console.assert(name in this._ledger_by_name);
-    return this._ledger_subjects[name];
-  }
-
-  public getLedgerSize(name: string): BehaviorSubject<number> {
-    console.assert(name in this._ledger_by_name);
-    return this._ledger_size_subjects[name];
+    return this._ledger_svc.getLedger(name);
   }
 
   public getRawLedger(name: string): Ledger {
-    console.assert(name in this._ledger_by_name);
-    return this._ledger_by_name[name];
+    return this._ledger_svc.getRawLedger(name);
   }
 
   public getRawLedgerSize(name: string): number {
-    console.assert(name in this._ledger_by_name);
-    return Object.keys(this._ledger_by_name[name].tasks).length;
+    return Object.keys(this.getRawLedger(name).tasks).length;
   }
 
   public getLedgersNames(): string[] {
-    return Object.keys(this._ledger_by_name);
+    return this._ledger_svc.getLedgersNames();
   }
 
   public getLedgerLabel(ledgername: string): string {
-    if (!(ledgername in this._ledger_by_name)) {
-      return "";
-    }
-    return this._ledger_by_name[ledgername].label;
+    const ledger: Ledger = this.getRawLedger(ledgername);
+    return ledger.label;
   }
 
   public getLedgerIcon(ledgername: string): string {
-    if (!(ledgername in this._ledger_by_name)) {
-      return "";
-    }
-    return this._ledger_by_name[ledgername].icon;
+    const ledger: Ledger = this.getRawLedger(ledgername);
+    return ledger.icon;
   }
 
   public getArchive(): BehaviorSubject<TaskArchiveEntry[]> {
@@ -390,18 +312,14 @@ export class TaskService {
     return this._all_tasks_subject;
   }
 
+  public getTasks(): BehaviorSubject<TaskLedgerEntry[]> {
+    return this._tasks_subject;
+  }
+
   public updateTask(task: TaskLedgerEntry, item: TaskItem): void {
-    // ensure we are editing the actual task entry. While we expect angular to
-    // be smart about it, and that we are receiving the actual task reference
-    // via the argument, lets not trust 100% on angular and be paranoid.
-    if (!(task.id in this._ledger_by_taskid)) {
-      return;
-    }
-    const ledger: Ledger = this._ledger_by_taskid[task.id];
-    const actual_task: TaskLedgerEntry = ledger.tasks[task.id];
+    const actual_task: TaskLedgerEntry = this._tasks[item.id];
     actual_task.item = item;
     this._stateSave();
-    this._updateLedgerSubjects(ledger);
   }
 
   public updateTaskInBulk(tasklst: TaskItem[]): void {
@@ -415,19 +333,11 @@ export class TaskService {
         return;
       }
 
-      const ledger: Ledger = this._ledger_by_taskid[task.id];
-      const actual_task: TaskLedgerEntry = ledger.tasks[task.id];
+      const actual_task: TaskLedgerEntry = this._tasks[task.id];
       actual_task.item = task;
-
-      if (!updated_ledgers.includes(ledger)) {
-        updated_ledgers.push(ledger);
-      }
     });
 
     this._stateSave();
-    updated_ledgers.forEach( (ledger: Ledger) => {
-      this._updateLedgerSubjects(ledger);
-    });
   }
 
 
@@ -466,11 +376,9 @@ export class TaskService {
     timer_state.intervals.push({start: new Date(), end: undefined});
     if (task.ledger.name !== "inprogress") {
       // move task to in-progress.
-      this._moveTo(task, this._ledger_by_name.inprogress);
-    } else {
-      // _moveTo() will save state
-      this._stateSave();
+      this._ledger_svc.moveToInProgress(task);
     }
+    this._stateSave();
   }
 
   private _timerPause(task: TaskLedgerEntry): void {
@@ -485,7 +393,7 @@ export class TaskService {
     const cur_interval: TaskTimerItem[] = this.getCurrentTimerIntervals(task);
     cur_interval.forEach( (entry: TaskTimerItem) => {
       entry.end = new Date();
-    })
+    });
   }
 
   public timerPause(task: TaskLedgerEntry): void {
@@ -504,13 +412,11 @@ export class TaskService {
     timer_state.state = "stopped";
     cur_interval.forEach( (entry: TaskTimerItem) => {
       entry.end = new Date();
-    })
+    });
     if (task.ledger.name !== "backlog") {
-      this._moveTo(task, this._ledger_by_name.backlog);
-    } else {
-      // _moveTo() will save state
-      this._stateSave();
+      this._ledger_svc.moveToBacklog(task);
     }
+    this._stateSave();
   }
 
   public isTimerRunning(task: TaskLedgerEntry): boolean {
@@ -557,7 +463,8 @@ export class TaskService {
 
   public getRunningTimerTask(): TaskLedgerEntry|undefined {
     let running_task: TaskLedgerEntry|undefined = undefined;
-    Object.values(this._ledger_by_name.inprogress.tasks).forEach(
+    const ledger: Ledger = this._ledger_svc.getRawLedger("inprogress");
+    Object.values(ledger.tasks).forEach(
       (task: TaskLedgerEntry) => {
         if (!task.item.timer || task.item.timer.state !== "running") {
           return;
