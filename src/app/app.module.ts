@@ -65,6 +65,7 @@ import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/materia
 import { SettingsProjectsLabelsComponent } from './settings/settings-projects-labels/settings-projects-labels.component';
 import { SettingsLabelsComponent } from './settings/settings-projects-labels/settings-labels/settings-labels.component';
 import { SettingsProjectsComponent } from './settings/settings-projects-labels/settings-projects/settings-projects.component';
+import { TeamsListComponent } from './teams/teams-list/teams-list.component';
 
 
 
@@ -97,6 +98,7 @@ import { SettingsProjectsComponent } from './settings/settings-projects-labels/s
     SettingsProjectsLabelsComponent,
     SettingsLabelsComponent,
     SettingsProjectsComponent,
+    TeamsListComponent,
   ],
   imports: [
     BrowserModule,

@@ -10,12 +10,14 @@ import * as triplesec from 'triplesec/browser/triplesec';
 import { Mutex } from 'async-mutex';
 import { set as idbset, get as idbget, del as idbdel } from 'idb-keyval';
 import { LabelsService, LabelsStorageDataItem } from './labels-service.service';
+import { TeamsService, TeamsStorageDataItem } from './teams-service.service';
 
 
 export interface StorageDataItem {
   tasks?: TasksStorageDataItem;
   projects?: ProjectsStorageDataItem;
   labels?: LabelsStorageDataItem;
+  teams?: TeamsStorageDataItem;
 }
 
 export interface StorageItem {
@@ -48,7 +50,8 @@ export class StorageService {
   public constructor(
     private _tasks_svc: TaskService,
     private _projects_svc: ProjectsService,
-    private _labels_svc: LabelsService
+    private _labels_svc: LabelsService,
+    private _teams_svc: TeamsService
   ) {
     this._initState();
 
@@ -76,6 +79,15 @@ export class StorageService {
           return;
         }
         this._handleLabelsData(item);
+      }
+    });
+
+    this._teams_svc.getStorageObserver().subscribe({
+      next: (item: TeamsStorageDataItem) => {
+        if (!item) {
+          return;
+        }
+        this._handleTeamsData(item);
       }
     });
   }
@@ -135,6 +147,10 @@ export class StorageService {
           this._current_state.data.labels = this._labels_svc.getInitState();
         }
         this._labels_svc.stateLoad(this._current_state.data.labels);
+        if (!("teams" in this._current_state.data)) {
+          this._current_state.data.teams = this._teams_svc.getInitState();
+        }
+        this._teams_svc.stateLoad(this._current_state.data.teams);
 
         resolve();
       })
@@ -304,6 +320,13 @@ export class StorageService {
     item: LabelsStorageDataItem
   ): Promise<void> {
     this._current_state.data.labels = item;
+    this._commitState();
+  }
+
+  private async _handleTeamsData(
+    item: TeamsStorageDataItem
+  ): Promise<void> {
+    this._current_state.data.teams = item;
     this._commitState();
   }
 

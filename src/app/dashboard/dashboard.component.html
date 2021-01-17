@@ -53,6 +53,15 @@
           <mat-icon>archive</mat-icon>
           <span *ngIf="isExpanded()" class="menu-item">Archives</span>
         </a>
+
+        <a mat-list-item
+            routerLinkActive="selected-route"
+            routerLink="teams"
+            matTooltip="Teams" matTooltipPosition="right"
+            [matTooltipDisabled]="isExpanded()">
+          <mat-icon>group_work</mat-icon>
+          <span *ngIf="isExpanded()" class="menu-item">Teams</span>
+        </a>
       </mat-nav-list>
 
       <!-- spacer -->
