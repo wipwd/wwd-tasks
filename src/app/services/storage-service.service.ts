@@ -11,6 +11,7 @@ import { Mutex } from 'async-mutex';
 import { set as idbset, get as idbget, del as idbdel } from 'idb-keyval';
 import { LabelsService, LabelsStorageDataItem } from './labels-service.service';
 import { TeamsService, TeamsStorageDataItem } from './teams-service.service';
+import { PeopleService, PeopleStorageDataItem } from './people-service.service';
 
 
 export interface StorageDataItem {
@@ -18,6 +19,7 @@ export interface StorageDataItem {
   projects?: ProjectsStorageDataItem;
   labels?: LabelsStorageDataItem;
   teams?: TeamsStorageDataItem;
+  people?: PeopleStorageDataItem;
 }
 
 export interface StorageItem {
@@ -51,7 +53,8 @@ export class StorageService {
     private _tasks_svc: TaskService,
     private _projects_svc: ProjectsService,
     private _labels_svc: LabelsService,
-    private _teams_svc: TeamsService
+    private _teams_svc: TeamsService,
+    private _people_svc: PeopleService
   ) {
     this._initState();
 
@@ -88,6 +91,15 @@ export class StorageService {
           return;
         }
         this._handleTeamsData(item);
+      }
+    });
+
+    this._people_svc.getStorageObserver().subscribe({
+      next: (item: PeopleStorageDataItem) => {
+        if (!item) {
+          return;
+        }
+        this._handlePeopleData(item);
       }
     });
   }
@@ -151,6 +163,10 @@ export class StorageService {
           this._current_state.data.teams = this._teams_svc.getInitState();
         }
         this._teams_svc.stateLoad(this._current_state.data.teams);
+        if (!("people" in this._current_state.data)) {
+          this._current_state.data.people = this._people_svc.getInitState();
+        }
+        this._people_svc.stateLoad(this._current_state.data.people);
 
         resolve();
       })
@@ -327,6 +343,13 @@ export class StorageService {
     item: TeamsStorageDataItem
   ): Promise<void> {
     this._current_state.data.teams = item;
+    this._commitState();
+  }
+
+  private async _handlePeopleData(
+    item: PeopleStorageDataItem
+  ): Promise<void> {
+    this._current_state.data.people = item;
     this._commitState();
   }
 
