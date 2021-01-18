@@ -23,7 +23,6 @@ export interface TaskInfoDialogData {
 export class TaskInfoComponent implements OnInit {
 
   public task: TaskLedgerEntry;
-  public item: TaskItem;
 
   // edit mode
   public is_edit_mode: boolean = false;
@@ -57,7 +56,6 @@ export class TaskInfoComponent implements OnInit {
     private _people_svc: PeopleService
   ) {
     this.task = this._data.task;
-    this.item = this.task.item;
 
     this.date_picker_form_group = this._fb.group({
       from: new FormControl("", Validators.required),
@@ -86,13 +84,18 @@ export class TaskInfoComponent implements OnInit {
       until: this.time_until_form_group
     });
 
-    if (typeof this.item.project !== "number") {
+    this._updateEditForm();
+  }
+
+  private _updateEditForm(): void {
+    const item: TaskItem = this.task.item;
+    if (typeof item.project !== "number") {
       throw new Error("project type is not a number; old format!");
     }
 
-    const projectid: number = (!!this.item.project ? this.item.project : 0);
-    const assigneeid: number = (!!this.item.assignee ? this.item.assignee : 0);
-    const teamid: number = (!!this.item.team ? this.item.team : 0);
+    const projectid: number = (!!item.project ? item.project : 0);
+    const assigneeid: number = (!!item.assignee ? item.assignee : 0);
+    const teamid: number = (!!item.team ? item.team : 0);
     this.edit_form_group = this._fb.group({
       title: new FormControl(this.task.item.title, Validators.required),
       priority: new FormControl(this.task.item.priority, Validators.required),
@@ -102,10 +105,34 @@ export class TaskInfoComponent implements OnInit {
     });
   }
 
+  private _updateFields(): void {
+    const item: TaskItem = this.task.item;
+    this.has_team = (!!item.team && item.team > 0);
+    this.has_assignee = (!!item.assignee && item.assignee > 0);
+
+    if (typeof item.project !== "number") {
+      throw new Error("old project version not supported");
+    }
+    if (item.project > 0) {
+      const project_item: ProjectItem =
+        this._projects_svc.getProjectByID(item.project);
+      if (!project_item) {
+        throw new Error(`could not find project ${item.project}`);
+      }
+      this.project = project_item.name;
+    }
+
+    if (this.has_assignee && Object.keys(this.edit_assignees).length > 0) {
+      this.assignee = this.edit_assignees[item.assignee];
+    }
+    if (this.has_team && Object.keys(this.edit_teams).length > 0) {
+      this.team = this.edit_teams[item.team];
+    }
+  }
+
   public ngOnInit(): void {
 
-    this.has_team = (!!this.item.team && this.item.team > 0);
-    this.has_assignee = (!!this.item.assignee && this.item.assignee > 0);
+    this._updateFields();
 
     this._projects_svc.getProjects().subscribe({
       next: (projects: ProjectsMap) => {
@@ -123,7 +150,7 @@ export class TaskInfoComponent implements OnInit {
           this.edit_teams[item.id] = item.name;
         });
         if (this.has_team) {
-          this.team = this.edit_teams[this.item.team];
+          this.team = this.edit_teams[this.task.item.team];
         }
       }
     });
@@ -135,22 +162,10 @@ export class TaskInfoComponent implements OnInit {
           this.edit_assignees[item.id] = item.name;
         });
         if (this.has_assignee) {
-          this.assignee = this.edit_assignees[this.item.assignee];
+          this.assignee = this.edit_assignees[this.task.item.assignee];
         }
       }
     });
-
-    if (typeof this.item.project !== "number") {
-      throw new Error("old project version not supported");
-    }
-    if (this.item.project > 0) {
-      const item: ProjectItem =
-        this._projects_svc.getProjectByID(this.item.project);
-      if (!item) {
-        throw new Error(`could not find project ${this.item.project}`);
-      }
-      this.project = item.name;
-    }
   }
 
   public _timeSpent(interval: TaskTimerItem): number {
@@ -166,14 +181,14 @@ export class TaskInfoComponent implements OnInit {
 
   public totalTimeSpent(): string {
     let total_diff: number = 0;
-    this.item.timer?.intervals.forEach( (interval: TaskTimerItem) => {
+    this.task.item.timer?.intervals.forEach( (interval: TaskTimerItem) => {
       total_diff += this._timeSpent(interval);
     });
     return getTimeDiffStr(total_diff, true);
   }
 
   public isMarkedDone(): boolean {
-    return !!this.item.done;
+    return !!this.task.item.done;
   }
 
   public toggleAddNewEntry(): void {
@@ -264,6 +279,7 @@ export class TaskInfoComponent implements OnInit {
     this.task.item.assignee = assignee_id;
     this.task.item.team = team_id;
     this._tasks_svc.updateTask(this.task, this.task.item);
+    this._updateFields();
   }
 
 }
