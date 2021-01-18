@@ -31,6 +31,8 @@ export interface TaskItem {
   timer?: TaskTimerState;
   notes?: TaskNoteItem[];
   done?: Date;
+  team?: number;
+  assignee?: number;
 }
 
 export interface TaskLedgerEntry {
@@ -493,6 +495,38 @@ export class TaskService
 
   public hasNotes(task: TaskLedgerEntry): boolean {
     return this.getNoteSize(task) > 0;
+  }
+
+  public setAssignee(task: TaskLedgerEntry, assignee_id: number): void {
+    if (!task || !assignee_id || assignee_id <= 0) {
+      return;
+    }
+    task.item.assignee = assignee_id;
+    this._stateSave();
+  }
+
+  public unsetAssignee(task: TaskLedgerEntry): void {
+    if (!task) {
+      return;
+    }
+    task.item.assignee = undefined;
+    this._stateSave();
+  }
+
+  public setTeam(task: TaskLedgerEntry, team_id: number): void {
+    if (!task || !team_id || team_id <= 0) {
+      return;
+    }
+    task.item.team = team_id;
+    this._stateSave();
+  }
+
+  public unsetTeam(task: TaskLedgerEntry): void {
+    if (!task) {
+      return;
+    }
+    task.item.team = undefined;
+    this._stateSave();
   }
 
   private _convertStrToDate(task: TaskItem): void {

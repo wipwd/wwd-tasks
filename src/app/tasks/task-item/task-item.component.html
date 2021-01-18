@@ -1,102 +1,116 @@
-<div fxLayout="row" fxLayoutAlign="space-between center">
+<div fxLayout="column" fxLayoutAlign="center start">
+  <div fxLayout="row" fxLayoutAlign="space-between center">
 
-  <div fxLayout="row" fxLayoutAlign="start center">
-    <!-- task title -->
-    <div class="item-title" fxLayout="row" fxLayoutAlign="start center">
+    <div fxLayout="row" fxLayoutAlign="start center">
+      <!-- task title -->
+      <div class="item-title" fxLayout="row" fxLayoutAlign="start center">
 
-      <button mat-icon-button (click)="openTaskInfo()">
-        <mat-icon>info</mat-icon>
-      </button>
-      <a [href]="task.item.url" target="new" *ngIf="hasURL()">
-        <mat-icon class="item-title-icon">open_in_new</mat-icon>
-      </a>
-      <div>
-        <span><strong>{{task.item.title}}</strong></span>
+        <button mat-icon-button (click)="openTaskInfo()">
+          <mat-icon>info</mat-icon>
+        </button>
+        <a [href]="task.item.url" target="new" *ngIf="hasURL()">
+          <mat-icon class="item-title-icon">open_in_new</mat-icon>
+        </a>
+        <div>
+          <span><strong>{{task.item.title}}</strong></span>
+        </div>
+        <button mat-icon-button (click)="openTaskNotes()">
+          <mat-icon *ngIf="hasNotes()" class="item-title-icon"
+              [matBadge]="getNumNotes()" matBadgeSize="small">
+            speaker_notes
+          </mat-icon>
+          <mat-icon *ngIf="!hasNotes()" class="item-title-icon">
+            speaker_notes_off
+          </mat-icon>
+        </button>
       </div>
-      <button mat-icon-button (click)="openTaskNotes()">
-        <mat-icon *ngIf="hasNotes()" class="item-title-icon"
-            [matBadge]="getNumNotes()" matBadgeSize="small">
-          speaker_notes
-        </mat-icon>
-        <mat-icon *ngIf="!hasNotes()" class="item-title-icon">
-          speaker_notes_off
-        </mat-icon>
-      </button>
-    </div>
 
-    <span class="item-spacer"></span>
+      <span class="item-spacer"></span>
 
-    <!-- created on -->
-    <div fxLayout="column" fxLayoutAlign="start center">
-      <span class="item-date">{{getCreatedSince()}}</span>
-      <span *ngIf="isMarkedDone()" class="item-date">{{getDoneOn()}}</span>
-    </div>
-
-    <span class="item-spacer"></span>
-
-    <!-- progress -->
-    <div *ngIf="!isMarkedDone()" class="item-progress"
-        fxLayout="row" fxLayoutAlign="start center">
-      <div class="item-progress-time">
-        <span>{{getRunningFor()|async}}</span>
+      <!-- created on -->
+      <div fxLayout="column" fxLayoutAlign="start center">
+        <span class="item-date">{{getCreatedSince()}}</span>
+        <span *ngIf="isMarkedDone()" class="item-date">{{getDoneOn()}}</span>
       </div>
-      <button mat-icon-button *ngIf="!isRunning()"
-          (click)="markStart()"
-          matTooltip="Start" matTooltipPosition="above"
-          [matTooltipDisabled]="false">
-        <mat-icon color="primary">play_circle_outline</mat-icon>
-      </button>
-      <button mat-icon-button *ngIf="isRunning()"
-          (click)="markPause()"
-          matTooltip="Pause" matTooltipPosition="above"
-          [matTooltipDisabled]="false">
-        <mat-icon color="primary">pause_circle_outline</mat-icon>
-      </button>
-      <button mat-icon-button *ngIf="isRunning()"
-          (click)="markStop()"
-          matTooltip="Stop" matTooltipPosition="above"
-          [matTooltipDisabled]="false">
-        <mat-icon color="warn">stop</mat-icon>
-      </button>
+
+      <span class="item-spacer"></span>
+
+      <!-- progress -->
+      <div *ngIf="!isMarkedDone()" class="item-progress"
+          fxLayout="row" fxLayoutAlign="start center">
+        <div class="item-progress-time">
+          <span>{{getRunningFor()|async}}</span>
+        </div>
+        <button mat-icon-button *ngIf="!isRunning()"
+            (click)="markStart()"
+            matTooltip="Start" matTooltipPosition="above"
+            [matTooltipDisabled]="false">
+          <mat-icon color="primary">play_circle_outline</mat-icon>
+        </button>
+        <button mat-icon-button *ngIf="isRunning()"
+            (click)="markPause()"
+            matTooltip="Pause" matTooltipPosition="above"
+            [matTooltipDisabled]="false">
+          <mat-icon color="primary">pause_circle_outline</mat-icon>
+        </button>
+        <button mat-icon-button *ngIf="isRunning()"
+            (click)="markStop()"
+            matTooltip="Stop" matTooltipPosition="above"
+            [matTooltipDisabled]="false">
+          <mat-icon color="warn">stop</mat-icon>
+        </button>
+      </div>
+
+      <span class="item-spacer"></span>
+
+      <!-- projects -->
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <span>{{getProject()}}</span>
+      </div>
     </div>
 
-    <span class="item-spacer"></span>
+    <!-- spacer -->
+    <span></span>
 
-    <!-- projects -->
-    <div fxLayout="row" fxLayoutAlign="space-between center">
-      <span>{{getProject()}}</span>
+    <!-- actions -->
+    <div>
+      <button mat-icon-button *ngIf="hasPrevious()" (click)="movePrevious()"
+          matTooltip="To Backlog" matTooltipPosition="above"
+          [matTooltipDisabled]="false">
+        <mat-icon>reply_all</mat-icon>
+      </button>
+      <button mat-icon-button (click)="remove()"
+          matTooltip="Delete" matTooltipPosition="above"
+          [matTooltipDisabled]="false">
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+      <button mat-icon-button *ngIf="canMarkDone()" (click)="markDone()"
+          matTooltip="Done" matTooltipPosition="above"
+          [matTooltipDisabled]="false">
+        <mat-icon>check_circle</mat-icon>
+      </button>
+      <button mat-icon-button *ngIf="isMarkedDone()" (click)="archive()"
+          matTooltip="Archive" matTooltipPosition="above"
+          [matTooltipDisabled]="false">
+        <mat-icon>archive</mat-icon>
+      </button>
+      <button mat-icon-button *ngIf="hasNext()" (click)="moveNext()"
+          matTooltip="Next" matTooltipPosition="above"
+          [matTooltipDisabled]="false">
+        <mat-icon>forward</mat-icon>
+      </button>
     </div>
   </div>
 
-  <!-- spacer -->
-  <span></span>
-
-  <!-- actions -->
-  <div>
-    <button mat-icon-button *ngIf="hasPrevious()" (click)="movePrevious()"
-        matTooltip="To Backlog" matTooltipPosition="above"
-        [matTooltipDisabled]="false">
-      <mat-icon>reply_all</mat-icon>
-    </button>
-    <button mat-icon-button (click)="remove()"
-        matTooltip="Delete" matTooltipPosition="above"
-        [matTooltipDisabled]="false">
-      <mat-icon>delete_forever</mat-icon>
-    </button>
-    <button mat-icon-button *ngIf="canMarkDone()" (click)="markDone()"
-        matTooltip="Done" matTooltipPosition="above"
-        [matTooltipDisabled]="false">
-      <mat-icon>check_circle</mat-icon>
-    </button>
-    <button mat-icon-button *ngIf="isMarkedDone()" (click)="archive()"
-        matTooltip="Archive" matTooltipPosition="above"
-        [matTooltipDisabled]="false">
-      <mat-icon>archive</mat-icon>
-    </button>
-    <button mat-icon-button *ngIf="hasNext()" (click)="moveNext()"
-        matTooltip="Next" matTooltipPosition="above"
-        [matTooltipDisabled]="false">
-      <mat-icon>forward</mat-icon>
-    </button>
+  <div fxLayout="row" fxLayoutAlign="start center" style="font-size: 12px;">
+    <div fxLayout="row" fxLayoutAlign="start center" *ngIf="has_assignee">
+      <mat-icon style="transform: scale(0.8)">people</mat-icon>
+      <span>{{assignee}}</span>
+    </div>
+    <span style="width: 20px"></span>
+    <div fxLayout="row" fxLayoutAlign="start center" *ngIf="has_team">
+      <mat-icon style="transform: scale(0.8)">group_work</mat-icon>
+      <span>{{team}}</span>
+    </div>
   </div>
 </div>

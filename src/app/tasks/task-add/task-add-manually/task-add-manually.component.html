@@ -40,11 +40,26 @@
         <mat-icon style="font-size: 16px" *ngIf="show_form_url">remove</mat-icon>
         <span>URL</span>
       </button>
-      <span style="width: 1.5em"></span>
+
+      <span style="width: 20px"></span>
       <button mat-icon-button (click)="show_form_notes = !show_form_notes">
         <mat-icon style="font-size: 16px" *ngIf="!show_form_notes">add</mat-icon>
         <mat-icon style="font-size: 16px" *ngIf="show_form_notes">remove</mat-icon>
         <span>Notes</span>
+      </button>
+      
+      <span style="width: 30px"></span>
+      <button mat-icon-button
+          (click)="show_form_assigned_to = !show_form_assigned_to">
+        <mat-icon style="font-size: 16px"
+            *ngIf="!show_form_assigned_to">
+          add
+        </mat-icon>
+        <mat-icon style="font-size: 16px"
+            *ngIf="show_form_assigned_to">
+          remove
+        </mat-icon>
+        <span>Assigned To</span>
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="space-between center" *ngIf="show_form_url">
@@ -60,7 +75,28 @@
         <textarea matInput [formControl]="form_ctrl_notes"
             rows="3" matTextareaAutosize></textarea>
       </mat-form-field>
-
+    </div>
+    <div fxLayout="row" fxLayoutAlign="start center"
+        *ngIf="show_form_assigned_to">
+      <mat-form-field appearance="fill">
+        <mat-label>Assignee</mat-label>
+        <mat-select [formControl]="form_ctrl_assignee">          
+          <mat-option *ngFor="let person of people" [value]="person.id">
+            {{person.name}}
+          </mat-option>
+          <mat-option [value]="0">- None -</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span style="width: 40px"></span>
+      <mat-form-field appearance="fill">
+        <mat-label>Team</mat-label>
+        <mat-select [formControl]="form_ctrl_team">
+          <mat-option *ngFor="let team of teams" [value]="team.id">
+            {{team.name}}
+          </mat-option>
+          <mat-option [value]="0">- None -</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
   </form>
 

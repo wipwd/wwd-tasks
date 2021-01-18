@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, interval, Subscription } from 'rxjs';
+import { PeopleMap, PeopleService } from 'src/app/services/people-service.service';
 import { ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
+import { TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
 import {
   TaskLedgerEntry, TaskService, getTimeDiffStr
 } from '../../services/task-service.service';
@@ -16,8 +18,12 @@ import { TaskNotesComponent } from '../task-notes/task-notes.component';
 })
 export class TaskItemComponent implements OnInit {
 
-  @Input() task: TaskLedgerEntry;
+  public team: string = "";
+  public assignee: string = "";
+  public has_team: boolean = false;
+  public has_assignee: boolean = false;
 
+  private _task: TaskLedgerEntry;
   private _running_for_observer: BehaviorSubject<string> =
     new BehaviorSubject<string>("");
   private _running_check_interval_subscription: Subscription;
@@ -29,7 +35,9 @@ export class TaskItemComponent implements OnInit {
     private _projects_svc: ProjectsService,
     private _task_info_dialog: MatDialog,
     private _task_delete_dialog: MatDialog,
-    private _task_notes_dialog: MatDialog
+    private _task_notes_dialog: MatDialog,
+    private _teams_svc: TeamsService,
+    private _people_svc: PeopleService
   ) { }
 
   public ngOnInit(): void {
@@ -44,6 +52,44 @@ export class TaskItemComponent implements OnInit {
         this._projects = projects;
       }
     });
+
+    this._teams_svc.getTeams().subscribe({
+      next: (teams: TeamsMap) => {
+        if (!this.has_team) {
+          return;
+        }
+        const teamid: number = this._task.item.team;
+        if (!(teamid in teams)) {
+          throw new Error(`teamid ${teamid} for task ${this._task.id} DNE`);
+        }
+        this.team = teams[teamid].name;
+      }
+    });
+
+    this._people_svc.getPeople().subscribe({
+      next: (people: PeopleMap) => {
+        if (!this.has_assignee) {
+          return;
+        }
+        const id: number = this._task.item.assignee;
+        if (!(id in people)) {
+          throw new Error(`assignee id ${id} for task ${this._task.id} DNE`);
+        }
+        this.assignee = people[id].name;
+      }
+    });
+  }
+
+  @Input() public set task(value: TaskLedgerEntry) {
+    this._task = value;
+    this.has_assignee =
+      (!!this._task.item.assignee && this._task.item.assignee > 0);
+    this.has_team =
+      (!!this._task.item.team && this._task.item.team > 0);
+  }
+
+  public get task(): TaskLedgerEntry {
+    return this._task;
   }
 
   public hasProject(): boolean {

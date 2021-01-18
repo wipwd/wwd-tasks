@@ -3,7 +3,9 @@ import {
   FormBuilder, FormControl, FormGroup, Validators
 } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { PeopleItem, PeopleMap, PeopleService } from 'src/app/services/people-service.service';
 import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
+import { TeamItem, TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
 import {
   TaskItem, TaskLedgerEntry, TaskTimerItem, getTimeDiffStr, TaskService
 } from '../../services/task-service.service';
@@ -24,11 +26,17 @@ export class TaskInfoComponent implements OnInit {
   public item: TaskItem;
 
   // edit mode
-  public edit_form_group: FormGroup;
-  public edit_projects: string[];
   public is_edit_mode: boolean = false;
+  public edit_form_group: FormGroup;
+  public edit_projects: {[id: number]: string};
+  public edit_teams: {[id: number]: string} = {};
+  public edit_assignees: {[id: number]: string} = {};
 
   public project: string = "none";
+  public has_team: boolean = false;
+  public has_assignee: boolean = false;
+  public team: string = "";
+  public assignee: string = "";
 
   // timesheet add entry
   public add_entry_form_group: FormGroup;
@@ -44,7 +52,9 @@ export class TaskInfoComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) private _data: TaskInfoDialogData,
     private _fb: FormBuilder,
     private _tasks_svc: TaskService,
-    private _projects_svc: ProjectsService
+    private _projects_svc: ProjectsService,
+    private _teams_svc: TeamsService,
+    private _people_svc: PeopleService
   ) {
     this.task = this._data.task;
     this.item = this.task.item;
@@ -76,21 +86,57 @@ export class TaskInfoComponent implements OnInit {
       until: this.time_until_form_group
     });
 
+    if (typeof this.item.project !== "number") {
+      throw new Error("project type is not a number; old format!");
+    }
+
+    const projectid: number = (!!this.item.project ? this.item.project : 0);
+    const assigneeid: number = (!!this.item.assignee ? this.item.assignee : 0);
+    const teamid: number = (!!this.item.team ? this.item.team : 0);
     this.edit_form_group = this._fb.group({
       title: new FormControl(this.task.item.title, Validators.required),
       priority: new FormControl(this.task.item.priority, Validators.required),
-      projects: new FormControl(this.task.item.project)
+      projects: new FormControl(projectid),
+      assignee: new FormControl(assigneeid),
+      team: new FormControl(teamid)
     });
   }
 
   public ngOnInit(): void {
+
+    this.has_team = (!!this.item.team && this.item.team > 0);
+    this.has_assignee = (!!this.item.assignee && this.item.assignee > 0);
+
     this._projects_svc.getProjects().subscribe({
       next: (projects: ProjectsMap) => {
-        const project_names: string[] = [];
+        this.edit_projects = {};
         Object.values(projects).forEach( (item: ProjectItem) => {
-          project_names.push(item.name);
+          this.edit_projects[item.id] = item.name;
         });
-        this.edit_projects = [...project_names];
+      }
+    });
+
+    this._teams_svc.getTeams().subscribe({
+      next: (teams: TeamsMap) => {
+        this.edit_teams = {};
+        Object.values(teams).forEach( (item: TeamItem) => {
+          this.edit_teams[item.id] = item.name;
+        });
+        if (this.has_team) {
+          this.team = this.edit_teams[this.item.team];
+        }
+      }
+    });
+
+    this._people_svc.getPeople().subscribe({
+      next: (people: PeopleMap) => {
+        this.edit_assignees = {};
+        Object.values(people).forEach( (item: PeopleItem) => {
+          this.edit_assignees[item.id] = item.name;
+        });
+        if (this.has_assignee) {
+          this.assignee = this.edit_assignees[this.item.assignee];
+        }
       }
     });
 
@@ -194,19 +240,29 @@ export class TaskInfoComponent implements OnInit {
 
     const title: string = this.edit_form_group.get("title").value;
     const priority: string = this.edit_form_group.get("priority").value;
-    const project: string = this.edit_form_group.get("projects").value;
+    const project: number = this.edit_form_group.get("projects").value;
+    const assignee_id: number = this.edit_form_group.get("assignee").value;
+    const team_id: number = this.edit_form_group.get("team").value;
 
-    if (!title || title === "" || !priority || priority === "" || !project) {
+    if (!title || title === "" || !priority || priority === "" ||
+        typeof project === "undefined") {
+      console.log("info > edit > not valid!");
       return;
     }
 
-    if (typeof project !== "string") {
-      throw new Error("project field expected to be a string");
+    if (typeof assignee_id === "undefined" || typeof team_id === "undefined") {
+      throw new Error("unexpected undefined on assignee or team edit");
+    }
+
+    if (typeof project !== "number") {
+      throw new Error("project field expected to be a number");
     }
 
     this.task.item.title = title;
     this.task.item.priority = priority;
     this.task.item.project = project;
+    this.task.item.assignee = assignee_id;
+    this.task.item.team = team_id;
     this._tasks_svc.updateTask(this.task, this.task.item);
   }
 
