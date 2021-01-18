@@ -1,7 +1,8 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { BehaviorSubject } from 'rxjs';
+import {
+  FormBuilder, FormControl, FormGroup, Validators
+} from '@angular/forms';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import {
   TaskItem, TaskLedgerEntry, TaskTimerItem, getTimeDiffStr, TaskService
@@ -24,7 +25,10 @@ export class TaskInfoComponent implements OnInit {
 
   // edit mode
   public edit_form_group: FormGroup;
-  public projects: string[];
+  public edit_projects: string[];
+  public is_edit_mode: boolean = false;
+
+  public project: string = "none";
 
   // timesheet add entry
   public add_entry_form_group: FormGroup;
@@ -35,13 +39,9 @@ export class TaskInfoComponent implements OnInit {
 
   private _is_add_new_entry: boolean = false;
 
-  // edit mode
-  private _is_edit_mode: boolean = false;
-
 
   public constructor(
     @Inject(MAT_DIALOG_DATA) private _data: TaskInfoDialogData,
-    private _dialog_ref: MatDialogRef<TaskInfoComponent>,
     private _fb: FormBuilder,
     private _tasks_svc: TaskService,
     private _projects_svc: ProjectsService
@@ -90,9 +90,21 @@ export class TaskInfoComponent implements OnInit {
         Object.values(projects).forEach( (item: ProjectItem) => {
           project_names.push(item.name);
         });
-        this.projects = [...project_names];
+        this.edit_projects = [...project_names];
       }
-    })
+    });
+
+    if (typeof this.item.project !== "number") {
+      throw new Error("old project version not supported");
+    }
+    if (this.item.project > 0) {
+      const item: ProjectItem =
+        this._projects_svc.getProjectByID(this.item.project);
+      if (!item) {
+        throw new Error(`could not find project ${this.item.project}`);
+      }
+      this.project = item.name;
+    }
   }
 
   public _timeSpent(interval: TaskTimerItem): number {
@@ -174,11 +186,11 @@ export class TaskInfoComponent implements OnInit {
   }
 
   public editMode(): void {
-    this._is_edit_mode = true;
+    this.is_edit_mode = true;
   }
 
   public saveEditValues(): void {
-    this._is_edit_mode = false;
+    this.is_edit_mode = false;
 
     const title: string = this.edit_form_group.get("title").value;
     const priority: string = this.edit_form_group.get("priority").value;
@@ -196,10 +208,6 @@ export class TaskInfoComponent implements OnInit {
     this.task.item.priority = priority;
     this.task.item.project = project;
     this._tasks_svc.updateTask(this.task, this.task.item);
-  }
-
-  public isEditMode(): boolean {
-    return this._is_edit_mode;
   }
 
 }

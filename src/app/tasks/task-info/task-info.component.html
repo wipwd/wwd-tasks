@@ -3,7 +3,7 @@
   <!-- title -->
   <div mat-dialog-title>
     <div fxLayout="row" fxLayoutAlign="space-between center"
-        *ngIf="isEditMode()"
+        *ngIf="is_edit_mode"
         [formGroup]="edit_form_group">
       <mat-form-field style="min-width: 64ch;">
         <input matInput formControlName="title"/>
@@ -22,7 +22,7 @@
       </button>
     </div>
     <div fxLayout="row" fxLayoutAlign="space-between center"
-        *ngIf="!isEditMode()">
+        *ngIf="!is_edit_mode">
       <span>{{item.title}} ({{item.priority}})</span>
       <span style="width: 0.5em"></span>
       <button mat-mini-fab (click)="editMode()">
@@ -40,17 +40,17 @@
       <!-- projects -->
       <div fxLayout="row" fxLayoutAlign="space-between center">
         <!-- view / read-only -->
-        <div *ngIf="!isEditMode()">
+        <div *ngIf="!is_edit_mode">
           <span style="min-width: 30em">
-            <strong>Projects:</strong> {{item.project}}
+            <strong>Projects:</strong> {{project}}
           </span>
         </div>
         <!-- edit -->
-        <div *ngIf="isEditMode()" [formGroup]="edit_form_group">
+        <div *ngIf="is_edit_mode" [formGroup]="edit_form_group">
           <mat-form-field>
             <mat-select formControlName="projects">
               <mat-option
-                  *ngFor="let project of projects"
+                  *ngFor="let project of edit_projects"
                   [value]="project">
                 {{project}}
               </mat-option>            
