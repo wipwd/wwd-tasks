@@ -39,6 +39,7 @@ export interface TaskLedgerEntry {
   id: string;
   item: TaskItem;
   ledger: Ledger;
+  last_modified: number;
 }
 
 export interface TaskArchiveEntry {
@@ -130,6 +131,9 @@ export class TaskService
   private _stateSave(): void {
     const new_state: TasksStorageDataItem = this._getCurrentState();
     this._storage_subject.next(new_state);
+    this._updateTasksSubject();
+    this._updateArchiveSubject();
+    this._updateAllTasksSubject();
   }
 
   public stateLoad(data: TasksStorageDataItem): void {
@@ -142,6 +146,7 @@ export class TaskService
   private _loadTasks(tasks: IDBTaskItem[]): void {
     const ledgertasks: TaskLedgerMap = {};
 
+    const now = new Date().getTime();
     tasks.forEach( (task: IDBTaskItem) => {
       this._convertStrToDate(task.item);
       this._convertProjectFormat(task.item);
@@ -149,6 +154,7 @@ export class TaskService
       this._convertToTaskWithLedger(task.ledger, task.item);
 
       const entry = this._ledger_svc.addTask(task.item);
+      entry.last_modified = now;
       ledgertasks[entry.id] = entry;
     });
 
@@ -214,6 +220,7 @@ export class TaskService
     const taskid: string = new Date().getTime().toString();
     task.id = taskid;
     const entry = this._ledger_svc.addToBacklog(task);
+    entry.last_modified = new Date().getTime();
     this._tasks[taskid] = entry;
     this._stateSave();
 
@@ -323,6 +330,7 @@ export class TaskService
   public updateTask(task: TaskLedgerEntry, item: TaskItem): void {
     const actual_task: TaskLedgerEntry = this._tasks[item.id];
     actual_task.item = item;
+    actual_task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -339,6 +347,7 @@ export class TaskService
 
       const actual_task: TaskLedgerEntry = this._tasks[task.id];
       actual_task.item = task;
+      actual_task.last_modified = new Date().getTime();
     });
 
     this._stateSave();
@@ -352,6 +361,7 @@ export class TaskService
     task.item.timer.intervals.push({
       start: from, end: until
     });
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -378,6 +388,7 @@ export class TaskService
       // move task to in-progress.
       this._ledger_svc.moveToInProgress(task);
     }
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -393,6 +404,7 @@ export class TaskService
     cur_interval.forEach( (entry: TaskTimerItem) => {
       entry.end = new Date();
     });
+    task.last_modified = new Date().getTime();
   }
 
   public timerPause(task: TaskLedgerEntry): void {
@@ -414,6 +426,7 @@ export class TaskService
     if (task.ledger.name !== "backlog") {
       this._ledger_svc.moveToBacklog(task);
     }
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -483,6 +496,7 @@ export class TaskService
       task.item.notes = [];
     }
     task.item.notes.push(note);
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -502,6 +516,7 @@ export class TaskService
       return;
     }
     task.item.assignee = assignee_id;
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -510,6 +525,7 @@ export class TaskService
       return;
     }
     task.item.assignee = undefined;
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -518,6 +534,7 @@ export class TaskService
       return;
     }
     task.item.team = team_id;
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 
@@ -526,6 +543,7 @@ export class TaskService
       return;
     }
     task.item.team = undefined;
+    task.last_modified = new Date().getTime();
     this._stateSave();
   }
 

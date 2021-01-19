@@ -29,6 +29,10 @@ export class TaskItemComponent implements OnInit {
   private _running_check_interval_subscription: Subscription;
 
   private _projects: ProjectsMap = {};
+  private _teams_map: TeamsMap = {};
+  private _people_map: PeopleMap = {};
+
+  private last_modified: number = 0;
 
   public constructor(
     private _tasks_svc: TaskService,
@@ -47,6 +51,22 @@ export class TaskItemComponent implements OnInit {
       this._updateTimer();
     }
 
+    this._tasks_svc.getTasks().subscribe({
+      next: (entries: TaskLedgerEntry[]) => {
+        const our_id = this._task.id;
+        entries.forEach( (entry: TaskLedgerEntry) => {
+          if (entry.id !== our_id ||
+              entry.last_modified <= this.last_modified) {
+            console.log("ignore update");
+            return;
+          }
+          console.log("item > update fields");
+          this._updateFields();
+          this.last_modified = entry.last_modified;
+        });
+      }
+    });
+
     this._projects_svc.getProjects().subscribe({
       next: (projects: ProjectsMap) => {
         this._projects = projects;
@@ -55,27 +75,15 @@ export class TaskItemComponent implements OnInit {
 
     this._teams_svc.getTeams().subscribe({
       next: (teams: TeamsMap) => {
-        if (!this.has_team) {
-          return;
-        }
-        const teamid: number = this._task.item.team;
-        if (!(teamid in teams)) {
-          throw new Error(`teamid ${teamid} for task ${this._task.id} DNE`);
-        }
-        this.team = teams[teamid].name;
+        this._teams_map = teams;
+        this._updateTeamField();
       }
     });
 
     this._people_svc.getPeople().subscribe({
       next: (people: PeopleMap) => {
-        if (!this.has_assignee) {
-          return;
-        }
-        const id: number = this._task.item.assignee;
-        if (!(id in people)) {
-          throw new Error(`assignee id ${id} for task ${this._task.id} DNE`);
-        }
-        this.assignee = people[id].name;
+        this._people_map = people;
+        this._updateAssigneeField();
       }
     });
   }
@@ -86,6 +94,8 @@ export class TaskItemComponent implements OnInit {
       (!!this._task.item.assignee && this._task.item.assignee > 0);
     this.has_team =
       (!!this._task.item.team && this._task.item.team > 0);
+
+    this.last_modified = this._task.last_modified;
   }
 
   public get task(): TaskLedgerEntry {
@@ -204,6 +214,33 @@ export class TaskItemComponent implements OnInit {
   public markStart(): void {
     this._tasks_svc.timerStart(this.task);
     this._startTimer();
+  }
+
+  private _updateFields(): void {
+    this._updateTeamField();
+    this._updateAssigneeField();
+  }
+
+  private _updateTeamField(): void {
+    if (!this.has_team || Object.keys(this._teams_map).length === 0) {
+      return;
+    }
+    const teamid: number = this._task.item.team;
+    if (!(teamid in this._teams_map)) {
+      throw new Error(`teamid ${teamid} for task ${this._task.id} DNE`);
+    }
+    this.team = this._teams_map[teamid].name;
+  }
+
+  private _updateAssigneeField(): void {
+    if (!this.has_assignee || Object.keys(this._people_map).length === 0) {
+      return;
+    }
+    const id: number = this._task.item.assignee;
+    if (!(id in this._people_map)) {
+      throw new Error(`assignee id ${id} for task ${this._task.id} DNE`);
+    }
+    this.assignee = this._people_map[id].name;
   }
 
   private _startTimer(): void {

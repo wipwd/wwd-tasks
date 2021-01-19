@@ -67,7 +67,8 @@ export class LedgerService {
     const entry = {
       id: task.id,
       item: task,
-      ledger: _ledger
+      ledger: _ledger,
+      last_modified: new Date().getTime()
     };
     _ledger.tasks[task.id] = entry;
     this._updatedLedger(_ledger.name);
