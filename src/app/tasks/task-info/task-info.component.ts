@@ -255,9 +255,9 @@ export class TaskInfoComponent implements OnInit {
 
     const title: string = this.edit_form_group.get("title").value;
     const priority: string = this.edit_form_group.get("priority").value;
-    const project: number = this.edit_form_group.get("projects").value;
-    const assignee_id: number = this.edit_form_group.get("assignee").value;
-    const team_id: number = this.edit_form_group.get("team").value;
+    const project: number = +this.edit_form_group.get("projects").value;
+    const assignee_id: number = +this.edit_form_group.get("assignee").value;
+    const team_id: number = +this.edit_form_group.get("team").value;
 
     if (!title || title === "" || !priority || priority === "" ||
         typeof project === "undefined") {
