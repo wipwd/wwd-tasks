@@ -1,0 +1,21 @@
+<mat-card class="mat-elevation-z8 wwd-choice-card">
+
+  <div matCardTitle>
+    <ng-content select="wwd-choice-card-title"></ng-content>
+    <div style="padding-top: 10px">
+      <mat-divider></mat-divider>
+    </div>
+  </div>
+
+  <div matCardContent
+      fxLayout="column" fxLayoutAlign="space-between center">
+
+    <span style="height: 30px"></span>
+    <mat-icon style="transform: scale(3)">{{icon}}</mat-icon>
+    <span style="height: 30px"></span>
+    <span style="text-align: justify">
+      <ng-content select="wwd-choice-card-content"></ng-content>      
+    </span>
+  </div>
+
+</mat-card>

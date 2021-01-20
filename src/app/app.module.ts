@@ -67,7 +67,7 @@ import { SettingsLabelsComponent } from './settings/settings-projects-labels/set
 import { SettingsProjectsComponent } from './settings/settings-projects-labels/settings-projects/settings-projects.component';
 import { PeopleListComponent } from './people/people-list/people-list.component';
 import { TeamsListComponent } from './teams/teams-list/teams-list.component';
-
+import { ChoiceCardModule } from "./components/choice-card/choice-card.module";
 
 
 @NgModule({
@@ -138,6 +138,7 @@ import { TeamsListComponent } from './teams/teams-list/teams-list.component';
     MatProgressBarModule,
     MatDatepickerModule,
     MatMomentDateModule,
+    ChoiceCardModule,
   ],
   providers: [
     {
