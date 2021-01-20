@@ -23,9 +23,9 @@
         <mat-label>Project</mat-label>
         <mat-select [formControl]="form_ctrl_project">
           <mat-option
-              *ngFor="let project of projects"
-              value="{{project}}">
-            {{project}}
+              *ngFor="let item of projects|keyvalue"
+              [value]="item.key">
+            {{item.value}}
           </mat-option>
         </mat-select>
       </mat-form-field>

@@ -30,7 +30,7 @@ export class TaskAddManuallyComponent implements OnInit {
   public show_form_notes: boolean = false;
   public show_form_assigned_to: boolean = false;
 
-  public projects: string[] = [];
+  public projects: {[id: number]: string} = {};
   public teams: TeamItem[] = [];
   public people: PeopleItem[] = [];
 
@@ -64,11 +64,10 @@ export class TaskAddManuallyComponent implements OnInit {
 
     this._projects_svc.getProjects().subscribe({
       next: (projects: ProjectsMap) => {
-        const project_names: string[] = [];
+        this.projects = {};
         Object.values(projects).forEach( (item: ProjectItem) => {
-          project_names.push(item.name);
+          this.projects[item.id] = item.name;
         });
-        this.projects = [...project_names];
       }
     });
 
@@ -98,18 +97,23 @@ export class TaskAddManuallyComponent implements OnInit {
       // ignore form submission: invalid.
       return;
     }
-    let project: string = "";
+
+    console.log("add-new-task > project: ", this.form_ctrl_project.value,
+                ", type: ", typeof this.form_ctrl_project.value);
+
+    let _project: number = 0;
     if (!!this.form_ctrl_project && !!this.form_ctrl_project.value) {
-      const tmp: string = this.form_ctrl_project.value as string;
+      const tmp: number = +this.form_ctrl_project.value;
       if (!!tmp) {
-        project = tmp;
+        _project = tmp;
       }
     }
+    console.log("add-new-task > project value: ", _project);
     const now: Date = new Date();
     const task: TaskItem = {
       title: this.form_ctrl_title.value,
       priority: this.form_ctrl_priority.value,
-      project: project,
+      project: _project,
       url: this.form_ctrl_url.value,
       date: now
     };
