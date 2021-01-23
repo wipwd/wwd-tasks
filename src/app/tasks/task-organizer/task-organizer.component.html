@@ -1,9 +1,18 @@
-<mat-sidenav-container class="sidenav-container">
+<mat-sidenav-container class="sidenav-container" autosize>
 
   <mat-sidenav role="navigation" mode="side" [opened]="true"
       class="sidenav-menu">
     
+      <mat-toolbar style="height: 48px">
+        <button mat-icon-button (click)="toggleExpandedMenu()">
+          <mat-icon *ngIf="!show_expanded_menu">keyboard_arrow_right</mat-icon>
+          <mat-icon *ngIf="show_expanded_menu">keyboard_arrow_left</mat-icon>
+        </button>
+        <span style="width: 150px" *ngIf="show_expanded_menu"></span>
+      </mat-toolbar>
+
       <mat-nav-list>
+        <!--
         <div *ngFor="let ledger of ledgers" fxLayout="column">
           <div fxLayout="row" fxLayoutAlign="space-between center">
             <a mat-list-item (click)="selectLedger(ledger)">
@@ -23,10 +32,11 @@
           </div>
           <mat-divider></mat-divider>
         </div>
+        -->
         <a mat-list-item (click)="toggleOptionsMenu()">
           <div fxLayout="row" fxLayoutAlign="start center">
             <mat-icon>filter_list</mat-icon>
-            <span class="menu-entry">Options</span>
+            <span class="menu-entry" *ngIf="show_expanded_menu">Options</span>
           </div>
         </a>
         <div *ngIf="show_options_menu" fxLayout="column">
@@ -34,7 +44,7 @@
               fxLayout="column" class="filter-menu"
               [formGroup]="filter_form_group">
             <span><strong>Filters</strong></span>
-            <mat-form-field style="width: 200px">
+            <mat-form-field style="width: 150px">
               <mat-label>Project</mat-label>
               <mat-select multiple formControlName="project"
                   (selectionChange)="projectFilterChanged($event)">
@@ -45,7 +55,7 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-form-field style="width: 200px">
+            <mat-form-field style="width: 150px">
               <mat-label>Title</mat-label>
               <input matInput formControlName="title"
                   (keyup)="titleFilterChanged($event)"/>
@@ -57,7 +67,7 @@
           <div fxLayout="column" class="filter-menu"
               [formGroup]="sorting_form_group">
             <span><strong>Sort By</strong></span>
-            <mat-form-field style="width: 200px">
+            <mat-form-field style="width: 150px">
               <mat-label>Field</mat-label>
               <mat-select formControlName="field"
                   (selectionChange)="sortingFieldChanged($event)">
@@ -67,7 +77,7 @@
                 <mat-option value="project">Project</mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-form-field style="width: 200px">
+            <mat-form-field style="width: 150px">
               <mat-label>Direction</mat-label>
               <mat-select formControlName="direction"
                   (selectionChange)="sortingDirectionChanged($event)">
@@ -84,6 +94,24 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
+
+    <mat-tab-group>
+
+      <mat-tab *ngFor="let ledger of ledgers">
+        <ng-template mat-tab-label>
+          <mat-icon>{{ledger.icon}}</mat-icon>
+          <span style="padding-left: 10px">{{ledger.label}}</span>
+          <span style="padding-left: 5px">{{getLedgerSize(ledger.name)|async}}</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <app-task-ledger [ledger]="ledger.name" [sorting]="sorting$">
+          </app-task-ledger>
+        </ng-template>
+      </mat-tab>
+
+    </mat-tab-group>
+
+    <!--
     <mat-card class="filters-card">
       <div fxLayout="row" fxLayoutAlign="center center">
         <span *ngFor="let filter of getFilters()|keyvalue" class="filter-entry">
@@ -106,7 +134,7 @@
         </app-task-ledger>
       </div>
     </div>
-
+    -->
   </mat-sidenav-content>
 
 </mat-sidenav-container>

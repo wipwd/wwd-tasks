@@ -26,6 +26,8 @@ declare type LedgerEntry = {
 })
 export class TaskOrganizerComponent implements OnInit {
 
+  private _show_expanded_menu: boolean = false;
+
   public ledgers: LedgerEntry[] = [];
   public selected_ledger: string;
 
@@ -104,6 +106,14 @@ export class TaskOrganizerComponent implements OnInit {
         this._ledger_sizes[ledgername].next(str);
       }
     });
+  }
+
+  public get show_expanded_menu(): boolean {
+    return this._show_expanded_menu || this.show_options_menu;
+  }
+
+  public toggleExpandedMenu(): void {
+    this._show_expanded_menu = !this.show_expanded_menu;
   }
 
   public toggleOptionsMenu(): void {
