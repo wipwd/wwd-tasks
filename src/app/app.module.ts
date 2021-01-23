@@ -69,6 +69,7 @@ import { PeopleListComponent } from './people/people-list/people-list.component'
 import { TeamsListComponent } from './teams/teams-list/teams-list.component';
 import { ByPeopleReportComponent } from './reports/by-people-report/by-people-report.component';
 import { ChoiceCardModule } from "./components/choice-card/choice-card.module";
+import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
 
 @NgModule({
@@ -141,6 +142,7 @@ import { ChoiceCardModule } from "./components/choice-card/choice-card.module";
     MatDatepickerModule,
     MatMomentDateModule,
     ChoiceCardModule,
+    NgxDatatableModule,
   ],
   providers: [
     {
