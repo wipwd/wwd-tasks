@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ColumnMode, TableColumn } from '@swimlane/ngx-datatable';
 import { ProjectItem, ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import { TaskByPeopleMap, TaskByPeopleService, TasksByPerson } from 'src/app/services/task-by-people-service.service';
@@ -7,6 +7,9 @@ import { TaskLedgerEntry } from 'src/app/services/task-service.service';
 interface ByPeopleReportItem {
   person_name: string;
   per_project: {[id: string]: number};
+  num_high: number;
+  num_med: number;
+  num_low: number;
 }
 
 @Component({
@@ -16,10 +19,13 @@ interface ByPeopleReportItem {
 })
 export class ByPeopleReportComponent implements OnInit {
 
+  @ViewChild("peopleTable") public table: any;
+
   public rows: any[] = [];
   public cols: TableColumn[] = [];
 
   public ColumnMode = ColumnMode;
+  public projects: string[] = [];
 
   private _tasks_by_people: TaskByPeopleMap = {};
   private _person_tasks: ByPeopleReportItem[] = [];
@@ -53,13 +59,19 @@ export class ByPeopleReportComponent implements OnInit {
     });
   }
 
+  public toggleExpandRow(row: any): void {
+    console.log("expand detail > row: ", row);
+    this.table.rowDetail.toggleExpandRow(row);
+  }
+
   private _updatePeople(): void {
 
     const people_items: ByPeopleReportItem[] = [];
     Object.values(this._tasks_by_people).forEach( (value: TasksByPerson) => {
       const item: ByPeopleReportItem = {
         person_name: value.person.name,
-        per_project: {}
+        per_project: {},
+        num_high: 0, num_med: 0, num_low: 0
       };
       // init all projects
       this._projects.forEach( (prj: string) => {
@@ -79,6 +91,11 @@ export class ByPeopleReportComponent implements OnInit {
           throw new Error("unexpected empty project name");
         }
         item.per_project[prjname] ++;
+        switch (entry.item.priority) {
+          case "high": item.num_high ++; break;
+          case "medium": item.num_med ++; break;
+          case "low": item.num_low ++; break;
+        }
       });
       people_items.push(item);
     });
@@ -93,10 +110,12 @@ export class ByPeopleReportComponent implements OnInit {
 
     this._updatePeople();
 
+    const projects: string[] = [];
     const rows: any[] = [];
     const cols: TableColumn[] = [{name: "Name", sortable: true}];
     this._projects.forEach( (prj: string) => {
       cols.push({name: prj, sortable: true});
+      projects.push(prj);
     });
 
     this._person_tasks.forEach( (item: ByPeopleReportItem) => {
@@ -109,10 +128,14 @@ export class ByPeopleReportComponent implements OnInit {
         }
         row[prj] = n;
       });
+      row.prio_high = item.num_high;
+      row.prio_medium = item.num_med;
+      row.prio_low = item.num_low;
       rows.push(row);
     });
 
     this.rows = [...rows];
     this.cols = [...cols];
+    this.projects = [...projects];
   }
 }

@@ -1,5 +1,6 @@
 <div class="mat-elevation-z8">
   <ngx-datatable
+      #peopleTable
       class="material"
       [headerHeight]="50"
       [limit]="5"
@@ -8,6 +9,54 @@
       rowHeight="auto"
       [trackByProp]="'update'"
       [rows]="rows"
-      [columns]="cols"
-  ></ngx-datatable>
+  >
+    <!-- row detail -->
+    <ngx-datatable-row-detail #personDetailRow [rowHeight]="50">
+      <ng-template let-row="row" let-expanded="expanded"
+          ngx-datatable-row-detail-template>
+        <div style="padding-left: 35px"
+            fxLayout="row" fxLayoutAlign="start center">
+          <span><strong>TASKS</strong></span>
+          <span style="width: 10px"></span>
+          <mat-icon>keyboard_arrow_right</mat-icon>
+          <span style="width: 20px"></span>
+          <span><strong style="color: red">HIGH:</strong> {{row.prio_high}}</span>
+          <span style="width: 20px"></span>
+          <span><strong style="color: orange">MEDIUM:</strong> {{row.prio_medium}}</span>
+          <span style="width: 20px"></span>
+          <span><strong style="color: cyan">LOW:</strong> {{row.prio_low}}</span>
+        </div>
+      </ng-template>
+    </ngx-datatable-row-detail>
+
+    <!-- columns -->
+    <ngx-datatable-column
+        [width]="50"
+        [resizeable]="false"
+        [sortable]="false"
+        [draggable]="false"
+        [canAutoResize]="false">
+
+      <ng-template let-row="row" let-expanded="expanded"
+          ngx-datatable-cell-template>
+        <a href="javascript:void(0)" (click)="toggleExpandRow(row)">
+          <mat-icon *ngIf="!expanded">keyboard_arrow_down</mat-icon>
+          <mat-icon *ngIf="expanded">keyboard_arrow_up</mat-icon>
+        </a>
+      </ng-template>
+    </ngx-datatable-column>
+    
+    <ngx-datatable-column name="NAME" [width]="200">
+      <ng-template let-row="row" let-expanded="expanded"
+          ngx-datatable-cell-template>
+        <div fxLayout="row" fxLayoutAlign="start center">
+          <strong>{{row.name}}</strong>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column *ngFor="let prj of projects" [name]="prj|uppercase">
+    </ngx-datatable-column>
+
+  </ngx-datatable>
 </div>
