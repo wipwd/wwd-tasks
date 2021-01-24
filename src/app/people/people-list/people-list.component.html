@@ -25,8 +25,11 @@
       <span style="width: 40px"></span>
       <mat-form-field>
         <mat-label>Team</mat-label>
-        <mat-select formControlName="team">
-          <mat-option value="1">Foo</mat-option>
+        <mat-select formControlName="team" [value]="0">
+          <mat-option value="0"></mat-option>
+          <mat-option *ngFor="let team of teams|keyvalue" [value]="team.key">
+            {{team.value}}
+          </mat-option>
         </mat-select>
       </mat-form-field>
 

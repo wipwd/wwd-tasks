@@ -5,7 +5,7 @@ import {
 import { ColumnMode } from '@swimlane/ngx-datatable';
 import { PeopleService } from 'src/app/services/people-service.service';
 import { TaskByPeopleMap, TaskByPeopleService, TasksByPerson } from 'src/app/services/task-by-people-service.service';
-import { TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
+import { TeamItem, TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
 
 
 interface PeopleListItem {
@@ -28,6 +28,7 @@ export class PeopleListComponent implements OnInit {
   public form_add_people: FormGroup;
 
   public rows: PeopleListItem[] = [];
+  public teams: {[id: number]: string} = {};
 
   private _people_map: TaskByPeopleMap = {};
   private _teams_map: TeamsMap = {};
@@ -55,6 +56,12 @@ export class PeopleListComponent implements OnInit {
     this._teams_svc.getTeams().subscribe({
       next: (teams_map: TeamsMap) => {
         this._teams_map = teams_map;
+
+        const teams: {[id: number]: string} = {};
+        Object.values(teams_map).forEach( (team: TeamItem) => {
+          teams[team.id] = team.name;
+        });
+        this.teams = teams;
         this._update();
       }
     });
