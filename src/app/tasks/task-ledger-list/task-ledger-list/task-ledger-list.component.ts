@@ -7,7 +7,8 @@ import { PeopleMap, PeopleService } from 'src/app/services/people-service.servic
 import { ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import {
   getTimeDiffStr,
-  TaskLedgerEntry
+  TaskLedgerEntry,
+  TaskService
 } from 'src/app/services/task-service.service';
 import { TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
 import { TaskInfoComponent } from '../../task-info/task-info.component';
@@ -56,6 +57,7 @@ export class TaskLedgerListComponent implements OnInit {
 
 
   public constructor(
+    private _tasks_svc: TaskService,
     private _filtered_tasks_svc: FilteredTasksService,
     private _teams_svc: TeamsService,
     private _projects_svc: ProjectsService,
@@ -185,11 +187,11 @@ export class TaskLedgerListComponent implements OnInit {
   }
 
   public moveTaskForward(row: TaskListItem): void {
-
+    this._tasks_svc.moveNext(row.raw_task);
   }
 
   public moveTaskToBacklog(row: TaskListItem): void {
-
+    this._tasks_svc.movePrevious(row.raw_task);
   }
 
   public deleteTask(row: TaskListItem): void {
