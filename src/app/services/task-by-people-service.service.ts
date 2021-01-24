@@ -19,6 +19,8 @@ export class TaskByPeopleService {
   private _people: PeopleMap = {};
   private _tasks: TaskLedgerEntry[] = [];
 
+  private _tasks_by_people: TaskByPeopleMap = {};
+
   private _subject: BehaviorSubject<TaskByPeopleMap> =
     new BehaviorSubject<TaskByPeopleMap>({});
 
@@ -64,10 +66,25 @@ export class TaskByPeopleService {
       tasks_by_person[pid] = person_tasks;
     });
 
-    this._subject.next(tasks_by_person);
+    this._tasks_by_people = tasks_by_person;
+    this._subject.next(this._tasks_by_people);
   }
 
   public getTasksByPeople(): BehaviorSubject<TaskByPeopleMap> {
     return this._subject;
+  }
+
+  public removePerson(person_id: number): void {
+    if (!(person_id in this._tasks_by_people)) {
+      console.error(`tasks-by-people-svc > rm > unknown person ${person_id}`);
+      return;
+    }
+
+    const item: TasksByPerson = this._tasks_by_people[person_id];
+    item.tasks.forEach( (entry: TaskLedgerEntry) => {
+      entry.item.assignee = 0;
+    });
+
+    this._people_svc.remove(item.person.name);
   }
 }

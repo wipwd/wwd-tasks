@@ -92,7 +92,7 @@ export class PeopleListComponent implements OnInit {
   }
 
   private _removePerson(item: PeopleListItem): void {
-    this._people_svc.remove(item.name);
+    this._task_by_people_svc.removePerson(item.id);
   }
 
   public togglePeopleAdd(): void {
