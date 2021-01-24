@@ -2,48 +2,167 @@ import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/cor
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
-import { BehaviorSubject } from 'rxjs';
+import { ColumnMode } from '@swimlane/ngx-datatable';
+import { BehaviorSubject, interval } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { FilteredTasksService } from 'src/app/services/filtered-tasks-service.service';
+import { PeopleMap, PeopleService } from 'src/app/services/people-service.service';
+import { ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import {
+  getTimeDiffStr,
   TaskLedgerEntry, TaskService
 } from 'src/app/services/task-service.service';
+import { TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
 import { TaskSortItem } from '../../task-organizer/task-list-options';
 import { TaskLedgerListDataSource } from './task-ledger-list-datasource';
+
+
+interface TaskListItem {
+  id: string;
+  title: string;
+  assignee: string;
+  team: string;
+  project: string;
+  created_on: Date;
+  finished_on: Date;
+}
+
+declare type CreatedOnMap = {[id: string]: string};
 
 @Component({
   selector: 'app-task-ledger-list',
   templateUrl: './task-ledger-list.component.html',
   styleUrls: ['./task-ledger-list.component.scss']
 })
-export class TaskLedgerListComponent implements AfterViewInit, OnInit {
+export class TaskLedgerListComponent implements OnInit {
 
   @Input() public ledger: string = "backlog";
   @Input() public prio: string = "medium";
   @Input() public sorting: BehaviorSubject<TaskSortItem>;
 
-  @ViewChild(MatPaginator) public paginator: MatPaginator;
-  @ViewChild(MatTable) public table: MatTable<TaskLedgerEntry>;
-  public data_source: TaskLedgerListDataSource;
 
-  public displayedColumns = ['id', 'name'];
+  public column_mode = ColumnMode.force;
+  public rows: TaskListItem[] = [];
+  public created_on: BehaviorSubject<CreatedOnMap> =
+    new BehaviorSubject<CreatedOnMap>({});
+
+  private _teams_map: TeamsMap = {};
+  private _projects_map: ProjectsMap = {};
+  private _people_map: PeopleMap = {};
+  private _wanted_tasks: TaskLedgerEntry[] = [];
+  private _has_started_timer: boolean = false;
+
 
   public constructor(
-    private _tasks_svc: TaskService,
-    private _filtered_tasks_svc: FilteredTasksService
+    private _filtered_tasks_svc: FilteredTasksService,
+    private _teams_svc: TeamsService,
+    private _projects_svc: ProjectsService,
+    private _people_svc: PeopleService
   ) { }
 
   public ngOnInit(): void {
-    this.data_source =
-      new TaskLedgerListDataSource(
-        this._filtered_tasks_svc,
-        this._tasks_svc,
-        this.ledger, this.prio,
-        this.sorting
-      );
+
+    this._teams_svc.getTeams().subscribe({
+      next: (teams: TeamsMap) => {
+        this._teams_map = teams;
+        this._update();
+      }
+    });
+
+    this._projects_svc.getProjects().subscribe({
+      next: (projects: ProjectsMap) => {
+        this._projects_map = projects;
+        this._update();
+      }
+    });
+
+    this._people_svc.getPeople().subscribe({
+      next: (people: PeopleMap) => {
+        this._people_map = people;
+        this._update();
+      }
+    });
+
+    this._filtered_tasks_svc.getLedger(this.ledger).subscribe({
+      next: (filtered_tasks: TaskLedgerEntry[]) => {
+        const wanted_tasks: TaskLedgerEntry[] = [];
+        filtered_tasks.forEach( (task: TaskLedgerEntry) => {
+          if (task.item.priority === this.prio) {
+            wanted_tasks.push(task);
+          }
+        });
+
+        this._wanted_tasks = wanted_tasks;
+        this._update();
+      }
+    });
   }
 
-  public ngAfterViewInit(): void {
-    this.data_source.paginator = this.paginator;
-    this.table.dataSource = this.data_source;
+
+  private _getCreatedOn(row: TaskListItem): string {
+    if (!row.created_on) {
+      return "";
+    }
+    const now: number = new Date().getTime();
+    const diff: number = Math.floor((now - row.created_on.getTime()) / 1000);
+    return getTimeDiffStr(diff, false);
+  }
+
+  private _updateCreatedOn(): void {
+
+    const created_on: CreatedOnMap = {};
+    const now: number = new Date().getTime();
+    this.rows.forEach( (row: TaskListItem) => {
+      const createdon: string = this._getCreatedOn(row);
+      created_on[row.id] = createdon;
+    });
+    this.created_on.next(created_on);
+
+    if (!this._has_started_timer) {
+      interval(1000).subscribe({
+        next: () => this._updateCreatedOn()
+      });
+      this._has_started_timer = true;
+    }
+
+  }
+
+  private _update(): void {
+
+    const rows: TaskListItem[] = [];
+    this._wanted_tasks.forEach( (task: TaskLedgerEntry) => {
+
+      if (typeof task.item.project !== "number") {
+        throw new Error(`expected number project id for task ${task.id}`);
+      }
+
+      const prjid: number = task.item.project;
+      const peopleid: number = (!!task.item.assignee ? task.item.assignee : 0);
+      const teamid: number = (!!task.item.team ? task.item.team : 0);
+
+      const prj: string =
+        (prjid in this._projects_map ? this._projects_map[prjid].name : "");
+      const person: string =
+        (peopleid in this._people_map ? this._people_map[peopleid].name : "");
+      const teamname: string =
+        (teamid in this._teams_map ? this._teams_map[teamid].name : "");
+
+      console.log(`task title ${task.item.title} created ${task.item.date}`);
+
+      const row: TaskListItem = {
+        id: task.id,
+        title: task.item.title,
+        assignee: person,
+        team: teamname,
+        project: prj,
+        created_on: task.item.date,
+        finished_on: task.item.done
+      };
+      rows.push(row);
+    });
+
+    this.rows = [...rows];
+
+    this._updateCreatedOn();
   }
 }
