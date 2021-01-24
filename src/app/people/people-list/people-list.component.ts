@@ -1,27 +1,40 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTable } from '@angular/material/table';
+import { Component, OnInit } from '@angular/core';
+import {
+  FormBuilder, FormControl, FormGroup, Validators
+} from '@angular/forms';
+import { ColumnMode } from '@swimlane/ngx-datatable';
 import { PeopleService } from 'src/app/services/people-service.service';
-import { PeopleListDataSource, PeopleListItem } from './people-list-datasource';
+import { TaskByPeopleMap, TaskByPeopleService, TasksByPerson } from 'src/app/services/task-by-people-service.service';
+import { TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
+
+
+interface PeopleListItem {
+  name: string;
+  team: string;
+  tasks: number;
+}
+
 
 @Component({
   selector: 'app-people-list',
   templateUrl: './people-list.component.html',
   styleUrls: ['./people-list.component.scss']
 })
-export class PeopleListComponent implements AfterViewInit, OnInit {
-  @ViewChild(MatPaginator) public paginator: MatPaginator;
-  @ViewChild(MatSort) public sort: MatSort;
-  @ViewChild(MatTable) public table: MatTable<PeopleListItem>;
-  public dataSource: PeopleListDataSource;
-  public displayedColumns = ['id', 'name', 'team', 'num_tasks'];
+export class PeopleListComponent implements OnInit {
+
+  public ColumnMode = ColumnMode;
 
   public show_people_add_form: boolean = false;
   public form_add_people: FormGroup;
 
+  public rows: PeopleListItem[] = [];
+
+  private _people_map: TaskByPeopleMap = {};
+  private _teams_map: TeamsMap = {};
+
   public constructor(
+    private _task_by_people_svc: TaskByPeopleService,
+    private _teams_svc: TeamsService,
     private _people_svc: PeopleService,
     private _fb: FormBuilder
   ) {
@@ -32,13 +45,38 @@ export class PeopleListComponent implements AfterViewInit, OnInit {
   }
 
   public ngOnInit(): void {
-    this.dataSource = new PeopleListDataSource(this._people_svc);
+    this._task_by_people_svc.getTasksByPeople().subscribe({
+      next: (people_map: TaskByPeopleMap) => {
+        this._people_map = people_map;
+        this._update();
+      }
+    });
+
+    this._teams_svc.getTeams().subscribe({
+      next: (teams_map: TeamsMap) => {
+        this._teams_map = teams_map;
+        this._update();
+      }
+    });
   }
 
-  public ngAfterViewInit(): void {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-    this.table.dataSource = this.dataSource;
+  private _update(): void {
+    const rows: PeopleListItem[] = [];
+
+    Object.values(this._people_map).forEach( (value: TasksByPerson) => {
+      const team_id: number = (!!value.person.teamid ? value.person.teamid : 0);
+      const team_name: string =
+        (team_id in this._teams_map ? this._teams_map[team_id].name : "");
+
+      const item: PeopleListItem = {
+        name: value.person.name,
+        team: team_name,
+        tasks: value.tasks.length
+      };
+      rows.push(item);
+    });
+
+    this.rows = [...rows];
   }
 
   public togglePeopleAdd(): void {
