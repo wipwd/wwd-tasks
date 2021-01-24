@@ -114,6 +114,8 @@ export class LedgerService {
     task.item.ledger = dest.name;
     dest.tasks[task.item.id] = task;
     delete _ledger.tasks[task.item.id];
+    this._updatedLedger(_ledger.name);
+    this._updatedLedger(dest.name);
   }
 
   public moveNext(task: TaskLedgerEntry): void {
