@@ -70,6 +70,7 @@ import { TeamsListComponent } from './teams/teams-list/teams-list.component';
 import { ByPeopleReportComponent } from './reports/by-people-report/by-people-report.component';
 import { ChoiceCardModule } from "./components/choice-card/choice-card.module";
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
+import { PeopleDeleteComponent } from './people/people-delete/people-delete.component';
 
 
 @NgModule({
@@ -104,6 +105,7 @@ import { NgxDatatableModule } from '@swimlane/ngx-datatable';
     PeopleListComponent,
     TeamsListComponent,
     ByPeopleReportComponent,
+    PeopleDeleteComponent,
   ],
   imports: [
     BrowserModule,

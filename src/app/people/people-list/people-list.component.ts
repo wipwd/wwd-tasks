@@ -2,13 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder, FormControl, FormGroup, Validators
 } from '@angular/forms';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ColumnMode } from '@swimlane/ngx-datatable';
 import { PeopleService } from 'src/app/services/people-service.service';
 import { TaskByPeopleMap, TaskByPeopleService, TasksByPerson } from 'src/app/services/task-by-people-service.service';
 import { TeamItem, TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
+import { PeopleDeleteComponent } from '../people-delete/people-delete.component';
 
 
 interface PeopleListItem {
+  id: number;
   name: string;
   team: string;
   tasks: number;
@@ -37,6 +40,7 @@ export class PeopleListComponent implements OnInit {
     private _task_by_people_svc: TaskByPeopleService,
     private _teams_svc: TeamsService,
     private _people_svc: PeopleService,
+    private _dialog: MatDialog,
     private _fb: FormBuilder
   ) {
     this.form_add_people = this._fb.group({
@@ -76,6 +80,7 @@ export class PeopleListComponent implements OnInit {
         (team_id in this._teams_map ? this._teams_map[team_id].name : "");
 
       const item: PeopleListItem = {
+        id: value.person.id,
         name: value.person.name,
         team: team_name,
         tasks: value.tasks.length
@@ -84,6 +89,10 @@ export class PeopleListComponent implements OnInit {
     });
 
     this.rows = [...rows];
+  }
+
+  private _removePerson(item: PeopleListItem): void {
+    this._people_svc.remove(item.name);
   }
 
   public togglePeopleAdd(): void {
@@ -113,5 +122,17 @@ export class PeopleListComponent implements OnInit {
     this._people_svc.add(name, teamid);
     this.form_add_people.setValue({name: "", team: ""});
     this.show_people_add_form = false;
+  }
+
+  public removePerson(item: PeopleListItem): void {
+    const dialogref: MatDialogRef<PeopleDeleteComponent> =
+      this._dialog.open(PeopleDeleteComponent);
+    dialogref.afterClosed().subscribe({
+      next: (result: boolean) => {
+        if (result) {
+          this._removePerson(item);
+        }
+      }
+    });
   }
 }
