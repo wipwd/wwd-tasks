@@ -1,20 +1,17 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTable } from '@angular/material/table';
+import { Component, Input, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ColumnMode } from '@swimlane/ngx-datatable';
 import { BehaviorSubject, interval } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { FilteredTasksService } from 'src/app/services/filtered-tasks-service.service';
 import { PeopleMap, PeopleService } from 'src/app/services/people-service.service';
 import { ProjectsMap, ProjectsService } from 'src/app/services/projects-service.service';
 import {
   getTimeDiffStr,
-  TaskLedgerEntry, TaskService
+  TaskLedgerEntry
 } from 'src/app/services/task-service.service';
 import { TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
+import { TaskInfoComponent } from '../../task-info/task-info.component';
 import { TaskSortItem } from '../../task-organizer/task-list-options';
-import { TaskLedgerListDataSource } from './task-ledger-list-datasource';
 
 
 interface TaskListItem {
@@ -25,6 +22,7 @@ interface TaskListItem {
   project: string;
   created_on: Date;
   finished_on: Date;
+  raw_task: TaskLedgerEntry;
 }
 
 declare type CreatedOnMap = {[id: string]: string};
@@ -57,7 +55,8 @@ export class TaskLedgerListComponent implements OnInit {
     private _filtered_tasks_svc: FilteredTasksService,
     private _teams_svc: TeamsService,
     private _projects_svc: ProjectsService,
-    private _people_svc: PeopleService
+    private _people_svc: PeopleService,
+    private _dialog: MatDialog,
   ) { }
 
   public ngOnInit(): void {
@@ -156,7 +155,8 @@ export class TaskLedgerListComponent implements OnInit {
         team: teamname,
         project: prj,
         created_on: task.item.date,
-        finished_on: task.item.done
+        finished_on: task.item.done,
+        raw_task: task
       };
       rows.push(row);
     });
@@ -164,5 +164,11 @@ export class TaskLedgerListComponent implements OnInit {
     this.rows = [...rows];
 
     this._updateCreatedOn();
+  }
+
+  public showTaskInfo(row: TaskListItem): void {
+    this._dialog.open(TaskInfoComponent, {
+      data: { task: row.raw_task }
+    });
   }
 }
