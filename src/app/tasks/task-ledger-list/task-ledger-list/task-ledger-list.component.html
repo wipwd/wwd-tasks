@@ -75,6 +75,35 @@
       </ng-template>
     </ngx-datatable-column>
 
+    <!-- actions -->
+    <ngx-datatable-column
+        [width]="100"
+        [resizeable]="false"
+        [sortable]="false"
+        [draggable]="false"
+        [canAutoResize]="false"
+    >
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        <div fxLayout="column" fxLayoutAlign="start center">
+          <div fxLayout="row" fxLayoutAlign="start start">
+            <a *ngIf="has_backlog_ledger" (click)="moveTaskToBacklog(row)"
+                href="javascript:void(0)" matTooltip="Move to Backlog">
+              <mat-icon style="transform: scale(0.8);">first_page</mat-icon>
+            </a>
+            <a *ngIf="has_next_ledger" (click)="moveTaskForward(row)"
+                href="javascript:void(0)" matTooltip="Move Forward">
+              <mat-icon style="transform: scale(0.8);">double_arrow</mat-icon>
+            </a>
+          </div>
+          <a (click)="deleteTask(row)"
+              href="javascript:void(0)" matTooltip="Delete"
+              style="color: darkred">
+            <mat-icon style="transform: scale(0.8);">delete</mat-icon>
+          </a>
+        </div>
+      </ng-template>
+    </ngx-datatable-column>
+
   </ngx-datatable>
 
 </div>

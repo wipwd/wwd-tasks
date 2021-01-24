@@ -40,6 +40,9 @@ export class TaskLedgerListComponent implements OnInit {
   @Input() public sorting: BehaviorSubject<TaskSortItem>;
 
 
+  public has_next_ledger: boolean = true;
+  public has_backlog_ledger: boolean = true;
+
   public column_mode = ColumnMode.force;
   public rows: TaskListItem[] = [];
   public created_on: BehaviorSubject<CreatedOnMap> =
@@ -96,6 +99,13 @@ export class TaskLedgerListComponent implements OnInit {
         this._update();
       }
     });
+
+    if (this.ledger.toLowerCase() === "backlog") {
+      this.has_backlog_ledger = false;
+    } else if (this.ledger.toLowerCase() === "done") {
+      this.has_next_ledger = false;
+    }
+
   }
 
 
@@ -172,5 +182,17 @@ export class TaskLedgerListComponent implements OnInit {
     this._dialog.open(TaskInfoComponent, {
       data: { task: row.raw_task }
     });
+  }
+
+  public moveTaskForward(row: TaskListItem): void {
+
+  }
+
+  public moveTaskToBacklog(row: TaskListItem): void {
+
+  }
+
+  public deleteTask(row: TaskListItem): void {
+
   }
 }
