@@ -19,9 +19,12 @@
         [draggable]="false"
         [canAutoResize]="false">
       <ng-template let-row="row" ngx-datatable-cell-template>
-        <a href="javascript:void(0)" (click)="showTaskInfo(row)">
-          <mat-icon>info</mat-icon>
-        </a>
+        <div fxLayout="column" fxLayoutAlign="start start">
+          <a href="javascript:void(0)" (click)="showTaskInfo(row)">
+            <mat-icon>info</mat-icon>
+          </a>
+        </div>
+        
       </ng-template>
     </ngx-datatable-column>
 
@@ -30,12 +33,23 @@
       <ng-template let-row="row" ngx-datatable-cell-template>
         <div fxLayout="column" fxLayoutAlign="start start">
           <div fxLayout="row" fxLayoutAlign="start start">
+            <a href="javascript:void(0)" (click)="startTimer(row)"
+              *ngIf="!has_running_timer[row.id]">
+            <mat-icon style="transform: scale(0.7);">play_circle_outline</mat-icon>
+            </a>
+            <a href="javascript:void(0)" (click)="pauseTimer(row)"
+                *ngIf="has_running_timer[row.id]">
+              <mat-icon style="transform: scale(0.7)">pause_circle_outline</mat-icon>
+            </a>
             <strong>{{row.title}}</strong>
             <span *ngIf="row.url !== ''" style="width: 5px"></span>
             <a *ngIf="row.url !== ''" [href]="row.url">
               (link)
             </a>
-          </div>          
+          </div>
+          <div *ngIf="has_timer[row.id]">
+            <span>spent {{(time_spent|async)[row.id]}}</span>
+          </div>       
         </div>
       </ng-template>
     </ngx-datatable-column>

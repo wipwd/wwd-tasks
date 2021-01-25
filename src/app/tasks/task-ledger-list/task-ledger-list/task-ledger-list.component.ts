@@ -31,6 +31,7 @@ interface TaskListItem {
 }
 
 declare type CreatedOnMap = {[id: string]: string};
+declare type TimeSpentMap = {[id: string]: string};
 
 @Component({
   selector: 'app-task-ledger-list',
@@ -51,12 +52,16 @@ export class TaskLedgerListComponent implements OnInit {
   public rows: TaskListItem[] = [];
   public created_on: BehaviorSubject<CreatedOnMap> =
     new BehaviorSubject<CreatedOnMap>({});
+  public time_spent: BehaviorSubject<TimeSpentMap> =
+    new BehaviorSubject<TimeSpentMap>({});
+  public has_timer: {[id: string]: boolean} = {};
+  public has_running_timer: {[id: string]: boolean} = {};
 
   private _teams_map: TeamsMap = {};
   private _projects_map: ProjectsMap = {};
   private _people_map: PeopleMap = {};
   private _wanted_tasks: TaskLedgerEntry[] = [];
-  private _has_started_timer: boolean = false;
+  private _has_started_loop: boolean = false;
 
 
   public constructor(
@@ -113,14 +118,18 @@ export class TaskLedgerListComponent implements OnInit {
 
   }
 
+  private _getTimeStr(ms: number, with_secs: boolean): string {
+    const diff: number = Math.floor(ms / 1000);
+    return getTimeDiffStr(diff, with_secs);
+  }
 
   private _getCreatedOn(row: TaskListItem): string {
     if (!row.created_on) {
       return "";
     }
     const now: number = new Date().getTime();
-    const diff: number = Math.floor((now - row.created_on.getTime()) / 1000);
-    return getTimeDiffStr(diff, false);
+    const ts: number = row.created_on.getTime();
+    return this._getTimeStr((now - ts), false);
   }
 
   private _updateCreatedOn(): void {
@@ -132,14 +141,41 @@ export class TaskLedgerListComponent implements OnInit {
       created_on[row.id] = createdon;
     });
     this.created_on.next(created_on);
+  }
 
-    if (!this._has_started_timer) {
-      interval(1000).subscribe({
-        next: () => this._updateCreatedOn()
-      });
-      this._has_started_timer = true;
+  private _updateTimers(): void {
+    const time_spent: TimeSpentMap = {};
+    const has_timer: {[id: string]: boolean} = {};
+    const running_timer: {[id: string]: boolean} = {};
+    this.rows.forEach( (row: TaskListItem) => {
+      const running: boolean = this._tasks_svc.isTimerRunning(row.raw_task);
+      const timer_total: number = this._tasks_svc.getTimerTotal(row.raw_task);
+      has_timer[row.id] = (timer_total > 0);
+      running_timer[row.id] = running;
+      if (!has_timer[row.id]) {
+        if (running_timer[row.id]) {
+          throw new Error("task has running timer yet no timer");
+        }
+        return;
+      }
+      time_spent[row.id] = this._getTimeStr(timer_total, true);
+    });
+    this.time_spent.next(time_spent);
+    this.has_timer = has_timer;
+    this.has_running_timer = running_timer;
+  }
+
+  private _startUpdateLoop(): void {
+    if (this._has_started_loop) {
+      return;
     }
 
+    interval(1000).subscribe({
+      next: () => {
+        this._updateCreatedOn();
+        this._updateTimers();
+      }
+    });
   }
 
   private _update(): void {
@@ -162,8 +198,6 @@ export class TaskLedgerListComponent implements OnInit {
       const teamname: string =
         (teamid in this._teams_map ? this._teams_map[teamid].name : "");
 
-      console.log(`task title ${task.item.title} created ${task.item.date}`);
-
       const row: TaskListItem = {
         id: task.id,
         title: task.item.title,
@@ -182,7 +216,7 @@ export class TaskLedgerListComponent implements OnInit {
 
     this.rows = [...rows];
 
-    this._updateCreatedOn();
+    this._startUpdateLoop();
   }
 
   public showTaskInfo(row: TaskListItem): void {
@@ -214,5 +248,13 @@ export class TaskLedgerListComponent implements OnInit {
 
   public markDone(row: TaskListItem): void {
     this._tasks_svc.markDone(row.raw_task);
+  }
+
+  public startTimer(row: TaskListItem): void {
+    this._tasks_svc.timerStart(row.raw_task);
+  }
+
+  public pauseTimer(row: TaskListItem): void {
+    this._tasks_svc.timerPause(row.raw_task);
   }
 }
