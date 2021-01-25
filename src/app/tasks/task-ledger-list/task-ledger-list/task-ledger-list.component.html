@@ -29,10 +29,13 @@
     <ngx-datatable-column [width]="200" name="TITLE" prop="title">
       <ng-template let-row="row" ngx-datatable-cell-template>
         <div fxLayout="column" fxLayoutAlign="start start">
-          <strong>{{row.title}}</strong>
-          <a *ngIf="row.url !== ''" [href]="row.url">
-            link
-          </a>
+          <div fxLayout="row" fxLayoutAlign="start start">
+            <strong>{{row.title}}</strong>
+            <span *ngIf="row.url !== ''" style="width: 5px"></span>
+            <a *ngIf="row.url !== ''" [href]="row.url">
+              (link)
+            </a>
+          </div>          
         </div>
       </ng-template>
     </ngx-datatable-column>
