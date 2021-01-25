@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ColumnMode } from '@swimlane/ngx-datatable';
 import { BehaviorSubject, interval } from 'rxjs';
 import { FilteredTasksService } from 'src/app/services/filtered-tasks-service.service';
@@ -11,6 +11,7 @@ import {
   TaskService
 } from 'src/app/services/task-service.service';
 import { TeamsMap, TeamsService } from 'src/app/services/teams-service.service';
+import { TaskDeleteComponent } from '../../task-delete/task-delete.component';
 import { TaskInfoComponent } from '../../task-info/task-info.component';
 import { TaskSortItem } from '../../task-organizer/task-list-options';
 
@@ -200,6 +201,15 @@ export class TaskLedgerListComponent implements OnInit {
 
   public deleteTask(row: TaskListItem): void {
 
+    const dialogref: MatDialogRef<TaskDeleteComponent> =
+      this._dialog.open(TaskDeleteComponent);
+    dialogref.afterClosed().subscribe({
+      next: (result: boolean) => {
+        if (result) {
+          this._tasks_svc.remove(row.raw_task);
+        }
+      }
+    });
   }
 
   public markDone(row: TaskListItem): void {
