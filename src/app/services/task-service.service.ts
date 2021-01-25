@@ -333,6 +333,7 @@ export class TaskService
     const actual_task: TaskLedgerEntry = this._tasks[item.id];
     actual_task.item = item;
     actual_task.last_modified = new Date().getTime();
+    this._ledger_svc.updateTask(task);
     this._stateSave();
   }
 

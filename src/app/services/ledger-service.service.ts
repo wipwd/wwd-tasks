@@ -80,6 +80,10 @@ export class LedgerService {
     return this.addTask(task);
   }
 
+  public updateTask(task: TaskLedgerEntry): void {
+    this._updatedLedger(task.ledger.name);
+  }
+
   public removeTask(task: TaskLedgerEntry): void {
     const _ledger: Ledger = this._ledgers[task.item.ledger];
     if (!_ledger) {
