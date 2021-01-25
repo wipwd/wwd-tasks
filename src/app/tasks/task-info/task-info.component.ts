@@ -86,7 +86,18 @@ export class TaskInfoComponent implements OnInit {
       until: this.time_until_form_group
     });
 
+    this._populateEditForm();
     this._updateEditForm();
+  }
+
+  private _populateEditForm(): void {
+    this.edit_form_group = this._fb.group({
+      title: new FormControl("", Validators.required),
+      priority: new FormControl("", Validators.required),
+      projects: new FormControl(),
+      assignee: new FormControl(),
+      team: new FormControl()
+    });
   }
 
   private _updateEditForm(): void {
@@ -98,12 +109,12 @@ export class TaskInfoComponent implements OnInit {
     const projectid: number = (!!item.project ? item.project : 0);
     const assigneeid: number = (!!item.assignee ? item.assignee : 0);
     const teamid: number = (!!item.team ? item.team : 0);
-    this.edit_form_group = this._fb.group({
-      title: new FormControl(this.task.item.title, Validators.required),
-      priority: new FormControl(this.task.item.priority, Validators.required),
-      projects: new FormControl(projectid),
-      assignee: new FormControl(assigneeid),
-      team: new FormControl(teamid)
+    this.edit_form_group.setValue({
+      title: this.task.item.title,
+      priority: this.task.item.priority,
+      projects: `${projectid}`,
+      assignee: `${assigneeid}`,
+      team: `${teamid}`
     });
   }
 
@@ -142,6 +153,8 @@ export class TaskInfoComponent implements OnInit {
         Object.values(projects).forEach( (item: ProjectItem) => {
           this.edit_projects[item.id] = item.name;
         });
+        this._updateFields();
+        this._updateEditForm();
       }
     });
 
@@ -154,6 +167,8 @@ export class TaskInfoComponent implements OnInit {
         if (this.has_team) {
           this.team = this.edit_teams[this.task.item.team];
         }
+        this._updateFields();
+        this._updateEditForm();
       }
     });
 
@@ -166,6 +181,8 @@ export class TaskInfoComponent implements OnInit {
         if (this.has_assignee) {
           this.assignee = this.edit_assignees[this.task.item.assignee];
         }
+        this._updateFields();
+        this._updateEditForm();
       }
     });
   }

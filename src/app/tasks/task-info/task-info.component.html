@@ -86,11 +86,11 @@
           <mat-form-field>
             <mat-label>Assignee</mat-label>
             <mat-select formControlName="assignee">
-              <mat-option [value]="0"></mat-option>
               <mat-option *ngFor="let item of edit_assignees|keyvalue"
                   [value]="item.key">
                 {{item.value}}
               </mat-option>
+              <mat-option value="0">Unassigned</mat-option>
             </mat-select>
           </mat-form-field>
         </div>
