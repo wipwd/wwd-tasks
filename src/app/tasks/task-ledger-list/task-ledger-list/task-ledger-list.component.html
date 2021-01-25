@@ -90,6 +90,10 @@
                 href="javascript:void(0)" matTooltip="Move to Backlog">
               <mat-icon style="transform: scale(0.8);">first_page</mat-icon>
             </a>
+            <a *ngIf="!row.is_done" (click)="markDone(row)"
+                href="javascript:void(0)" matTooltip="Mark as Done">
+              <mat-icon style="transform: scale(0.8)">check_circle_outline</mat-icon>
+            </a>
             <a *ngIf="has_next_ledger" (click)="moveTaskForward(row)"
                 href="javascript:void(0)" matTooltip="Move Forward">
               <mat-icon style="transform: scale(0.8);">double_arrow</mat-icon>

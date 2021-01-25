@@ -25,6 +25,7 @@ interface TaskListItem {
   created_on: Date;
   created_on_ms: number;
   finished_on: Date;
+  is_done: boolean;
   raw_task: TaskLedgerEntry;
 }
 
@@ -172,6 +173,7 @@ export class TaskLedgerListComponent implements OnInit {
         created_on: task.item.date,
         created_on_ms: (!!task.item.date ? task.item.date.getTime() : 0),
         finished_on: task.item.done,
+        is_done: !!task.item.done,
         raw_task: task
       };
       rows.push(row);
@@ -198,5 +200,9 @@ export class TaskLedgerListComponent implements OnInit {
 
   public deleteTask(row: TaskListItem): void {
 
+  }
+
+  public markDone(row: TaskListItem): void {
+    this._tasks_svc.markDone(row.raw_task);
   }
 }
