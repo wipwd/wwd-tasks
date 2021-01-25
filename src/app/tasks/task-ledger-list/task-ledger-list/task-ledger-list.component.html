@@ -26,7 +26,7 @@
     </ngx-datatable-column>
 
     <!-- title -->
-    <ngx-datatable-column [width]="200" name="TITLE">
+    <ngx-datatable-column [width]="200" name="TITLE" prop="title">
       <ng-template let-row="row" ngx-datatable-cell-template>
         <div fxLayout="column" fxLayoutAlign="start start">
           <strong>{{row.title}}</strong>
@@ -38,14 +38,14 @@
     </ngx-datatable-column>
 
     <!-- project -->
-    <ngx-datatable-column [width]="200" name="PROJECT">
+    <ngx-datatable-column [width]="200" name="PROJECT" prop="project">
       <ng-template let-row="row" ngx-datatable-cell-template>
         <span>{{row.project}}</span>
       </ng-template>
     </ngx-datatable-column>
 
     <!-- assigned -->
-    <ngx-datatable-column [width]="200" name="ASSIGNED">
+    <ngx-datatable-column [width]="200" name="ASSIGNED" prop="assignee">
       <ng-template let-row="row" ngx-datatable-cell-template>
         <div fxLayout="column" fxLayoutAlign="start start">
           <div fxLayout="row" fxLayoutAlign="start start"
@@ -69,7 +69,7 @@
     </ngx-datatable-column>
 
     <!-- created -->
-    <ngx-datatable-column [width]="200" name="CREATED">
+    <ngx-datatable-column [width]="200" name="CREATED" prop="created_on_ms">
       <ng-template let-row="row" ngx-datatable-cell-template>
         <span>{{(created_on|async)[row.id]}}</span>
       </ng-template>

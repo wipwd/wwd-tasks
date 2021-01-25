@@ -23,6 +23,7 @@ interface TaskListItem {
   project: string;
   url: string;
   created_on: Date;
+  created_on_ms: number;
   finished_on: Date;
   raw_task: TaskLedgerEntry;
 }
@@ -169,6 +170,7 @@ export class TaskLedgerListComponent implements OnInit {
         project: prj,
         url: task.item.url,
         created_on: task.item.date,
+        created_on_ms: (!!task.item.date ? task.item.date.getTime() : 0),
         finished_on: task.item.done,
         raw_task: task
       };
