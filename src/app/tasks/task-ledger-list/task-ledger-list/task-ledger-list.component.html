@@ -86,7 +86,8 @@
       <ng-template let-row="row" ngx-datatable-cell-template>
         <div fxLayout="column" fxLayoutAlign="start center">
           <div fxLayout="row" fxLayoutAlign="start start">
-            <a *ngIf="has_backlog_ledger" (click)="moveTaskToBacklog(row)"
+            <a *ngIf="has_backlog_ledger && !row.is_done"
+                (click)="moveTaskToBacklog(row)"
                 href="javascript:void(0)" matTooltip="Move to Backlog">
               <mat-icon style="transform: scale(0.8);">first_page</mat-icon>
             </a>
