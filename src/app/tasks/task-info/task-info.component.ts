@@ -44,6 +44,8 @@ export class TaskInfoComponent implements OnInit {
   public time_from_form_group: FormGroup;
   public time_until_form_group: FormGroup;
 
+  public content: string = "timesheet";
+
   private _is_add_new_entry: boolean = false;
 
 

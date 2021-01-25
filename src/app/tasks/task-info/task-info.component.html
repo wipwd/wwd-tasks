@@ -133,20 +133,64 @@
     <!-- spacer -->
     <span style="height: 2em"></span>
 
-    <!-- timesheet -->
-    <div fxLayout="column">
+    <div style="padding-top: 20px">
+      <mat-sidenav-container autosize style="height: calc(100vh / 2)">
 
-      <div fxLayout="row" fxLayoutAlign="start">
-        <h3 class="mat-h3">Time Sheet</h3>
-        <span style="width: 50px"></span>
-        <button mat-icon-button id="timesheet-add-button"
-            fxLayout="row" fxLayoutAlign="start top"
-            (click)="toggleAddNewEntry()">
-          <mat-icon *ngIf="!isAddNewEntry()">add_circle_outline</mat-icon>
-          <mat-icon *ngIf="isAddNewEntry()">highlight_off</mat-icon>
-          <span>add entry</span>
-        </button>
-      </div>
+        <mat-sidenav role="navigation" mode="side" [opened]="true">
+
+          <mat-nav-list class="menu-nav-list">
+            <a mat-list-item (click)="content = 'timesheet'"
+                [class.menu-active]="content === 'timesheet'">
+              <span>Time Sheet</span>
+            </a>
+            <a mat-list-item (click)="content = 'notes'"
+                [class.menu-active]="content === 'notes'">
+              <span>Notes</span>
+            </a>
+          </mat-nav-list>
+
+        </mat-sidenav>
+
+        <mat-sidenav-content>
+
+          <div *ngIf="content === 'timesheet'">
+            <mat-toolbar class="mat-elevation-z2 menu-toolbar">
+              <div fxLayout="row" fxLayoutAlign="start">
+                <a href="javascript:void(0)" (click)="toggleAddNewEntry()"
+                    style="text-decoration: none;">
+                  <div fxLayout="row" fxLayoutAlign="start center">
+                    <mat-icon *ngIf="!isAddNewEntry()" style="transform: scale(0.8);">
+                      add_circle_outline
+                    </mat-icon>
+                    <mat-icon *ngIf="isAddNewEntry()">highlight_off</mat-icon>
+                    <span>add entry</span>
+                  </div>
+                </a>
+              </div>
+            </mat-toolbar>
+
+            <ng-container [ngTemplateOutlet]="timesheet"></ng-container>
+          </div>
+
+          <div *ngIf="content === 'notes'">
+            <span>Notes stuff</span>
+          </div>
+
+        </mat-sidenav-content>
+
+      </mat-sidenav-container>
+    </div>
+
+  </mat-dialog-content>
+
+</div>
+
+
+<ng-template #timesheet>
+  <!-- timesheet -->
+  <mat-sidenav-container>
+
+    <mat-sidenav-content>
 
       <div *ngIf="isAddNewEntry()" class="add-entry-container">
 
@@ -262,9 +306,6 @@
           <tr mat-footer-row *matFooterRowDef="['interval', 'total']"></tr>
         </table>
       </div>
-
-    </div>
-
-  </mat-dialog-content>
-
-</div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</ng-template>

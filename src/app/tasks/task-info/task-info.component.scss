@@ -27,3 +27,20 @@
 .add-entry-container {
   padding-bottom: 1.5em;
 }
+
+.menu-active {
+  border-bottom: 2px solid rgb(63, 81, 181);;
+  background: rgb(0, 0, 0, 0.1);
+}
+
+.mat-list-base.menu-nav-list {
+  padding-top: 0;
+}
+
+.menu-toolbar {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  border-top: 2px solid rgb(63, 81, 181);
+  height: 50px;
+}
