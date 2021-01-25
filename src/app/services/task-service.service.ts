@@ -209,6 +209,8 @@ export class TaskService
   private _remove(task: TaskLedgerEntry): void {
     const ledger: Ledger = task.ledger;
     this._ledger_svc.removeTask(task);
+    delete this._tasks[task.id];
+    delete this._all_tasks[task.id];
     this._stateSave();
   }
 
